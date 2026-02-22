@@ -42,7 +42,7 @@ export default function OnboardingSlide2() {
           <View style={styles.dot} />
         </View>
 
-        <TouchableOpacity style={styles.nextBtn} onPress={() => router.push('/(auth)/sign-up')}>
+        <TouchableOpacity style={styles.nextBtn} onPress={() => router.push('/(onboarding)/slide-3')}>
           <Ionicons name="arrow-forward" size={22} color={Colors.white} />
         </TouchableOpacity>
       </View>
