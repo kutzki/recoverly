@@ -52,7 +52,7 @@ export default function SignUp() {
       Alert.alert('Weak password', 'Password must be at least 8 characters.');
       return;
     }
-    if (strength?.label === 'Weak') {
+    if (strength?.label === 'Weak' || strength?.label === 'Fair') {
       Alert.alert('Password too weak', 'Include uppercase letters, numbers, or special characters to make it stronger.');
       return;
     }

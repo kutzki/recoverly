@@ -46,7 +46,8 @@ export default function Challenges() {
 
   const toggle = (id: string) => {
     if (id === 'prefer_not') {
-      setSelected(['prefer_not']);
+      // Second tap on prefer_not deselects it
+      setSelected(prev => prev.includes('prefer_not') ? [] : ['prefer_not']);
       return;
     }
     setSelected(prev => {

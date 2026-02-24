@@ -58,7 +58,8 @@ export default function SignIn() {
     try {
       await supabase.auth.resetPasswordForEmail(trimmedEmail);
       Alert.alert('Email Sent 📬', `If an account exists for ${trimmedEmail}, you'll receive a password reset link shortly.`);
-    } catch {
+    } catch (err: any) {
+      console.error('[SignIn] resetPasswordForEmail error:', err);
       Alert.alert('Error', 'Could not send reset email. Please try again later.');
     }
   };
