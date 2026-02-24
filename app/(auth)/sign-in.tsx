@@ -31,7 +31,7 @@ export default function SignIn() {
       Alert.alert('Missing fields', 'Please enter your email and password.');
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(trimmedEmail)) {
       Alert.alert('Invalid email', 'Please enter a valid email address.');
       return;
@@ -50,7 +50,7 @@ export default function SignIn() {
       Alert.alert('Email Required', 'Enter your email address above first, then tap "Forgot password?"');
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(trimmedEmail)) {
       Alert.alert('Invalid Email', 'Please enter a valid email address.');
       return;

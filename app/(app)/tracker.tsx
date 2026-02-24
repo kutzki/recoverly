@@ -162,7 +162,7 @@ export default function Tracker() {
                   <View
                     style={[
                       styles.statFill,
-                      { width: `${(stat.done / stat.total) * 100}%` },
+                      { width: `${stat.total > 0 ? (stat.done / stat.total) * 100 : 0}%` },
                     ]}
                   />
                 </View>

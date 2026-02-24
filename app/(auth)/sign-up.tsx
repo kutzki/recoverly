@@ -43,13 +43,17 @@ export default function SignUp() {
       Alert.alert('Missing fields', 'Please enter your email and password.');
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(trimmedEmail)) {
       Alert.alert('Invalid email', 'Please enter a valid email address.');
       return;
     }
     if (password.length < 8) {
       Alert.alert('Weak password', 'Password must be at least 8 characters.');
+      return;
+    }
+    if (strength?.label === 'Weak') {
+      Alert.alert('Password too weak', 'Include uppercase letters, numbers, or special characters to make it stronger.');
       return;
     }
     try {
