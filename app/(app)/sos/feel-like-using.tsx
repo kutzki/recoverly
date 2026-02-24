@@ -1,10 +1,10 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Linking,
   Alert,
@@ -13,6 +13,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { useAuthStore } from '../../../store/auth';
 
 const ACTIONS = [
   { id: 'sponsor', label: 'Call your Sponsor', icon: 'call-outline' as const },
@@ -21,6 +22,10 @@ const ACTIONS = [
 ];
 
 export default function FeelLikeUsing() {
+  const { user } = useAuthStore();
+  const sponsor = user?.sponsor;
+  const innerCircle = user?.innerCircle ?? [];
+
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
 
   const toggle = (id: string) => {
@@ -28,12 +33,28 @@ export default function FeelLikeUsing() {
   };
 
   const callSponsor = () => {
+    if (!sponsor?.name || !sponsor?.phone) {
+      Alert.alert(
+        'No Sponsor Added',
+        'You haven\'t added a sponsor yet. Add one in your profile settings.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    const phone = sponsor.phone.replace(/\D/g, '');
     Alert.alert(
       'Call Sponsor',
-      'Call Jack – your sponsor?',
+      `Call ${sponsor.name} – your sponsor?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Call Jack', onPress: () => Linking.openURL('tel:8888888888') },
+        {
+          text: `Call ${sponsor.name}`,
+          onPress: () => {
+            Linking.openURL(`tel:${phone}`).catch(() => {
+              Alert.alert('Error', `Could not open the phone app. Please dial: ${sponsor.phone}`);
+            });
+          },
+        },
       ]
     );
   };
@@ -47,8 +68,31 @@ export default function FeelLikeUsing() {
   };
 
   const openEmergencyContacts = () => {
-    Alert.alert('Emergency Contacts', 'Your emergency contacts list will appear here.');
+    if (innerCircle.length === 0) {
+      Alert.alert(
+        'No Emergency Contacts',
+        'You haven\'t added any emergency contacts yet. Add them in your profile settings.'
+      );
+      return;
+    }
+    const list = innerCircle.map(c => `${c.name}: ${c.phone}`).join('\n');
+    // iOS Alert supports up to 3 buttons; show Cancel + up to 2 callable contacts
+    Alert.alert('Emergency Contacts', list, [
+      { text: 'Cancel', style: 'cancel' },
+      ...innerCircle.slice(0, 2).map(c => ({
+        text: `Call ${c.name}`,
+        onPress: () => {
+          const phone = c.phone.replace(/\D/g, '');
+          Linking.openURL(`tel:${phone}`).catch(() => {
+            Alert.alert('Error', `Could not open the phone app. Please dial: ${c.phone}`);
+          });
+        },
+      })),
+    ]);
   };
+
+  const sponsorInitial = sponsor?.name?.[0]?.toUpperCase() ?? '?';
+  const sponsorDisplay = sponsor?.phone ?? '—';
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -99,19 +143,26 @@ export default function FeelLikeUsing() {
             Try talking about your feelings to a friend, family member, health professional or sponsor.
           </Text>
 
-          <TouchableOpacity style={styles.sponsorCard} onPress={callSponsor} activeOpacity={0.85}>
-            <View style={styles.sponsorAvatar}>
-              <Text style={styles.sponsorAvatarText}>J</Text>
-            </View>
-            <View style={styles.sponsorInfo}>
-              <Text style={styles.sponsorName}>Jack</Text>
-              <Text style={styles.sponsorRole}>Sponsor</Text>
-              <Text style={styles.sponsorNumber}>888-888-8888</Text>
-            </View>
-            <View style={styles.callIcon}>
-              <Ionicons name="call" size={22} color={Colors.white} />
-            </View>
-          </TouchableOpacity>
+          {sponsor ? (
+            <TouchableOpacity style={styles.sponsorCard} onPress={callSponsor} activeOpacity={0.85}>
+              <View style={styles.sponsorAvatar}>
+                <Text style={styles.sponsorAvatarText}>{sponsorInitial}</Text>
+              </View>
+              <View style={styles.sponsorInfo}>
+                <Text style={styles.sponsorName}>{sponsor.name}</Text>
+                <Text style={styles.sponsorRole}>Sponsor</Text>
+                <Text style={styles.sponsorNumber}>{sponsorDisplay}</Text>
+              </View>
+              <View style={styles.callIcon}>
+                <Ionicons name="call" size={22} color={Colors.white} />
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.noSponsorCard} onPress={callSponsor} activeOpacity={0.85}>
+              <Ionicons name="person-add-outline" size={22} color={Colors.textMuted} />
+              <Text style={styles.noSponsorText}>No sponsor added yet — tap to learn more</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Buttons */}
@@ -207,6 +258,18 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.primaryLight,
   },
+  noSponsorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
+  },
+  noSponsorText: { flex: 1, fontSize: 14, color: Colors.textMuted },
   sponsorAvatar: {
     width: 52,
     height: 52,

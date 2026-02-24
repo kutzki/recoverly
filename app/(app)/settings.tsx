@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   Switch,
   Alert,
+  Linking,
   Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
 import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth';
+
+const SETTINGS_KEY = 'app_settings';
+const APP_VERSION = '1.1.0';
 
 export default function Settings() {
   const signOut = useAuthStore(s => s.signOut);
@@ -21,6 +26,39 @@ export default function Settings() {
   const [dailyReminder, setDailyReminder] = useState(true);
   const [anonymousMode, setAnonymousMode] = useState(false);
   const [biometrics, setBiometrics] = useState(false);
+
+  // Load persisted settings on mount
+  useEffect(() => {
+    SecureStore.getItemAsync(SETTINGS_KEY).then(raw => {
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        if (saved.notifications !== undefined) setNotifications(saved.notifications);
+        if (saved.dailyReminder !== undefined) setDailyReminder(saved.dailyReminder);
+        if (saved.anonymousMode !== undefined) setAnonymousMode(saved.anonymousMode);
+        if (saved.biometrics !== undefined) setBiometrics(saved.biometrics);
+      } catch {}
+    }).catch(() => {});
+  }, []);
+
+  const persist = (updates: Record<string, boolean>) => {
+    SecureStore.getItemAsync(SETTINGS_KEY).then(raw => {
+      const current = raw ? JSON.parse(raw) : {};
+      SecureStore.setItemAsync(SETTINGS_KEY, JSON.stringify({ ...current, ...updates })).catch(() => {});
+    }).catch(() => {});
+  };
+
+  // Keys that are not yet implemented — toggles are disabled/greyed
+  const COMING_SOON_KEYS = new Set(['notifications', 'dailyReminder', 'biometrics']);
+
+  const handleToggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
+    if (COMING_SOON_KEYS.has(key)) {
+      Alert.alert('Coming Soon', 'This feature is not yet available. Stay tuned for an upcoming update!', [{ text: 'OK' }]);
+      return; // don't change state or persist
+    }
+    setter(value);
+    persist({ [key]: value });
+  };
 
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -38,29 +76,61 @@ export default function Settings() {
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
-      'This will permanently delete your account and all data. This cannot be undone.',
+      'Are you sure you want to permanently delete your account? This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {} },
+        {
+          text: 'Yes, Delete My Account',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Final Confirmation',
+              'All your data, progress, and messages will be permanently deleted. To complete deletion, we\'ll send a request to our team.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Send Deletion Request',
+                  style: 'destructive',
+                  onPress: () =>
+                    Linking.openURL('mailto:support@recvrly.com?subject=Delete%20My%20Account').catch(() => {}),
+                },
+              ]
+            );
+          },
+        },
       ]
     );
   };
+
+  const openLink = (url: string) => {
+    Linking.openURL(url).catch(() => Alert.alert('Error', 'Could not open this link.'));
+  };
+
+  const ACCOUNT_LINKS = [
+    { label: 'Edit Profile', icon: 'person-circle-outline' as const, onPress: () => router.push('/(app)/edit-profile' as any) },
+    { label: 'Sponsor', icon: 'hand-right-outline' as const, onPress: () => router.push('/(app)/sponsor' as any) },
+    { label: 'Inner Circle', icon: 'people-circle-outline' as const, onPress: () => router.push('/(app)/inner-circle' as any) },
+    { label: 'My Goals', icon: 'flag-outline' as const, onPress: () => router.push('/(app)/goals' as any) },
+    { label: 'Crisis History', icon: 'time-outline' as const, onPress: () => router.push('/(app)/crisis-history' as any) },
+  ];
 
   const SECTIONS = [
     {
       title: 'Notifications',
       items: [
         {
+          key: 'notifications',
           label: 'Push Notifications',
           icon: 'notifications-outline' as const,
           toggle: notifications,
-          onToggle: setNotifications,
+          onToggle: (v: boolean) => handleToggle('notifications', v, setNotifications),
         },
         {
+          key: 'dailyReminder',
           label: 'Daily Reminder',
           icon: 'alarm-outline' as const,
           toggle: dailyReminder,
-          onToggle: setDailyReminder,
+          onToggle: (v: boolean) => handleToggle('dailyReminder', v, setDailyReminder),
         },
       ],
     },
@@ -68,26 +138,48 @@ export default function Settings() {
       title: 'Privacy',
       items: [
         {
+          key: 'anonymousMode',
           label: 'Anonymous Mode',
           icon: 'eye-off-outline' as const,
           toggle: anonymousMode,
-          onToggle: setAnonymousMode,
+          onToggle: (v: boolean) => handleToggle('anonymousMode', v, setAnonymousMode),
         },
         {
+          key: 'biometrics',
           label: 'Biometric Login',
           icon: 'finger-print-outline' as const,
           toggle: biometrics,
-          onToggle: setBiometrics,
+          onToggle: (v: boolean) => handleToggle('biometrics', v, setBiometrics),
         },
       ],
     },
   ];
 
   const LINKS = [
-    { label: 'Privacy Policy', icon: 'shield-outline' as const },
-    { label: 'Terms of Service', icon: 'document-text-outline' as const },
-    { label: 'About Recoverly', icon: 'information-circle-outline' as const },
-    { label: 'Send Feedback', icon: 'chatbubble-outline' as const },
+    {
+      label: 'Privacy Policy',
+      icon: 'shield-outline' as const,
+      onPress: () => openLink('https://recvrly.com/privacy'),
+    },
+    {
+      label: 'Terms of Service',
+      icon: 'document-text-outline' as const,
+      onPress: () => openLink('https://recvrly.com/tos'),
+    },
+    {
+      label: 'About Recoverly',
+      icon: 'information-circle-outline' as const,
+      onPress: () =>
+        Alert.alert(
+          'About Recoverly',
+          `Recoverly is your daily companion on the road to recovery. Built with care for people committed to a sober life.\n\nVersion ${APP_VERSION}`
+        ),
+    },
+    {
+      label: 'Send Feedback',
+      icon: 'chatbubble-outline' as const,
+      onPress: () => openLink('mailto:feedback@recvrly.com?subject=App%20Feedback'),
+    },
   ];
 
   return (
@@ -101,29 +193,61 @@ export default function Settings() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* Account */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          <View style={styles.card}>
+            {ACCOUNT_LINKS.map((link, i) => (
+              <TouchableOpacity
+                key={link.label}
+                style={[styles.row, i < ACCOUNT_LINKS.length - 1 && styles.rowBorder]}
+                onPress={link.onPress}
+                activeOpacity={0.7}
+              >
+                <View style={styles.rowLeft}>
+                  <View style={styles.rowIcon}>
+                    <Ionicons name={link.icon} size={18} color={Colors.primary} />
+                  </View>
+                  <Text style={styles.rowLabel}>{link.label}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
         {SECTIONS.map(section => (
           <View key={section.title} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
             <View style={styles.card}>
-              {section.items.map((item, i) => (
-                <View
-                  key={item.label}
-                  style={[styles.row, i < section.items.length - 1 && styles.rowBorder]}
-                >
-                  <View style={styles.rowLeft}>
-                    <View style={styles.rowIcon}>
-                      <Ionicons name={item.icon} size={18} color={Colors.primary} />
+              {section.items.map((item, i) => {
+                const isSoon = COMING_SOON_KEYS.has(item.key);
+                return (
+                  <View
+                    key={item.label}
+                    style={[styles.row, i < section.items.length - 1 && styles.rowBorder, isSoon && { opacity: 0.5 }]}
+                  >
+                    <View style={styles.rowLeft}>
+                      <View style={styles.rowIcon}>
+                        <Ionicons name={item.icon} size={18} color={Colors.primary} />
+                      </View>
+                      <Text style={styles.rowLabel}>{item.label}</Text>
+                      {isSoon && (
+                        <View style={styles.soonBadge}>
+                          <Text style={styles.soonBadgeText}>SOON</Text>
+                        </View>
+                      )}
                     </View>
-                    <Text style={styles.rowLabel}>{item.label}</Text>
+                    <Switch
+                      value={item.toggle}
+                      onValueChange={item.onToggle}
+                      trackColor={{ false: Colors.border, true: Colors.primary }}
+                      thumbColor={Colors.white}
+                      disabled={isSoon}
+                    />
                   </View>
-                  <Switch
-                    value={item.toggle}
-                    onValueChange={item.onToggle}
-                    trackColor={{ false: Colors.border, true: Colors.primary }}
-                    thumbColor={Colors.white}
-                  />
-                </View>
-              ))}
+                );
+              })}
             </View>
           </View>
         ))}
@@ -135,6 +259,8 @@ export default function Settings() {
               <TouchableOpacity
                 key={link.label}
                 style={[styles.row, i < LINKS.length - 1 && styles.rowBorder]}
+                onPress={link.onPress}
+                activeOpacity={0.7}
               >
                 <View style={styles.rowLeft}>
                   <View style={styles.rowIcon}>
@@ -158,7 +284,7 @@ export default function Settings() {
           <Text style={styles.deleteText}>Delete Account</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>Recoverly v1.1.0</Text>
+        <Text style={styles.version}>Recoverly v{APP_VERSION}</Text>
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -183,7 +309,14 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: '700', color: Colors.text },
   scroll: { padding: 20 },
   section: { marginBottom: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: Colors.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.textMuted,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   card: {
     backgroundColor: Colors.white,
     borderRadius: 14,
@@ -223,4 +356,12 @@ const styles = StyleSheet.create({
   },
   deleteText: { color: Colors.textMuted, fontSize: 14, textDecorationLine: 'underline' },
   version: { textAlign: 'center', fontSize: 12, color: Colors.textLight, marginTop: 16 },
+  soonBadge: {
+    backgroundColor: Colors.border,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginLeft: 8,
+  },
+  soonBadgeText: { fontSize: 9, fontWeight: '700', color: Colors.textMuted, letterSpacing: 0.5 },
 });

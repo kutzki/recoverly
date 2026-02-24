@@ -16,6 +16,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { useAuth } from '../../hooks/useAuth';
+import { supabase } from '../../services/supabase';
 
 export default function SignIn() {
   const { signIn, isLoading } = useAuth();
@@ -25,15 +26,40 @@ export default function SignIn() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleSignIn = async () => {
-    if (!email.trim() || !password.trim()) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password.trim()) {
       Alert.alert('Missing fields', 'Please enter your email and password.');
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      Alert.alert('Invalid email', 'Please enter a valid email address.');
+      return;
+    }
     try {
-      await signIn(email.trim(), password);
+      await signIn(trimmedEmail, password);
       router.replace('/(app)/home');
     } catch (err: any) {
       Alert.alert('Sign in failed', err.message || 'Please check your credentials and try again.');
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      Alert.alert('Email Required', 'Enter your email address above first, then tap "Forgot password?"');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+    try {
+      await supabase.auth.resetPasswordForEmail(trimmedEmail);
+      Alert.alert('Email Sent 📬', `If an account exists for ${trimmedEmail}, you'll receive a password reset link shortly.`);
+    } catch {
+      Alert.alert('Error', 'Could not send reset email. Please try again later.');
     }
   };
 
@@ -83,6 +109,7 @@ export default function SignIn() {
               autoCapitalize="none"
               keyboardType="email-address"
               autoComplete="email"
+              returnKeyType="next"
               onFocus={() => setFocusedField('email')}
               onBlur={() => setFocusedField(null)}
             />
@@ -99,6 +126,8 @@ export default function SignIn() {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               autoComplete="current-password"
+              returnKeyType="done"
+              onSubmitEditing={handleSignIn}
               onFocus={() => setFocusedField('password')}
               onBlur={() => setFocusedField(null)}
             />
@@ -111,7 +140,7 @@ export default function SignIn() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotWrap}>
+          <TouchableOpacity style={styles.forgotWrap} onPress={handleForgotPassword}>
             <Text style={styles.forgotText}>Forgot password?</Text>
           </TouchableOpacity>
 
@@ -122,10 +151,11 @@ export default function SignIn() {
             <View style={styles.dividerLine} />
           </View>
 
-          {/* Google */}
-          <TouchableOpacity style={styles.googleBtn} onPress={handleGoogle} activeOpacity={0.8}>
-            <Ionicons name="logo-google" size={20} color={Colors.text} />
-            <Text style={styles.googleText}>Continue with Google</Text>
+          {/* Google — coming soon */}
+          <TouchableOpacity style={[styles.googleBtn, styles.googleBtnDisabled]} onPress={handleGoogle} activeOpacity={0.6}>
+            <Ionicons name="logo-google" size={20} color={Colors.textMuted} />
+            <Text style={styles.googleTextDisabled}>Continue with Google</Text>
+            <View style={styles.soonChip}><Text style={styles.soonChipText}>Soon</Text></View>
           </TouchableOpacity>
 
           {/* Sign in */}
@@ -281,6 +311,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.text,
   },
+  googleBtnDisabled: { opacity: 0.5 },
+  googleTextDisabled: { fontSize: 15, fontWeight: '600', color: Colors.textMuted, flex: 1 },
+  soonChip: { backgroundColor: Colors.border, borderRadius: 4, paddingHorizontal: 7, paddingVertical: 2 },
+  soonChipText: { fontSize: 10, fontWeight: '700', color: Colors.textMuted },
   signInBtn: {
     backgroundColor: Colors.primary,
     borderRadius: 12,

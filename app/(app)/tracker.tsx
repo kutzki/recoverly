@@ -1,13 +1,15 @@
-import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   Platform,
   Alert,
+  ActivityIndicator,
+  Share,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,14 +18,25 @@ import { SobrietyCounter } from '../../components/ui/SobrietyCounter';
 import { MilestoneCard } from '../../components/ui/MilestoneCard';
 import { useProgressStore } from '../../store/progress';
 import { useSobrietyTimer } from '../../hooks/useSobrietyTimer';
+import { useAuthStore } from '../../store/auth';
+import { postActivity } from '../../services/streamFeed';
 
 const MILESTONES = [
-  { label: 'First day sober', days: 1, date: '1 Jan', icon: 'star-outline' as const, variant: 'grey' as const },
-  { label: '7 days sober', days: 7, date: '7 Jan', icon: 'flame-outline' as const, variant: 'purple' as const },
-  { label: 'Thirty days sober', days: 30, date: '1 Feb', icon: 'trophy-outline' as const, variant: 'cyan' as const },
-  { label: 'Sixty days sober', days: 60, date: '1 Mar', icon: 'medal-outline' as const, variant: 'cyan' as const },
-  { label: 'Ninety days sober', days: 90, date: '1 Apr', icon: 'ribbon-outline' as const, variant: 'cyan' as const },
+  { label: 'First day sober', days: 1, icon: 'star-outline' as const, variant: 'grey' as const },
+  { label: '7 days sober', days: 7, icon: 'flame-outline' as const, variant: 'purple' as const },
+  { label: 'Thirty days sober', days: 30, icon: 'trophy-outline' as const, variant: 'cyan' as const },
+  { label: 'Sixty days sober', days: 60, icon: 'medal-outline' as const, variant: 'cyan' as const },
+  { label: 'Ninety days sober', days: 90, icon: 'ribbon-outline' as const, variant: 'cyan' as const },
 ];
+
+function getMilestoneDate(sobrietyStartDate: string | null | undefined, days: number): string {
+  if (!sobrietyStartDate) return '—';
+  const start = new Date(sobrietyStartDate);
+  if (isNaN(start.getTime())) return '—';
+  const target = new Date(start);
+  target.setDate(target.getDate() + days);
+  return target.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+}
 
 const MILESTONE_MESSAGES: Record<number, string> = {
   1: 'Incredible!',
@@ -36,9 +49,44 @@ const MILESTONE_MESSAGES: Record<number, string> = {
 export default function Tracker() {
   const { sobrietyStartDate, tasksCompleted, tasksTarget, checkInsCompleted, checkInsTarget, meetingsAttended, meetingsTarget } = useProgressStore();
   const timer = useSobrietyTimer(sobrietyStartDate);
+  const { user } = useAuthStore();
+  const [sharing, setSharing] = useState(false);
 
-  const handleShare = () => {
-    Alert.alert('Share', `I've been sober for ${timer.days} days using Recoverly! 💜`);
+  const handleShare = async () => {
+    if (sharing) return;
+    if (!user) {
+      Alert.alert('Share', `I've been sober for ${timer.days} days using Recoverly! 💜`);
+      return;
+    }
+    setSharing(true);
+    try {
+      await postActivity({
+        text: `🎯 I've been sober for ${timer.days} day${timer.days === 1 ? '' : 's'}! 💜 #recovery`,
+        type: 'milestone',
+        userId: user.id,
+        userName: user.name,
+      });
+      Alert.alert('Posted! 🎉', 'Your milestone has been shared to the community feed.', [
+        { text: 'View Feed', onPress: () => router.push('/(app)/feed' as any) },
+        { text: 'OK' },
+      ]);
+    } catch {
+      Alert.alert(
+        'Could not post to feed',
+        'Your connection may be unavailable. Share manually instead?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Share',
+            onPress: () => {
+              Share.share({ message: `I've been sober for ${timer.days} days using Recoverly! 💜 #recovery` }).catch(() => {});
+            },
+          },
+        ]
+      );
+    } finally {
+      setSharing(false);
+    }
   };
 
   return (
@@ -73,9 +121,22 @@ export default function Tracker() {
             ))}
           </View>
 
-          <TouchableOpacity style={styles.shareBtn} onPress={handleShare}>
-            <Text style={styles.shareText}>Share now</Text>
-            <Ionicons name="share-outline" size={16} color={Colors.primary} />
+          <TouchableOpacity
+            style={[styles.shareBtn, sharing && { opacity: 0.6 }]}
+            onPress={handleShare}
+            disabled={sharing}
+          >
+            {sharing ? (
+              <>
+                <ActivityIndicator size="small" color={Colors.primary} />
+                <Text style={styles.shareText}>Sharing…</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.shareText}>Share now</Text>
+                <Ionicons name="share-outline" size={16} color={Colors.primary} />
+              </>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -118,7 +179,7 @@ export default function Tracker() {
               key={m.days}
               label={m.label}
               subtitle={`${MILESTONE_MESSAGES[m.days]} ${m.days} day${m.days > 1 ? 's' : ''} sober`}
-              date={m.date}
+              date={getMilestoneDate(sobrietyStartDate, m.days)}
               icon={m.icon}
               variant={m.variant}
               unlocked={timer.days >= m.days}

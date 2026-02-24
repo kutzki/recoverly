@@ -1,77 +1,217 @@
-import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
-  SafeAreaView,
   Platform,
+  Alert,
+  Modal,
+  TextInput,
+  FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { ChannelList, Chat, ChannelPreviewMessenger } from 'stream-chat-react-native';
+import { Channel as ChannelType } from 'stream-chat';
 import { Colors } from '../../constants/colors';
+import { getStreamChatClient, buildChannelFilters, buildChannelSort, getOrCreateDMChannel, searchUsers } from '../../services/streamChat';
+import { useAuthStore } from '../../store/auth';
 
-const MOCK_MESSAGES = [
-  { id: '1', name: 'Jack (Sponsor)', lastMsg: 'How are you feeling today?', time: '2m ago', unread: 3, initial: 'J' },
-  { id: '2', name: 'Recovery Group', lastMsg: 'Sarah: Great meeting everyone!', time: '1h ago', unread: 13, initial: 'R' },
-  { id: '3', name: 'Mike S.', lastMsg: 'Let\'s grab coffee before the meeting', time: '2h ago', unread: 0, initial: 'M' },
-  { id: '4', name: 'AA Meeting Chat', lastMsg: 'Next meeting Thursday 7pm', time: 'Yesterday', unread: 0, initial: 'A' },
-  { id: '5', name: 'Emma T.', lastMsg: '30 days!! So proud of you 🎉', time: 'Yesterday', unread: 0, initial: 'E' },
-];
+// ─── New DM / compose modal ───────────────────────────────────────────────────
+
+function ComposeModal({ visible, onClose, currentUserId }: {
+  visible: boolean;
+  onClose: () => void;
+  currentUserId: string;
+}) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const search = useCallback(async (text: string) => {
+    if (!text.trim()) { setResults([]); return; }
+    setLoading(true);
+    try {
+      const users = await searchUsers(text, currentUserId, 15);
+      setResults(users);
+    } catch {
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUserId]);
+
+  useEffect(() => {
+    const t = setTimeout(() => search(query), 350);
+    return () => clearTimeout(t);
+  }, [query, search]);
+
+  const openDM = async (userId: string) => {
+    try {
+      onClose();
+      const channel = await getOrCreateDMChannel(currentUserId, userId);
+      router.push({ pathname: '/(app)/chat/[cid]' as any, params: { cid: channel.cid } });
+    } catch (err) {
+      Alert.alert('Error', 'Could not open chat. Please try again.');
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+      <SafeAreaView style={modal.safe}>
+        <View style={modal.header}>
+          <Text style={modal.title}>New Message</Text>
+          <TouchableOpacity onPress={onClose}>
+            <Ionicons name="close" size={24} color={Colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={modal.searchRow}>
+          <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
+          <TextInput
+            style={modal.input}
+            placeholder="Search people..."
+            placeholderTextColor={Colors.textMuted}
+            value={query}
+            onChangeText={setQuery}
+            autoFocus
+          />
+          {loading && <ActivityIndicator size="small" color={Colors.primary} />}
+        </View>
+
+        <FlatList
+          data={results}
+          keyExtractor={u => u.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={modal.userRow} onPress={() => openDM(item.id)}>
+              <View style={modal.avatar}>
+                <Text style={modal.avatarText}>{(item.name || item.id)[0].toUpperCase()}</Text>
+              </View>
+              <View>
+                <Text style={modal.userName}>{item.name || item.id}</Text>
+                {item.days_sober != null && (
+                  <Text style={modal.userSub}>{item.days_sober} days sober</Text>
+                )}
+              </View>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            query.length > 1 ? (
+              loading
+                ? <Text style={modal.empty}>Searching…</Text>
+                : <Text style={modal.empty}>No users found</Text>
+            ) : null
+          }
+        />
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
+// ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function Messages() {
-  const totalUnread = MOCK_MESSAGES.reduce((acc, m) => acc + m.unread, 0);
+  const { user } = useAuthStore();
+  const [composeVisible, setComposeVisible] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+  // Incrementing retryCount forces useEffect to re-run the 15s timer on retry
+  const [retryCount, setRetryCount] = useState(0);
+  const chatClient = getStreamChatClient();
+
+  // After 15 seconds without a chat client, stop showing spinner and show error.
+  // Re-runs when chatClient connects OR when user taps "Try Again" (retryCount bump).
+  useEffect(() => {
+    if (chatClient) return;
+    setTimedOut(false); // reset to spinner on each new attempt
+    const t = setTimeout(() => setTimedOut(true), 15000);
+    return () => clearTimeout(t);
+  }, [chatClient, retryCount]);
+
+  const onSelectChannel = useCallback((channel: ChannelType) => {
+    router.push({ pathname: '/(app)/chat/[cid]' as any, params: { cid: channel.cid } });
+  }, []);
+
+  if (!chatClient || !user) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={24} color={Colors.primary} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Messages</Text>
+          <View style={{ width: 36 }} />
+        </View>
+        <View style={styles.centered}>
+          {timedOut ? (
+            <>
+              <Ionicons name="wifi-outline" size={48} color={Colors.primaryLight} />
+              <Text style={styles.emptyTitle}>Chat unavailable</Text>
+              <Text style={styles.emptySubtitle}>
+                Could not connect to messaging. Please check your connection and try again.
+              </Text>
+              <TouchableOpacity onPress={() => setRetryCount(c => c + 1)} style={styles.retryBtn}>
+                <Text style={styles.retryBtnText}>Try Again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.back()} style={styles.backLink}>
+                <Text style={styles.backLinkText}>Go Back</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <ActivityIndicator color={Colors.primary} />
+              <Text style={styles.loadingText}>Connecting…</Text>
+              <Text style={styles.loadingSubText}>This may take a moment</Text>
+            </>
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const filters = buildChannelFilters(user.id);
+  const sort = buildChannelSort();
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={Colors.primary} />
         </TouchableOpacity>
-        <View>
-          <Text style={styles.title}>Messages</Text>
-          {totalUnread > 0 && (
-            <Text style={styles.unreadLabel}>{totalUnread} unread</Text>
-          )}
-        </View>
-        <TouchableOpacity style={styles.composeBtn}>
+        <Text style={styles.title}>Messages</Text>
+        <TouchableOpacity style={styles.composeBtn} onPress={() => setComposeVisible(true)}>
           <Ionicons name="create-outline" size={22} color={Colors.primary} />
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={MOCK_MESSAGES}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={styles.sep} />}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.msgRow} activeOpacity={0.8}>
-            <View style={[styles.avatar, item.unread > 0 && styles.avatarUnread]}>
-              <Text style={styles.avatarText}>{item.initial}</Text>
+      <Chat client={chatClient}>
+        <ChannelList
+          filters={filters}
+          sort={sort}
+          onSelect={onSelectChannel}
+          Preview={ChannelPreviewMessenger}
+          additionalFlatListProps={{
+            contentContainerStyle: { flexGrow: 1 },
+          }}
+          EmptyStateIndicator={() => (
+            <View style={styles.emptyState}>
+              <Ionicons name="chatbubbles-outline" size={52} color={Colors.primaryLight} />
+              <Text style={styles.emptyTitle}>No conversations yet</Text>
+              <Text style={styles.emptySubtitle}>Tap + to message someone</Text>
             </View>
-            <View style={styles.msgInfo}>
-              <View style={styles.msgTopRow}>
-                <Text style={[styles.msgName, item.unread > 0 && styles.msgNameBold]}>
-                  {item.name}
-                </Text>
-                <Text style={styles.msgTime}>{item.time}</Text>
-              </View>
-              <View style={styles.msgBottomRow}>
-                <Text style={[styles.msgPreview, item.unread > 0 && styles.msgPreviewBold]} numberOfLines={1}>
-                  {item.lastMsg}
-                </Text>
-                {item.unread > 0 && (
-                  <View style={styles.unreadBadge}>
-                    <Text style={styles.unreadText}>{item.unread}</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+          )}
+        />
+      </Chat>
+
+      {user && (
+        <ComposeModal
+          visible={composeVisible}
+          onClose={() => setComposeVisible(false)}
+          currentUserId={user.id}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -91,44 +231,71 @@ const styles = StyleSheet.create({
   },
   backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  unreadLabel: { fontSize: 12, color: Colors.primary },
   composeBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  list: { paddingVertical: 8 },
-  sep: { height: 1, backgroundColor: Colors.border, marginLeft: 76 },
-  msgRow: {
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32 },
+  loadingText: { color: Colors.textMuted, fontSize: 14 },
+  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingTop: 80 },
+  emptyTitle: { fontSize: 17, fontWeight: '700', color: Colors.text, textAlign: 'center' },
+  emptySubtitle: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  retryBtnText: { color: Colors.white, fontWeight: '700', fontSize: 14 },
+  backLink: { marginTop: 4, paddingVertical: 8 },
+  backLinkText: { color: Colors.textMuted, fontSize: 14 },
+  loadingSubText: { color: Colors.textMuted, fontSize: 13, marginTop: -4 },
+});
+
+const modal = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: Colors.background },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    margin: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  input: { flex: 1, fontSize: 15, color: Colors.text },
+  userRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarUnread: { backgroundColor: Colors.primary },
   avatarText: { fontSize: 18, fontWeight: '700', color: Colors.primary },
-  msgInfo: { flex: 1 },
-  msgTopRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 },
-  msgName: { fontSize: 15, color: Colors.text },
-  msgNameBold: { fontWeight: '700' },
-  msgTime: { fontSize: 12, color: Colors.textMuted },
-  msgBottomRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  msgPreview: { flex: 1, fontSize: 13, color: Colors.textMuted, marginRight: 8 },
-  msgPreviewBold: { color: Colors.text, fontWeight: '500' },
-  unreadBadge: {
-    backgroundColor: Colors.primary,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 5,
-  },
-  unreadText: { color: Colors.white, fontSize: 11, fontWeight: '700' },
+  userName: { fontSize: 15, fontWeight: '600', color: Colors.text },
+  userSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  empty: { textAlign: 'center', marginTop: 40, color: Colors.textMuted, fontSize: 14 },
 });

@@ -17,24 +17,43 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { useAuth } from '../../hooks/useAuth';
 
+function getPasswordStrength(pw: string): { label: string; color: string; pct: string } | null {
+  if (!pw) return null;
+  const hasUpper = /[A-Z]/.test(pw);
+  const hasNumber = /[0-9]/.test(pw);
+  const hasSpecial = /[^A-Za-z0-9]/.test(pw);
+  const score = (pw.length >= 8 ? 1 : 0) + (hasUpper ? 1 : 0) + (hasNumber ? 1 : 0) + (hasSpecial ? 1 : 0);
+  if (score <= 1) return { label: 'Weak', color: '#EF4444', pct: '25%' };
+  if (score === 2) return { label: 'Fair', color: '#F59E0B', pct: '50%' };
+  if (score === 3) return { label: 'Good', color: '#3B82F6', pct: '75%' };
+  return { label: 'Strong', color: '#10B981', pct: '100%' };
+}
+
 export default function SignUp() {
   const { signUp, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const strength = getPasswordStrength(password);
 
   const handleProceed = async () => {
-    if (!email.trim() || !password.trim()) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password.trim()) {
       Alert.alert('Missing fields', 'Please enter your email and password.');
       return;
     }
-    if (password.length < 6) {
-      Alert.alert('Weak password', 'Password must be at least 6 characters.');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      Alert.alert('Invalid email', 'Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 8) {
+      Alert.alert('Weak password', 'Password must be at least 8 characters.');
       return;
     }
     try {
-      await signUp(email.trim(), password);
+      await signUp(trimmedEmail, password);
       router.replace('/(setup)/welcome');
     } catch (err: any) {
       Alert.alert('Sign up failed', err.message || 'Please try again.');
@@ -88,6 +107,7 @@ export default function SignUp() {
               autoCapitalize="none"
               keyboardType="email-address"
               autoComplete="email"
+              returnKeyType="next"
               onFocus={() => setFocusedField('email')}
               onBlur={() => setFocusedField(null)}
             />
@@ -104,6 +124,8 @@ export default function SignUp() {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               autoComplete="new-password"
+              returnKeyType="done"
+              onSubmitEditing={handleProceed}
               onFocus={() => setFocusedField('password')}
               onBlur={() => setFocusedField(null)}
             />
@@ -116,6 +138,16 @@ export default function SignUp() {
             </TouchableOpacity>
           </View>
 
+          {/* Password strength */}
+          {strength && (
+            <View style={styles.strengthWrap}>
+              <View style={styles.strengthTrack}>
+                <View style={[styles.strengthFill, { width: strength.pct, backgroundColor: strength.color }]} />
+              </View>
+              <Text style={[styles.strengthLabel, { color: strength.color }]}>{strength.label}</Text>
+            </View>
+          )}
+
           {/* Divider */}
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
@@ -123,10 +155,11 @@ export default function SignUp() {
             <View style={styles.dividerLine} />
           </View>
 
-          {/* Google */}
-          <TouchableOpacity style={styles.googleBtn} onPress={handleGoogle} activeOpacity={0.8}>
-            <Ionicons name="logo-google" size={20} color={Colors.text} />
-            <Text style={styles.googleText}>Continue with Google</Text>
+          {/* Google — coming soon */}
+          <TouchableOpacity style={[styles.googleBtn, styles.googleBtnDisabled]} onPress={handleGoogle} activeOpacity={0.6}>
+            <Ionicons name="logo-google" size={20} color={Colors.textMuted} />
+            <Text style={styles.googleTextDisabled}>Continue with Google</Text>
+            <View style={styles.soonChip}><Text style={styles.soonChipText}>Soon</Text></View>
           </TouchableOpacity>
 
           {/* Proceed */}
@@ -301,5 +334,33 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: 14,
     fontWeight: '600',
+  },
+  googleBtnDisabled: { opacity: 0.5 },
+  googleTextDisabled: { fontSize: 15, fontWeight: '600', color: Colors.textMuted, flex: 1 },
+  soonChip: { backgroundColor: Colors.border, borderRadius: 4, paddingHorizontal: 7, paddingVertical: 2 },
+  soonChipText: { fontSize: 10, fontWeight: '700', color: Colors.textMuted },
+  strengthWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: -8,
+    marginBottom: 12,
+  },
+  strengthTrack: {
+    flex: 1,
+    height: 4,
+    backgroundColor: Colors.border,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  strengthFill: {
+    height: 4,
+    borderRadius: 2,
+  },
+  strengthLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    minWidth: 44,
+    textAlign: 'right',
   },
 });
