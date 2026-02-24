@@ -63,8 +63,8 @@ export default function EditProfile() {
         bio: bio.trim(),
       } as any);
       router.back();
-    } catch {
-      Alert.alert('Error', 'Could not save changes. Please try again.');
+    } catch (err: any) {
+      Alert.alert('Error', err?.message || 'Could not save changes. Please try again.');
     } finally {
       setSaving(false);
     }

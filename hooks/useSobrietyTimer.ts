@@ -16,6 +16,8 @@ export function useSobrietyTimer(startDate: string | null): SobrietyTime {
 
     const calculate = () => {
       const start = new Date(startDate).getTime();
+      // Guard: malformed startDate produces NaN — skip to keep the display at 0
+      if (isNaN(start)) { console.warn('[useSobrietyTimer] Invalid startDate:', startDate); return; }
       const now = Date.now();
       const diffSec = Math.max(0, Math.floor((now - start) / 1000));
 

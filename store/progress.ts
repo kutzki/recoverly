@@ -45,8 +45,8 @@ function currentMondayKey() {
 function persist(partial: Partial<ProgressState>) {
   SecureStore.getItemAsync(PROGRESS_KEY).then(raw => {
     const current = raw ? JSON.parse(raw) : {};
-    SecureStore.setItemAsync(PROGRESS_KEY, JSON.stringify({ ...current, ...partial })).catch(() => {});
-  }).catch(() => {});
+    SecureStore.setItemAsync(PROGRESS_KEY, JSON.stringify({ ...current, ...partial })).catch((err) => { console.warn('[Progress] persist write error:', err); });
+  }).catch((err) => { console.warn('[Progress] persist read error:', err); });
 }
 
 export const useProgressStore = create<ProgressState>((set, get) => ({
