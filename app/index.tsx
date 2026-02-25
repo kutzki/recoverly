@@ -12,7 +12,15 @@ export default function SplashScreen() {
     if (isLoading) return;
     const timer = setTimeout(() => {
       if (isAuthenticated && user) {
-        if (user.isProfileComplete) {
+        // isProfileComplete is now persisted to DB.
+        // Also use a heuristic fallback for existing accounts created before this
+        // fix was deployed (when is_profile_complete was never written to DB).
+        const profileDone =
+          user.isProfileComplete ||
+          Boolean(user.sobrietyStartDate) ||
+          (user.challenges && user.challenges.length > 0) ||
+          Boolean(user.shortTermGoal);
+        if (profileDone) {
           router.replace('/(app)/home');
         } else {
           router.replace('/(setup)/welcome');

@@ -12,6 +12,7 @@ import {
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { journalService } from '../../services/journal';
 
 const MOODS = [
   { id: 'happy', emoji: '😊', label: 'Happy' },
@@ -32,20 +33,34 @@ const JournalSheet = forwardRef<BottomSheet>((_, ref) => {
   const [underline, setUnderline] = useState(false);
   const [align, setAlign] = useState<'left' | 'center' | 'right'>('left');
 
-  const handleSubmit = () => {
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async () => {
     if (!body.trim()) {
       Alert.alert('Empty entry', 'Please write something before submitting.');
       return;
     }
-    // TODO: call journal service
-    Alert.alert('Entry saved', 'Your journal entry has been saved.', [
-      { text: 'OK', onPress: () => {
-        setTitle('');
-        setBody('');
-        setSelectedMood(null);
-        (ref as any)?.current?.close();
-      }},
-    ]);
+    setSaving(true);
+    try {
+      await journalService.createEntry({
+        date: new Date().toISOString().split('T')[0],
+        mood: selectedMood || 'blank',
+        title: title.trim() || 'Journal Entry',
+        body: body.trim(),
+      });
+      Alert.alert('Entry saved', 'Your journal entry has been saved.', [
+        { text: 'OK', onPress: () => {
+          setTitle('');
+          setBody('');
+          setSelectedMood(null);
+          (ref as any)?.current?.close();
+        }},
+      ]);
+    } catch {
+      Alert.alert('Error', 'Could not save your entry. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -132,7 +147,7 @@ const JournalSheet = forwardRef<BottomSheet>((_, ref) => {
               underline && { textDecorationLine: 'underline' },
               { textAlign: align },
             ]}
-            placeholder="Write how about how you're feeling today and what you did....."
+            placeholder="Write about how you're feeling today and what you did…"
             placeholderTextColor={Colors.textMuted}
             value={body}
             onChangeText={setBody}
@@ -144,11 +159,11 @@ const JournalSheet = forwardRef<BottomSheet>((_, ref) => {
 
         {/* Submit */}
         <TouchableOpacity
-          style={[styles.submitBtn, !body.trim() && styles.submitDisabled]}
+          style={[styles.submitBtn, (!body.trim() || saving) && styles.submitDisabled]}
           onPress={handleSubmit}
-          disabled={!body.trim()}
+          disabled={!body.trim() || saving}
         >
-          <Text style={styles.submitText}>Submit Entry</Text>
+          <Text style={styles.submitText}>{saving ? 'Saving…' : 'Submit Entry'}</Text>
         </TouchableOpacity>
       </BottomSheetView>
     </BottomSheet>

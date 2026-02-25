@@ -7,7 +7,10 @@ export function useAuth() {
 
   const signUp = async (email: string, password: string, name?: string) => {
     const result = await authService.signUp({ email, password, name });
-    store.setAuth(result.user, result.token);
+    // Don't setAuth if email confirmation is required — user has no valid session yet
+    if (result.token !== 'pending_email_confirmation') {
+      store.setAuth(result.user, result.token);
+    }
     return result;
   };
 

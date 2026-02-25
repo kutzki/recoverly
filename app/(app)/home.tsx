@@ -1,3 +1,4 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useRef, useCallback } from 'react';
 import {
   View,
@@ -5,8 +6,9 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
+  Alert,
   Platform,
+  Animated,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,15 +26,20 @@ import BottomSheet from '@gorhom/bottom-sheet';
 
 const QUICK_ACTIONS = [
   { id: 'meeting', label: 'Meeting', icon: 'people-outline' as const, route: '/(app)/meetings' },
-  { id: 'awards', label: 'Awards', icon: 'trophy-outline' as const, route: null },
+  { id: 'awards', label: 'Awards', icon: 'trophy-outline' as const, route: '/(app)/profile' },
   { id: 'tracker', label: 'Tracker', icon: 'bar-chart-outline' as const, route: '/(app)/tracker' },
   { id: 'checklist', label: 'Checklist', icon: 'checkbox-outline' as const, action: 'checklist' },
   { id: 'journal', label: 'Journal', icon: 'journal-outline' as const, action: 'journal' },
 ] as const;
 
+// Today's weekday index (Mon=0 … Sun=6) — matches progress store
+function todayWeekIndex() {
+  return (new Date().getDay() + 6) % 7;
+}
+
 export default function Home() {
   const user = useAuthStore(s => s.user);
-  const { sobrietyStartDate, weeklyStreak } = useProgressStore();
+  const { sobrietyStartDate, weeklyStreak, markTodayCheckedIn } = useProgressStore();
   const { items: checklistItems } = useChecklistStore();
   const timer = useSobrietyTimer(sobrietyStartDate);
   const { openDrawer } = useDrawer();
@@ -40,8 +47,28 @@ export default function Home() {
   const checklistRef = useRef<BottomSheet>(null);
   const journalRef = useRef<BottomSheet>(null);
 
+  // Animated scale for thumb bounce
+  const thumbScale = useRef(new Animated.Value(1)).current;
+
   const completedToday = checklistItems.filter(i => i.completed).length;
   const totalTasks = checklistItems.length;
+
+  // Check if user has already checked in today
+  const checkedInToday = weeklyStreak[todayWeekIndex()];
+
+  const handleCheckIn = useCallback(() => {
+    if (checkedInToday) {
+      Alert.alert('Already checked in! 💜', 'You\'ve already done your daily check-in today. Come back tomorrow!');
+      return;
+    }
+    // Bounce animation
+    Animated.sequence([
+      Animated.spring(thumbScale, { toValue: 1.4, useNativeDriver: true, speed: 20 }),
+      Animated.spring(thumbScale, { toValue: 1.0, useNativeDriver: true, speed: 20 }),
+    ]).start();
+    markTodayCheckedIn();
+    Alert.alert('Checked in! 👍', 'Great work showing up today. Keep that streak going!');
+  }, [checkedInToday, markTodayCheckedIn, thumbScale]);
 
   const handleQuickAction = useCallback((action: typeof QUICK_ACTIONS[number]) => {
     if ('route' in action && action.route) {
@@ -51,6 +78,8 @@ export default function Home() {
         checklistRef.current?.expand();
       } else if (action.action === 'journal') {
         journalRef.current?.expand();
+      } else if (action.action === 'comingSoon') {
+        Alert.alert('Coming Soon', 'Awards are on the way! Keep building your streak. 🏆');
       }
     }
   }, []);
@@ -115,12 +144,24 @@ export default function Home() {
           <View style={styles.cardRow}>
             <View style={styles.cardTextCol}>
               <Text style={styles.cardTitle}>Daily Check-In</Text>
-              <Text style={styles.cardSubtitle}>Have you checked in yet today?</Text>
+              <Text style={styles.cardSubtitle}>
+                {checkedInToday ? 'You checked in today ✓' : 'Have you checked in yet today?'}
+              </Text>
               <StreakDots streak={weeklyStreak} />
             </View>
-            <View style={styles.thumbsWrap}>
-              <Ionicons name="thumbs-up" size={40} color={Colors.primaryLight} />
-            </View>
+            <TouchableOpacity
+              style={styles.thumbsWrap}
+              onPress={handleCheckIn}
+              activeOpacity={0.7}
+            >
+              <Animated.View style={{ transform: [{ scale: thumbScale }] }}>
+                <Ionicons
+                  name={checkedInToday ? 'thumbs-up' : 'thumbs-up-outline'}
+                  size={40}
+                  color={checkedInToday ? Colors.primary : Colors.primaryLight}
+                />
+              </Animated.View>
+            </TouchableOpacity>
           </View>
           <View style={styles.progressBarTrack}>
             <View
@@ -135,41 +176,37 @@ export default function Home() {
           </Text>
         </View>
 
-        {/* Upcoming Events */}
-        <Text style={styles.sectionTitle}>Upcoming Events</Text>
-        {[
-          {
-            org: 'New Connections',
-            location: 'Los Angeles County',
-            time: 'Tonight · 7:00 PM',
-            icon: 'people' as const,
-            color: Colors.primary,
-          },
-          {
-            org: 'New Connections',
-            location: 'Los Angeles County',
-            time: 'Tomorrow · 10:00 AM',
-            icon: 'people' as const,
-            color: Colors.accent,
-          },
-        ].map((event, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.eventCard}
-            onPress={() => router.push('/(app)/meetings' as any)}
-            activeOpacity={0.85}
-          >
-            <View style={[styles.eventIcon, { backgroundColor: event.color + '22' }]}>
-              <Ionicons name={event.icon} size={22} color={event.color} />
-            </View>
-            <View style={styles.eventInfo}>
-              <Text style={styles.eventOrg}>{event.org}</Text>
-              <Text style={styles.eventLocation}>{event.location}</Text>
-              <Text style={styles.eventTime}>{event.time}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
-          </TouchableOpacity>
-        ))}
+        {/* Meetings CTA */}
+        <Text style={styles.sectionTitle}>Find Support</Text>
+        <TouchableOpacity
+          style={styles.meetingsBanner}
+          onPress={() => router.push('/(app)/meetings' as any)}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.eventIcon, { backgroundColor: Colors.primary + '22' }]}>
+            <Ionicons name="people" size={22} color={Colors.primary} />
+          </View>
+          <View style={styles.eventInfo}>
+            <Text style={styles.eventOrg}>Find a Meeting Near You</Text>
+            <Text style={styles.eventLocation}>Browse AA, NA, SMART Recovery and more</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.meetingsBanner}
+          onPress={() => router.push('/(app)/sober-pal' as any)}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.eventIcon, { backgroundColor: Colors.accent + '22' }]}>
+            <Ionicons name="heart" size={22} color={Colors.accent} />
+          </View>
+          <View style={styles.eventInfo}>
+            <Text style={styles.eventOrg}>Connect with a Sober Pal</Text>
+            <Text style={styles.eventLocation}>Find someone who understands your journey</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+        </TouchableOpacity>
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -303,7 +340,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 14,
   },
-  eventCard: {
+  meetingsBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,

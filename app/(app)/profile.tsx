@@ -69,8 +69,8 @@ export default function Profile() {
               <Text style={styles.location}>{user.location}</Text>
             </View>
           ) : null}
-          {(user as any)?.bio ? (
-            <Text style={styles.bio}>{(user as any).bio}</Text>
+          {user?.bio ? (
+            <Text style={styles.bio}>{user.bio}</Text>
           ) : null}
         </View>
 

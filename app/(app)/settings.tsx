@@ -18,7 +18,7 @@ import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth';
 
 const SETTINGS_KEY = 'app_settings';
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.0.22';
 
 export default function Settings() {
   const signOut = useAuthStore(s => s.signOut);

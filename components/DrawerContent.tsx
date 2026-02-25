@@ -33,7 +33,7 @@ function DrawerContent({ onClose }: { onClose: () => void }) {
   };
 
   const topItems: NavItem[] = [
-    { label: 'Messages', icon: 'chatbubble-outline', route: '/(app)/messages', badge: 16 },
+    { label: 'Messages', icon: 'chatbubble-outline', route: '/(app)/messages' },
     { label: 'My Sober Pal', icon: 'people-circle-outline', route: '/(app)/sober-pal' },
     { label: 'Meetings', icon: 'calendar-outline', route: '/(app)/meetings' },
     { label: 'Resource Hub', icon: 'library-outline', route: '/(app)/resource-hub' },
@@ -47,7 +47,7 @@ function DrawerContent({ onClose }: { onClose: () => void }) {
   return (
     <View style={styles.container}>
       {/* Profile Header */}
-      <TouchableOpacity style={styles.profile} onPress={() => navigate('/(app)/profile')}>
+      <TouchableOpacity style={styles.profile} onPress={() => navigate('/(app)/profile')} accessibilityLabel="View your profile">
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{user?.name?.[0]?.toUpperCase() || 'U'}</Text>
         </View>

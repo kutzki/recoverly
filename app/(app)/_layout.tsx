@@ -69,6 +69,15 @@ function AppLayout() {
           }}
         />
         <Tabs.Screen
+          name="feed"
+          options={{
+            title: 'Feed',
+            tabBarIcon: ({ color, size }) => (
+              <TabBarIcon name="people-outline" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="apps"
           options={{
             title: 'Apps',
@@ -113,6 +122,15 @@ function AppLayout() {
         <Tabs.Screen name="meetings" options={{ href: null }} />
         <Tabs.Screen name="resource-hub" options={{ href: null }} />
         <Tabs.Screen name="settings" options={{ href: null }} />
+        <Tabs.Screen name="find-users" options={{ href: null }} />
+        <Tabs.Screen name="chat" options={{ href: null }} />
+        {/* New screens */}
+        <Tabs.Screen name="edit-profile" options={{ href: null }} />
+        <Tabs.Screen name="sponsor" options={{ href: null }} />
+        <Tabs.Screen name="inner-circle" options={{ href: null }} />
+        <Tabs.Screen name="goals" options={{ href: null }} />
+        <Tabs.Screen name="crisis-history" options={{ href: null }} />
+        <Tabs.Screen name="user" options={{ href: null }} />
       </Tabs>
 
       {/* Custom side drawer overlay */}

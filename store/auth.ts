@@ -17,6 +17,7 @@ export interface User {
   shortTermGoal?: string;
   location?: string;
   dateOfBirth?: string;
+  bio?: string;
   sponsor?: { name: string; phone: string };
   innerCircle?: Array<{ name: string; phone: string }>;
   isProfileComplete?: boolean;
@@ -116,6 +117,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             shortTermGoal: profile.short_term_goal ?? undefined,
             location: profile.location ?? undefined,
             dateOfBirth: profile.date_of_birth ?? undefined,
+            bio: profile.bio ?? undefined,
             sponsor: profile.sponsor_name
               ? { name: profile.sponsor_name, phone: profile.sponsor_phone ?? '' }
               : undefined,

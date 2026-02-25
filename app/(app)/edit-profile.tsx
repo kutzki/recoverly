@@ -24,7 +24,7 @@ export default function EditProfile() {
   const [username, setUsername] = useState((user?.username ?? '').replace('@', ''));
   const [location, setLocation] = useState(user?.location ?? '');
   const [goal, setGoal] = useState(user?.shortTermGoal ?? '');
-  const [bio, setBio] = useState((user as any)?.bio ?? '');
+  const [bio, setBio] = useState(user?.bio ?? '');
   const [saving, setSaving] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
 
@@ -35,7 +35,7 @@ export default function EditProfile() {
     username !== (user?.username ?? '').replace('@', '') ||
     location !== (user?.location ?? '') ||
     goal !== (user?.shortTermGoal ?? '') ||
-    bio !== ((user as any)?.bio ?? '');
+    bio !== (user?.bio ?? '');
 
   const handleBack = () => {
     if (isDirty) {
@@ -61,7 +61,7 @@ export default function EditProfile() {
         location: location.trim(),
         shortTermGoal: goal.trim(),
         bio: bio.trim(),
-      } as any);
+      });
       router.back();
     } catch (err: any) {
       Alert.alert('Error', err?.message || 'Could not save changes. Please try again.');

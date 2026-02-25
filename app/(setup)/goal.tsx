@@ -8,6 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -19,11 +21,19 @@ export default function Goal() {
   const updateUser = useAuthStore(s => s.updateUser);
   const [goal, setGoal] = useState('');
   const [focused, setFocused] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!goal.trim()) return;
-    updateUser({ shortTermGoal: goal.trim() });
-    router.push('/(setup)/thank-you');
+    setSaving(true);
+    try {
+      await updateUser({ shortTermGoal: goal.trim() });
+      router.push('/(setup)/thank-you');
+    } catch {
+      Alert.alert('Error', 'Could not save your goal. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -96,12 +106,17 @@ export default function Goal() {
 
           {/* Submit */}
           <TouchableOpacity
-            style={[styles.submitBtn, !goal.trim() && styles.submitDisabled]}
+            style={[styles.submitBtn, (!goal.trim() || saving) && styles.submitDisabled]}
             onPress={handleSubmit}
-            disabled={!goal.trim()}
+            disabled={!goal.trim() || saving}
           >
-            <Text style={styles.submitText}>Submit</Text>
-            <Ionicons name="checkmark" size={18} color={Colors.white} />
+            {saving
+              ? <ActivityIndicator color={Colors.white} />
+              : <>
+                  <Text style={styles.submitText}>Submit</Text>
+                  <Ionicons name="checkmark" size={18} color={Colors.white} />
+                </>
+            }
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

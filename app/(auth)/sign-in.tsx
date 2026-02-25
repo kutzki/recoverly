@@ -37,8 +37,12 @@ export default function SignIn() {
       return;
     }
     try {
-      await signIn(trimmedEmail, password);
-      router.replace('/(app)/home');
+      const result = await signIn(trimmedEmail, password);
+      if (result.user.isProfileComplete) {
+        router.replace('/(app)/home');
+      } else {
+        router.replace('/(setup)/welcome');
+      }
     } catch (err: any) {
       Alert.alert('Sign in failed', err.message || 'Please check your credentials and try again.');
     }

@@ -57,8 +57,16 @@ export default function SignUp() {
       return;
     }
     try {
-      await signUp(trimmedEmail, password);
-      router.replace('/(setup)/welcome');
+      const result = await signUp(trimmedEmail, password);
+      if (result.token === 'pending_email_confirmation') {
+        Alert.alert(
+          'Check your email 📬',
+          `We sent a confirmation link to ${trimmedEmail}. Please verify your email then sign in.`,
+          [{ text: 'Go to Sign In', onPress: () => router.replace('/(auth)/sign-in') }]
+        );
+      } else {
+        router.replace('/(setup)/welcome');
+      }
     } catch (err: any) {
       Alert.alert('Sign up failed', err.message || 'Please try again.');
     }

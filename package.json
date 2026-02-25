@@ -13,10 +13,16 @@
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "^5.2.8",
+    "@react-native-community/netinfo": "^12.0.1",
     "@react-navigation/drawer": "^7.8.1",
+    "@stream-io/react-native-webrtc": "^137.1.2",
+    "@stream-io/video-react-native-sdk": "^1.29.4",
+    "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.90.21",
     "axios": "^1.13.5",
+    "eas-build-cache-provider": "^18.0.2",
     "expo": "~54.0.33",
+    "expo-build-properties": "^1.0.10",
     "expo-constants": "~18.0.13",
     "expo-font": "~14.0.11",
     "expo-haptics": "~15.0.8",
@@ -27,10 +33,12 @@
     "expo-secure-store": "~15.0.8",
     "expo-sharing": "~14.0.8",
     "expo-status-bar": "~3.0.9",
+    "getstream": "^8.9.0",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-drawer-layout": "^4.2.2",
     "react-native-gesture-handler": "^2.30.0",
+    "react-native-incall-manager": "^4.2.1",
     "react-native-pell-rich-editor": "^1.10.0",
     "react-native-reanimated": "^4.2.2",
     "react-native-safe-area-context": "~5.6.0",
@@ -38,6 +46,8 @@
     "react-native-svg": "15.12.1",
     "react-native-webview": "^13.16.0",
     "react-native-worklets": "^0.7.4",
+    "stream-chat": "^9.35.1",
+    "stream-chat-react-native": "^8.13.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
@@ -54,7 +64,9 @@
         "react-native-reanimated",
         "react-native-webview",
         "react-native-worklets",
-        "@react-navigation/drawer"
+        "@react-navigation/drawer",
+        "@stream-io/react-native-webrtc",
+        "react-native-incall-manager"
       ]
     }
   }

@@ -1,10 +1,10 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Linking,
   Alert,
@@ -48,6 +48,10 @@ const CRISIS_OPTIONS = [
 ] as const;
 
 export default function SOSMain() {
+  const handleBack = () => {
+    router.back();
+  };
+
   const callCrisisLine = () => {
     Alert.alert(
       'Call Crisis Line',
@@ -65,6 +69,13 @@ export default function SOSMain() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <TouchableOpacity
+        style={styles.backBtn}
+        onPress={handleBack}
+        accessibilityLabel="Go back"
+      >
+        <Ionicons name="chevron-back" size={24} color={Colors.primary} />
+      </TouchableOpacity>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -85,7 +96,7 @@ export default function SOSMain() {
             <Text style={styles.quickSub}>Find a meeting nearby</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.quickBtn} onPress={callCrisisLine}>
+          <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/(app)/inner-circle' as any)}>
             <View style={[styles.quickIcon, { backgroundColor: '#FFE5E5' }]}>
               <Ionicons name="call" size={24} color="#FF3B30" />
             </View>
@@ -93,6 +104,27 @@ export default function SOSMain() {
             <Text style={styles.quickSub}>Call your contacts</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Talk to Someone — Live Video/Audio */}
+        <TouchableOpacity
+          style={styles.talkBtn}
+          onPress={() =>
+            router.push({
+              pathname: '/(app)/call/[callId]' as any,
+              params: { callId: 'sos_support_room', type: 'default', calleeName: encodeURIComponent('Support Room') },
+            })
+          }
+          activeOpacity={0.85}
+        >
+          <View style={styles.talkIconWrap}>
+            <Ionicons name="videocam" size={22} color="#fff" />
+          </View>
+          <View style={styles.talkTextWrap}>
+            <Text style={styles.talkTitle}>Talk to Someone Now</Text>
+            <Text style={styles.talkSub}>Join a live support video call</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={Colors.primary} />
+        </TouchableOpacity>
 
         {/* Crisis list */}
         <Text style={styles.crisisLabel}>What's going on?</Text>
@@ -140,7 +172,17 @@ export default function SOSMain() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
-  scroll: { paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 20 : 12 },
+  backBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 20 : 12,
+    left: 16,
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scroll: { paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 56 : 48 },
   header: {
     alignItems: 'center',
     marginBottom: 28,
@@ -189,6 +231,33 @@ const styles = StyleSheet.create({
   },
   quickLabel: { fontSize: 14, fontWeight: '700', color: Colors.text },
   quickSub: { fontSize: 11, color: Colors.textMuted, textAlign: 'center' },
+  talkBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    gap: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.primary + '33',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  talkIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  talkTextWrap: { flex: 1 },
+  talkTitle: { fontSize: 15, fontWeight: '700', color: Colors.text },
+  talkSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
   crisisLabel: {
     fontSize: 16,
     fontWeight: '700',

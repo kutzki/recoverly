@@ -13,6 +13,8 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { useProgressStore } from '../../store/progress';
+import { useAuthStore } from '../../store/auth';
 
 interface Action {
   id: string;
@@ -31,8 +33,41 @@ interface Props {
 
 export function SOSResponseScreen({ title, subtitle, accentColor, headerIcon, actions, tip }: Props) {
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
+  const setSobrietyStart = useProgressStore(s => s.setSobrietyStart);
+  const updateUser = useAuthStore(s => s.updateUser);
 
-  const toggle = (id: string) => setCompleted(prev => ({ ...prev, [id]: !prev[id] }));
+  const confirmResetCounter = () => {
+    Alert.alert(
+      'Reset Sobriety Counter',
+      "This will reset your sobriety counter to today. It's a fresh start — you're not failing, you're trying again. 💜",
+      [
+        { text: 'Not Yet', style: 'cancel' },
+        {
+          text: 'Reset Counter',
+          style: 'destructive',
+          onPress: () => {
+            const today = new Date().toISOString();
+            setSobrietyStart(today);
+            updateUser({ sobrietyStartDate: today });
+            setCompleted(prev => ({ ...prev, reset: true }));
+            Alert.alert(
+              'Counter Reset 💜',
+              "Your sobriety counter starts fresh today. Every day sober is a victory. You've got this.",
+              [{ text: 'Thank you' }]
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const toggle = (id: string) => {
+    if (id === 'reset') {
+      confirmResetCounter();
+      return;
+    }
+    setCompleted(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const callCrisis = () => {
     Alert.alert(

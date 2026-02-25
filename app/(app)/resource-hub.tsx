@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   Linking,
+  Alert,
   Platform,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -39,6 +40,12 @@ const RESOURCES = [
   },
 ];
 
+const openLink = (url: string) => {
+  Linking.openURL(url).catch(() =>
+    Alert.alert('Error', 'Could not open this link. Please try again.')
+  );
+};
+
 export default function ResourceHub() {
   return (
     <SafeAreaView style={styles.safe}>
@@ -62,7 +69,7 @@ export default function ResourceHub() {
               <TouchableOpacity
                 key={i}
                 style={styles.resourceCard}
-                onPress={() => Linking.openURL(item.url)}
+                onPress={() => openLink(item.url)}
                 activeOpacity={0.85}
               >
                 <View style={[styles.resourceIcon, { backgroundColor: item.color + '22' }]}>

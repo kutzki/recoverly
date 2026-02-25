@@ -257,3 +257,60 @@ export async function removeFavorite(favoriteId: string): Promise<void> {
   const { error } = await supabase.from('user_favorites').delete().eq('id', favoriteId);
   if (error) console.warn('[Supabase] removeFavorite error:', error.message);
 }
+
+// ─── Journal entries ───────────────────────────────────────────────────────────
+
+export interface JournalEntryRow {
+  id: string;
+  user_id: string;
+  date: string;
+  mood: string;
+  title: string;
+  body: string;
+  created_at: string;
+}
+
+export async function getJournalEntries(userId: string): Promise<JournalEntryRow[]> {
+  const { data, error } = await supabase
+    .from('journal_entries')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) {
+    console.warn('[Supabase] getJournalEntries error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+export async function insertJournalEntry(
+  userId: string,
+  entry: { date: string; mood: string; title: string; body: string }
+): Promise<JournalEntryRow | null> {
+  const { data, error } = await supabase
+    .from('journal_entries')
+    .insert({ user_id: userId, ...entry })
+    .select()
+    .single();
+  if (error) {
+    console.warn('[Supabase] insertJournalEntry error:', error.message);
+    return null;
+  }
+  return data;
+}
+
+export async function updateJournalEntry(
+  entryId: string,
+  updates: Partial<Pick<JournalEntryRow, 'mood' | 'title' | 'body'>>
+): Promise<void> {
+  const { error } = await supabase
+    .from('journal_entries')
+    .update(updates)
+    .eq('id', entryId);
+  if (error) console.warn('[Supabase] updateJournalEntry error:', error.message);
+}
+
+export async function deleteJournalEntry(entryId: string): Promise<void> {
+  const { error } = await supabase.from('journal_entries').delete().eq('id', entryId);
+  if (error) console.warn('[Supabase] deleteJournalEntry error:', error.message);
+}

@@ -141,14 +141,19 @@ export default function BasicInfo() {
     }
 
     setLoading(true);
-    updateUser({
-      name: name.trim(),
-      username: `@${username}`,
-      location: finalLocation,
-      ...(dateOfBirth ? { dateOfBirth } : {}),
-    });
-    setLoading(false);
-    router.push('/(setup)/challenges');
+    try {
+      await updateUser({
+        name: name.trim(),
+        username: `@${username}`,
+        location: finalLocation,
+        ...(dateOfBirth ? { dateOfBirth } : {}),
+      });
+      router.push('/(setup)/challenges');
+    } catch {
+      Alert.alert('Error', 'Could not save your information. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

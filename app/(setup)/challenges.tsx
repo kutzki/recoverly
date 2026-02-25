@@ -5,6 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -43,6 +45,7 @@ const CHALLENGES = [
 export default function Challenges() {
   const updateUser = useAuthStore(s => s.updateUser);
   const [selected, setSelected] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
 
   const toggle = (id: string) => {
     if (id === 'prefer_not') {
@@ -58,9 +61,16 @@ export default function Challenges() {
     });
   };
 
-  const handleNext = () => {
-    updateUser({ challenges: selected });
-    router.push('/(setup)/goal');
+  const handleNext = async () => {
+    setSaving(true);
+    try {
+      await updateUser({ challenges: selected });
+      router.push('/(setup)/goal');
+    } catch {
+      Alert.alert('Error', 'Could not save your selection. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -123,12 +133,17 @@ export default function Challenges() {
 
         {/* Next */}
         <TouchableOpacity
-          style={[styles.nextBtn, selected.length === 0 && styles.nextDisabled]}
+          style={[styles.nextBtn, (selected.length === 0 || saving) && styles.nextDisabled]}
           onPress={handleNext}
-          disabled={selected.length === 0}
+          disabled={selected.length === 0 || saving}
         >
-          <Text style={styles.nextText}>Continue</Text>
-          <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+          {saving
+            ? <ActivityIndicator color={Colors.white} />
+            : <>
+                <Text style={styles.nextText}>Continue</Text>
+                <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+              </>
+          }
         </TouchableOpacity>
       </ScrollView>
     </LinearGradient>
