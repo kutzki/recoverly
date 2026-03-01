@@ -12,8 +12,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth';
 import { checkUsernameAvailable } from '../../services/supabase';
@@ -23,7 +23,6 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-// Full year range: most-recent-eligible (13 years ago) → 1940, newest first
 const MIN_AGE = 13;
 const MAX_YEAR = new Date().getFullYear() - MIN_AGE;
 const YEARS: string[] = Array.from(
@@ -61,16 +60,15 @@ export default function BasicInfo() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Clean up the debounce timer on unmount
-  useEffect(() => () => { if (usernameCheckTimer.current) clearTimeout(usernameCheckTimer.current); }, []);
+  useEffect(() => () => {
+    if (usernameCheckTimer.current) clearTimeout(usernameCheckTimer.current);
+  }, []);
 
   const handleUsernameChange = (val: string) => {
-    // Strip spaces, @-signs and lowercase
     const clean = val.replace(/[@\s]/g, '').toLowerCase();
     setUsername(clean);
     setUsernameStatus('idle');
     if (clean.length < 3) return;
-    // Debounce the availability check by 400ms
     if (usernameCheckTimer.current) clearTimeout(usernameCheckTimer.current);
     setUsernameStatus('checking');
     usernameCheckTimer.current = setTimeout(async () => {
@@ -100,7 +98,6 @@ export default function BasicInfo() {
     : location;
 
   const handleNext = async () => {
-    // Required fields
     if (!name.trim()) {
       Alert.alert('Name required', 'Please enter your name.');
       return;
@@ -125,15 +122,12 @@ export default function BasicInfo() {
       Alert.alert('Location required', 'Please enter your location.');
       return;
     }
-    // DOB cross-validation (optional field, but if one is set both must be set)
     if ((dobMonth && !dobYear) || (!dobMonth && dobYear)) {
       Alert.alert('Date of Birth', 'Please select both a month and a year.');
       return;
     }
 
     const finalLocation = location === 'Other' ? otherLocation.trim() : location;
-
-    // Build DOB string: "YYYY-MM" e.g. "1992-07"
     let dateOfBirth: string | undefined;
     if (dobYear && dobMonth) {
       const monthNum = String(MONTHS.indexOf(dobMonth) + 1).padStart(2, '0');
@@ -156,9 +150,17 @@ export default function BasicInfo() {
     }
   };
 
+  const usernameBorderColor =
+    usernameStatus === 'available' ? '#40c64e' :
+    usernameStatus === 'taken'    ? '#EF4444' :
+    focusedField === 'username'   ? Colors.primary :
+    '#dddddd';
+
   return (
     <LinearGradient
-      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
+      colors={['#D6EEFF', '#EDE6FF', '#FFFFFF']}
+      start={{ x: 0.1, y: 0 }}
+      end={{ x: 0.9, y: 1 }}
       style={styles.container}
     >
       <KeyboardAvoidingView
@@ -171,196 +173,203 @@ export default function BasicInfo() {
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled
         >
-          {/* Progress bar */}
-          <View style={styles.progressRow}>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: '25%' }]} />
-            </View>
-            <Text style={styles.progressLabel}>1 of 4</Text>
+          {/* ── Header ─────────────────────────────────────────── */}
+          <View style={styles.headerWrap}>
+            <Text style={styles.caption}>
+              Before we get started we will need some basics.
+            </Text>
+            <Text style={styles.heading}>
+              Firstly, we will need your name, age, and location.
+            </Text>
+            <Text style={styles.sub}>
+              Please fill out the information below
+            </Text>
           </View>
-
-          <Text style={styles.heading}>Tell us about yourself</Text>
-          <Text style={styles.sub}>
-            We'll need your name, age, and location to personalise your experience.
-          </Text>
 
           {/* ── Name ─────────────────────────────────────────── */}
-          <Text style={styles.label}>Full Name <Text style={styles.required}>*</Text></Text>
-          <View style={[styles.inputWrap, focusedField === 'name' && styles.inputFocused]}>
-            <TextInput
-              style={styles.input}
-              placeholder="John Smith"
-              placeholderTextColor={Colors.textMuted}
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              onFocus={() => setFocusedField('name')}
-              onBlur={() => setFocusedField(null)}
-            />
-          </View>
-          <Text style={styles.hint}>We won't display your full name if you don't want us to</Text>
-
-          {/* ── Username ─────────────────────────────────────── */}
-          <Text style={styles.label}>Username <Text style={styles.required}>*</Text></Text>
-          <View style={[styles.inputWrap, focusedField === 'username' && styles.inputFocused]}>
-            <Text style={styles.atSign}>@</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="johnsmith"
-              placeholderTextColor={Colors.textMuted}
-              value={username}
-              onChangeText={handleUsernameChange}
-              autoCapitalize="none"
-              autoCorrect={false}
-              onFocus={() => setFocusedField('username')}
-              onBlur={() => setFocusedField(null)}
-            />
-            {usernameStatus === 'checking' && <ActivityIndicator size="small" color={Colors.primary} />}
-            {usernameStatus === 'available' && <Ionicons name="checkmark-circle" size={20} color={Colors.success} />}
-            {usernameStatus === 'taken' && <Ionicons name="close-circle" size={20} color="#EF4444" />}
-          </View>
-          {usernameStatus === 'taken'
-            ? <Text style={[styles.hint, { color: '#EF4444' }]}>That username is already taken</Text>
-            : <Text style={styles.hint}>Min. 3 characters, no spaces</Text>
-          }
-
-          {/* ── Date of Birth ────────────────────────────────── */}
-          <Text style={styles.label}>Date of Birth</Text>
-          <TouchableOpacity
-            style={[styles.inputWrap, styles.pickerWrap]}
-            onPress={() => {
-              setShowDobPicker(v => !v);
-              setShowLocationPicker(false);
-            }}
-          >
-            <Text style={[styles.input, !dobLabel && { color: Colors.textMuted }]}>
-              {dobLabel || 'Select month & year (optional)'}
-            </Text>
-            <Ionicons
-              name={showDobPicker ? 'chevron-up' : 'chevron-down'}
-              size={16}
-              color={Colors.textMuted}
-            />
-          </TouchableOpacity>
-
-          {showDobPicker && (
-            <View style={styles.pickerDropdown}>
-              {/* Year — horizontally scrollable chips */}
-              <Text style={styles.pickerSectionLabel}>Year</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.yearScroll}
-                contentContainerStyle={styles.yearScrollContent}
-                nestedScrollEnabled
-              >
-                {YEARS.map(y => (
-                  <TouchableOpacity
-                    key={y}
-                    style={[styles.yearChip, dobYear === y && styles.chipActive]}
-                    onPress={() => setDobYear(y)}
-                  >
-                    <Text style={[styles.chipText, dobYear === y && styles.chipActiveText]}>{y}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              {/* Month — vertical list */}
-              <Text style={[styles.pickerSectionLabel, { marginTop: 4 }]}>Month</Text>
-              {MONTHS.map(m => (
-                <TouchableOpacity
-                  key={m}
-                  style={[styles.monthRow, dobMonth === m && styles.monthActive]}
-                  onPress={() => handleSelectMonth(m)}
-                >
-                  <Text style={[styles.monthText, dobMonth === m && styles.monthActiveText]}>{m}</Text>
-                  {dobMonth === m && (
-                    <Ionicons name="checkmark" size={16} color={Colors.primary} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          {/* ── Location ─────────────────────────────────────── */}
-          <Text style={styles.label}>Location <Text style={styles.required}>*</Text></Text>
-          <TouchableOpacity
-            style={[styles.inputWrap, styles.pickerWrap]}
-            onPress={() => {
-              setShowLocationPicker(v => !v);
-              setShowDobPicker(false);
-            }}
-          >
-            <Text style={[styles.input, !location && { color: Colors.textMuted }]}>
-              {locationLabel || 'Select your location'}
-            </Text>
-            <Ionicons
-              name={showLocationPicker ? 'chevron-up' : 'chevron-down'}
-              size={16}
-              color={Colors.textMuted}
-            />
-          </TouchableOpacity>
-
-          {showLocationPicker && (
-            <View style={styles.pickerDropdown}>
-              {LOCATIONS.map(loc => (
-                <TouchableOpacity
-                  key={loc}
-                  style={[styles.monthRow, location === loc && styles.monthActive]}
-                  onPress={() => handleSelectLocation(loc)}
-                >
-                  <Text style={[styles.monthText, location === loc && styles.monthActiveText]}>{loc}</Text>
-                  {location === loc && (
-                    <Ionicons name="checkmark" size={16} color={Colors.primary} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          {/* "Other" location text input — shown inline once Other is selected */}
-          {location === 'Other' && (
-            <View
-              style={[
-                styles.inputWrap,
-                styles.otherInput,
-                focusedField === 'otherLocation' && styles.inputFocused,
-              ]}
-            >
-              <Ionicons name="location-outline" size={16} color={Colors.textMuted} style={{ marginRight: 8 }} />
+          <View style={styles.fieldWrap}>
+            <Text style={styles.label}>Name</Text>
+            <View style={[
+              styles.inputWrap,
+              focusedField === 'name' && styles.inputFocused,
+            ]}>
               <TextInput
                 style={styles.input}
-                placeholder="Enter your city or region…"
-                placeholderTextColor={Colors.textMuted}
-                value={otherLocation}
-                onChangeText={setOtherLocation}
+                placeholder="John Smith"
+                placeholderTextColor="rgba(0,0,0,0.35)"
+                value={name}
+                onChangeText={setName}
                 autoCapitalize="words"
-                returnKeyType="done"
-                onFocus={() => setFocusedField('otherLocation')}
+                onFocus={() => setFocusedField('name')}
                 onBlur={() => setFocusedField(null)}
               />
             </View>
-          )}
+            <Text style={styles.hint}>We won't display your name if you don't want us to</Text>
+          </View>
 
-          <View style={styles.spacer} />
-
-          {/* ── Continue ─────────────────────────────────────── */}
-          <TouchableOpacity
-            style={[styles.nextBtn, loading && { opacity: 0.7 }]}
-            onPress={handleNext}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color={Colors.white} />
-            ) : (
-              <>
-                <Text style={styles.nextText}>Continue</Text>
-                <Ionicons name="arrow-forward" size={18} color={Colors.white} />
-              </>
+          {/* ── Username ─────────────────────────────────────── */}
+          <View style={styles.fieldWrap}>
+            <Text style={styles.label}>Username</Text>
+            <View style={[styles.inputWrap, { borderColor: usernameBorderColor }]}>
+              <TextInput
+                style={styles.input}
+                placeholder="@johnsmith"
+                placeholderTextColor="rgba(0,0,0,0.35)"
+                value={username ? `@${username}` : ''}
+                onChangeText={handleUsernameChange}
+                autoCapitalize="none"
+                autoCorrect={false}
+                onFocus={() => setFocusedField('username')}
+                onBlur={() => setFocusedField(null)}
+              />
+              {usernameStatus === 'checking' && (
+                <ActivityIndicator size="small" color={Colors.primary} />
+              )}
+              {usernameStatus === 'available' && (
+                <View style={styles.checkCircle}>
+                  <Ionicons name="checkmark" size={14} color="#fff" />
+                </View>
+              )}
+              {usernameStatus === 'taken' && (
+                <Ionicons name="close-circle" size={22} color="#EF4444" />
+              )}
+            </View>
+            {usernameStatus === 'taken' && (
+              <Text style={[styles.hint, { color: '#EF4444' }]}>That username is already taken</Text>
             )}
-          </TouchableOpacity>
+          </View>
+
+          {/* ── Date of Birth ────────────────────────────────── */}
+          <View style={styles.fieldWrap}>
+            <Text style={styles.label}>Date of birth</Text>
+            <TouchableOpacity
+              style={styles.inputWrap}
+              onPress={() => {
+                setShowDobPicker(v => !v);
+                setShowLocationPicker(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.input, !dobLabel && styles.placeholder]}>
+                {dobLabel || 'Enter here'}
+              </Text>
+              <Ionicons
+                name={showDobPicker ? 'chevron-up' : 'chevron-down'}
+                size={16}
+                color="rgba(0,0,0,0.4)"
+              />
+            </TouchableOpacity>
+
+            {showDobPicker && (
+              <View style={styles.pickerDropdown}>
+                <Text style={styles.pickerSectionLabel}>Year</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.yearScroll}
+                  contentContainerStyle={styles.yearScrollContent}
+                  nestedScrollEnabled
+                >
+                  {YEARS.map(y => (
+                    <TouchableOpacity
+                      key={y}
+                      style={[styles.yearChip, dobYear === y && styles.chipActive]}
+                      onPress={() => setDobYear(y)}
+                    >
+                      <Text style={[styles.chipText, dobYear === y && styles.chipActiveText]}>{y}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <Text style={[styles.pickerSectionLabel, { marginTop: 4 }]}>Month</Text>
+                {MONTHS.map(m => (
+                  <TouchableOpacity
+                    key={m}
+                    style={[styles.monthRow, dobMonth === m && styles.monthActive]}
+                    onPress={() => handleSelectMonth(m)}
+                  >
+                    <Text style={[styles.monthText, dobMonth === m && styles.monthActiveText]}>{m}</Text>
+                    {dobMonth === m && <Ionicons name="checkmark" size={16} color={Colors.primary} />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* ── Location ─────────────────────────────────────── */}
+          <View style={styles.fieldWrap}>
+            <Text style={styles.label}>Location</Text>
+            <TouchableOpacity
+              style={styles.inputWrap}
+              onPress={() => {
+                setShowLocationPicker(v => !v);
+                setShowDobPicker(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.input, !location && styles.placeholder]}>
+                {locationLabel || 'Select one'}
+              </Text>
+              <Ionicons
+                name={showLocationPicker ? 'chevron-up' : 'chevron-down'}
+                size={16}
+                color="rgba(0,0,0,0.4)"
+              />
+            </TouchableOpacity>
+
+            {showLocationPicker && (
+              <View style={styles.pickerDropdown}>
+                {LOCATIONS.map(loc => (
+                  <TouchableOpacity
+                    key={loc}
+                    style={[styles.monthRow, location === loc && styles.monthActive]}
+                    onPress={() => handleSelectLocation(loc)}
+                  >
+                    <Text style={[styles.monthText, location === loc && styles.monthActiveText]}>{loc}</Text>
+                    {location === loc && <Ionicons name="checkmark" size={16} color={Colors.primary} />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {location === 'Other' && (
+              <View style={[
+                styles.inputWrap,
+                { marginTop: 10 },
+                focusedField === 'otherLocation' && styles.inputFocused,
+              ]}>
+                <Ionicons name="location-outline" size={16} color="rgba(0,0,0,0.4)" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your city or region…"
+                  placeholderTextColor="rgba(0,0,0,0.35)"
+                  value={otherLocation}
+                  onChangeText={setOtherLocation}
+                  autoCapitalize="words"
+                  returnKeyType="done"
+                  onFocus={() => setFocusedField('otherLocation')}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </View>
+            )}
+          </View>
+
+          {/* Bottom spacer so content clears the absolute button */}
+          <View style={{ height: 100 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* ── Next button (black circle, absolute at bottom) ── */}
+      <TouchableOpacity
+        style={[styles.nextBtn, loading && { opacity: 0.6 }]}
+        onPress={handleNext}
+        disabled={loading}
+        activeOpacity={0.85}
+      >
+        {loading
+          ? <ActivityIndicator color="#fff" />
+          : <Ionicons name="arrow-forward" size={22} color="#fff" />
+        }
+      </TouchableOpacity>
     </LinearGradient>
   );
 }
@@ -370,94 +379,99 @@ const styles = StyleSheet.create({
   kav: { flex: 1 },
   scroll: {
     flexGrow: 1,
-    paddingTop: 60,
+    paddingTop: 56,
     paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingBottom: 24,
   },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+
+  // ── Header ──────────────────────────────────────────────
+  headerWrap: {
     gap: 10,
     marginBottom: 32,
   },
-  progressTrack: {
-    flex: 1,
-    height: 4,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 2,
+  caption: {
+    fontSize: 16,
+    fontFamily: 'GeneralSans-Regular',
+    color: '#a91cff',
+    lineHeight: 24,
   },
-  progressFill: {
-    height: 4,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-  },
-  progressLabel: { color: Colors.textMuted, fontSize: 12 },
   heading: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 6,
+    fontSize: 18,
+    fontFamily: 'GeneralSans-Semibold',
+    color: '#000',
+    lineHeight: 27,
   },
   sub: {
-    fontSize: 15,
-    color: Colors.textMuted,
-    lineHeight: 22,
-    marginBottom: 28,
+    fontSize: 16,
+    fontFamily: 'GeneralSans-Regular',
+    color: 'rgba(0,0,0,0.5)',
+    lineHeight: 24,
   },
-  required: { color: '#EF4444' },
+
+  // ── Form fields ──────────────────────────────────────────
+  fieldWrap: {
+    gap: 10,
+    marginBottom: 14,
+  },
   label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 7,
-    marginTop: 4,
-  },
-  hint: {
     fontSize: 12,
-    color: Colors.textMuted,
-    marginTop: -2,
-    marginBottom: 18,
+    fontFamily: 'GeneralSans-Medium',
+    color: '#121212',
+    letterSpacing: 0.375,
   },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: '#fff',
     borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    paddingHorizontal: 14,
-    height: 52,
-    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: '#dddddd',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    minHeight: 55,
   },
   inputFocused: { borderColor: Colors.primary },
-  otherInput: { marginTop: 8, marginBottom: 16 },
-  atSign: {
-    fontSize: 15,
-    color: Colors.primary,
-    fontWeight: '600',
-    marginRight: 4,
-  },
   input: {
     flex: 1,
-    fontSize: 15,
-    color: Colors.text,
+    fontSize: 14,
+    fontFamily: 'Poppins-Regular',
+    color: '#000',
+    letterSpacing: 0.5,
+    padding: 0,  // remove default iOS/Android TextInput padding
   },
-  pickerWrap: { marginBottom: 4 },
-  pickerDropdown: {
-    backgroundColor: Colors.white,
+  placeholder: { color: 'rgba(0,0,0,0.35)' },
+  hint: {
+    fontSize: 12,
+    fontFamily: 'GeneralSans-Medium',
+    color: 'rgba(0,0,0,0.5)',
+    lineHeight: 20,
+  },
+
+  // ── Username checkmark badge ─────────────────────────────
+  checkCircle: {
+    width: 24,
+    height: 24,
     borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    marginBottom: 16,
+    backgroundColor: '#40c64e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // ── Dropdowns ───────────────────────────────────────────
+  pickerDropdown: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#dddddd',
     overflow: 'hidden',
   },
   pickerSectionLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: Colors.textMuted,
+    color: 'rgba(0,0,0,0.4)',
     letterSpacing: 0.8,
     textTransform: 'uppercase',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 6,
   },
@@ -472,13 +486,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: Colors.background,
+    backgroundColor: '#f5f5f5',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: '#ddd',
   },
   chipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  chipText: { fontSize: 13, color: Colors.text },
-  chipActiveText: { color: Colors.white, fontWeight: '600' },
+  chipText: { fontSize: 13, color: '#000' },
+  chipActiveText: { color: '#fff', fontWeight: '600' },
   monthRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -486,24 +500,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 13,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: '#f0f0f0',
   },
   monthActive: { backgroundColor: Colors.primaryLight },
-  monthText: { fontSize: 15, color: Colors.text },
+  monthText: { fontSize: 15, color: '#000' },
   monthActiveText: { color: Colors.primary, fontWeight: '600' },
-  spacer: { height: 24 },
+
+  // ── Black circle next button ─────────────────────────────
   nextBtn: {
-    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    height: 52,
-  },
-  nextText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '700',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
 });

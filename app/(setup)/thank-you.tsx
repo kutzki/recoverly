@@ -2,30 +2,27 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth';
-
-const DOTS = ['', '', ''];
+import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
 export default function ThankYou() {
   const setProfileComplete = useAuthStore(s => s.updateUser);
   const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.8)).current;
+  const translateY = useRef(new Animated.Value(24)).current;
   const dotAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Entrance animation
     Animated.parallel([
-      Animated.spring(scale, {
-        toValue: 1,
-        useNativeDriver: true,
-        friction: 6,
-        tension: 60,
-      }),
       Animated.timing(opacity, {
         toValue: 1,
-        duration: 500,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 600,
         useNativeDriver: true,
       }),
     ]).start();
@@ -50,35 +47,18 @@ export default function ThankYou() {
 
   return (
     <LinearGradient
-      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
+      colors={['#D6EEFF', '#EDE6FF', '#FFFFFF']}
+      start={{ x: 0.1, y: 0 }}
+      end={{ x: 0.9, y: 1 }}
       style={styles.container}
     >
-      <Animated.View
-        style={[
-          styles.content,
-          { opacity, transform: [{ scale }] },
-        ]}
-      >
-        {/* Logo */}
-        <View style={styles.logoWrap}>
-          <View style={styles.logoOuter}>
-            <View style={styles.logoMid}>
-              <View style={styles.logoInner} />
-            </View>
-          </View>
-          <Text style={styles.logoText}>recoverly</Text>
-        </View>
+      {/* ── Centered text block ── */}
+      <Animated.View style={[styles.textWrap, { opacity, transform: [{ translateY }] }]}>
+        <Text style={styles.heading}>Thank you.</Text>
 
-        {/* Check icon */}
-        <View style={styles.checkCircle}>
-          <Ionicons name="checkmark" size={40} color={Colors.white} />
-        </View>
-
-        <Text style={styles.thankYou}>Thank you.</Text>
-        <Text style={styles.subtitle}>We are setting up your profile</Text>
-
-        {/* Loading dots */}
-        <View style={styles.dotsRow}>
+        {/* Subtitle + animated dots */}
+        <View style={styles.subtitleRow}>
+          <Text style={styles.subtitle}>We are setting up your profile</Text>
           {[0, 1, 2].map(i => (
             <Animated.View
               key={i}
@@ -96,13 +76,13 @@ export default function ThankYou() {
                     extrapolate: 'clamp',
                   }),
                   transform: [{
-                    scale: dotAnim.interpolate({
+                    translateY: dotAnim.interpolate({
                       inputRange: [
                         Math.max(0, i * 0.3),
                         i * 0.3 + 0.15,
                         Math.min(1, i * 0.3 + 0.3),
                       ],
-                      outputRange: [1, 1.4, 1],
+                      outputRange: [0, -4, 0],
                       extrapolate: 'clamp',
                     }),
                   }],
@@ -111,6 +91,11 @@ export default function ThankYou() {
             />
           ))}
         </View>
+      </Animated.View>
+
+      {/* ── Logo pinned to the bottom (matches Figma) ── */}
+      <Animated.View style={[styles.logoWrap, { opacity }]}>
+        <RecoverlyLogo size={44} showWordmark />
       </Animated.View>
     </LinearGradient>
   );
@@ -122,77 +107,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  content: {
+  textWrap: {
     alignItems: 'center',
-    gap: 20,
+    gap: 16,
   },
-  logoWrap: {
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
-  },
-  logoOuter: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoMid: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.primary,
-    opacity: 0.35,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoInner: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.primary,
-    opacity: 0.9,
-  },
-  logoText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.primary,
-    letterSpacing: -0.6,
-  },
-  checkCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  thankYou: {
-    fontSize: 34,
+  heading: {
+    fontSize: 50,
     fontWeight: '700',
     color: Colors.text,
-    letterSpacing: -0.8,
+    letterSpacing: -1.5,
+    fontFamily: 'GeneralSans-Semibold',
+  },
+  subtitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.textMuted,
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 8,
+    color: Colors.primary,
+    fontFamily: 'GeneralSans-Regular',
+    letterSpacing: 0.1,
   },
   loadDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
     backgroundColor: Colors.primary,
+    marginTop: 2,
+  },
+  logoWrap: {
+    position: 'absolute',
+    bottom: 52,
+    alignItems: 'center',
   },
 });

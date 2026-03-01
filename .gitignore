@@ -40,3 +40,13 @@ yarn-error.*
 /ios
 /android
 credentials.json
+
+# Claude Code local settings
+.claude/
+
+# Icon generation scripts (dev tooling)
+generate_icons.mjs
+generate_icons.py
+
+# Claude project notes
+CLAUDE.md

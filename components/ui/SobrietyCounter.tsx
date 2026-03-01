@@ -1,70 +1,124 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { View, useWindowDimensions } from 'react-native';
+import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 'react-native-svg';
 import { Colors } from '../../constants/colors';
 
 interface Props {
   days: number;
-  maxDays?: number;
-  size?: number;
+  /** Sobriety goal in days (default 90). Progress arc fills to this target. */
+  goal?: number;
 }
 
-export function SobrietyCounter({ days, maxDays = 365, size = 160 }: Props) {
-  const SIZE = size;
-  const STROKE = Math.round(SIZE * 0.088); // ~14px at 160
-  const R = (SIZE - STROKE) / 2;
-  const CIRCUMFERENCE = 2 * Math.PI * R;
-  const progress = Math.min(days / maxDays, 1);
-  const strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+const ARC_BLUE  = '#B8E8FF';   // remaining arc — light blue
+const ARC_TRACK = '#EDE6FF';   // faint background track
 
-  const fontSize = Math.round(SIZE * 0.237); // ~38px at 160
-  const unitSize = Math.round(SIZE * 0.088); // ~14px at 160
+/**
+ * Semicircular ∩ progress arc.
+ *
+ * The purple arc fills from the left endpoint clockwise based on days/goal.
+ * At goal completion (p=1) the arc is fully purple.
+ *
+ * Progress endpoint maths (circle centre cx,cy, radius r):
+ *   progressX = cx - r · cos(p · π)
+ *   progressY = cy - r · sin(p · π)
+ */
+export function SobrietyCounter({ days, goal = 90 }: Props) {
+  const { width: screenWidth } = useWindowDimensions();
+  const p = Math.min(days / goal, 1);   // progress 0 → 1
+
+  const W      = screenWidth - 40;      // content width (20 px padding each side)
+  const STROKE = 13;
+  const PAD    = STROKE / 2 + 8;
+  const r      = W / 2 - PAD;
+  const cx     = W / 2;
+  const cy     = r + STROKE / 2 + 8;
+  const H      = cy + STROKE / 2 + 8;
+
+  // Progress endpoint on the arc
+  const progX = cx - r * Math.cos(p * Math.PI);
+  const progY = cy - r * Math.sin(p * Math.PI);
+
+  // Paths (large-arc-flag always 0: each segment ≤ 180°)
+  const trackPath  = `M ${PAD} ${cy} A ${r} ${r} 0 0 1 ${W - PAD} ${cy}`;
+  const purplePath = p > 0.001
+    ? `M ${PAD} ${cy} A ${r} ${r} 0 0 1 ${progX} ${progY}`
+    : null;
+  const bluePath   = p < 0.999
+    ? `M ${progX} ${progY} A ${r} ${r} 0 0 1 ${W - PAD} ${cy}`
+    : null;
+
+  const numFontSize = Math.round(r * 0.42);
+  const lblFontSize = Math.round(r * 0.18);
+
+  const midY     = (cy - r + cy) / 2;
+  const numBaseY = midY + numFontSize * 0.36;
+  const lblBaseY = numBaseY + numFontSize * 0.65 + 4;
 
   return (
-    <View style={[styles.container, { width: SIZE, height: SIZE }]}>
-      <Svg width={SIZE} height={SIZE} style={styles.svg}>
+    <View>
+      <Svg width={W} height={H}>
         <Defs>
-          <LinearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <Stop offset="0%" stopColor={Colors.primaryLight} />
-            <Stop offset="100%" stopColor={Colors.primary} />
-          </LinearGradient>
+          <SvgGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0"   stopColor="#7B2FE0" />
+            <Stop offset="1"   stopColor="#A855F7" />
+          </SvgGradient>
         </Defs>
-        {/* Track */}
-        <Circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
-          r={R}
-          stroke={Colors.primaryLight}
+
+        {/* faint background track */}
+        <Path
+          d={trackPath}
+          stroke={ARC_TRACK}
           strokeWidth={STROKE}
           fill="none"
-        />
-        {/* Progress arc */}
-        <Circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
-          r={R}
-          stroke="url(#arcGrad)"
-          strokeWidth={STROKE}
-          fill="none"
-          strokeDasharray={`${CIRCUMFERENCE}`}
-          strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          rotation="-90"
-          origin={`${SIZE / 2}, ${SIZE / 2}`}
         />
+
+        {/* remaining (blue) arc */}
+        {bluePath && (
+          <Path
+            d={bluePath}
+            stroke={ARC_BLUE}
+            strokeWidth={STROKE}
+            fill="none"
+            strokeLinecap="round"
+          />
+        )}
+
+        {/* progress (purple) arc */}
+        {purplePath && (
+          <Path
+            d={purplePath}
+            stroke="url(#purpleGrad)"
+            strokeWidth={STROKE}
+            fill="none"
+            strokeLinecap="round"
+          />
+        )}
+
+        {/* day count */}
+        <SvgText
+          x={cx}
+          y={numBaseY}
+          textAnchor="middle"
+          fontSize={numFontSize}
+          fontFamily="GeneralSans-Bold"
+          fill={Colors.text}
+        >
+          {days}
+        </SvgText>
+
+        {/* "Days" label */}
+        <SvgText
+          x={cx}
+          y={lblBaseY}
+          textAnchor="middle"
+          fontSize={lblFontSize}
+          fontFamily="GeneralSans-Regular"
+          fill={Colors.textMuted}
+        >
+          Days
+        </SvgText>
       </Svg>
-      <View style={styles.label}>
-        <Text style={[styles.number, { fontSize, lineHeight: fontSize + 4 }]}>{days}</Text>
-        <Text style={[styles.unit, { fontSize: unitSize }]}>Days</Text>
-      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { alignItems: 'center', justifyContent: 'center' },
-  svg: { position: 'absolute' },
-  label: { alignItems: 'center' },
-  number: { fontWeight: '700', color: Colors.text },
-  unit: { color: Colors.textMuted, fontWeight: '500' },
-});

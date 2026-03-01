@@ -20,18 +20,18 @@ function SOSTabIcon() {
 
 const sosStyles = StyleSheet.create({
   wrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#FF3B30',
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Platform.OS === 'ios' ? 12 : 16,
-    shadowColor: '#FF3B30',
+    marginBottom: Platform.OS === 'ios' ? 14 : 18,
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
 });
 
@@ -68,15 +68,8 @@ function AppLayout() {
             ),
           }}
         />
-        <Tabs.Screen
-          name="feed"
-          options={{
-            title: 'Feed',
-            tabBarIcon: ({ color, size }) => (
-              <TabBarIcon name="people-outline" color={color} size={size} />
-            ),
-          }}
-        />
+        {/* Feed — hidden from tab bar, still accessible via router.push */}
+        <Tabs.Screen name="feed" options={{ href: null }} />
         <Tabs.Screen
           name="apps"
           options={{
@@ -93,7 +86,7 @@ function AppLayout() {
             title: 'SOS',
             tabBarIcon: () => <SOSTabIcon />,
             tabBarLabel: () => (
-              <Text style={{ fontSize: 11, fontWeight: '700', color: '#FF3B30' }}>SOS</Text>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: Colors.primary }}>Sober SOS</Text>
             ),
           }}
         />
@@ -131,6 +124,7 @@ function AppLayout() {
         <Tabs.Screen name="goals" options={{ href: null }} />
         <Tabs.Screen name="crisis-history" options={{ href: null }} />
         <Tabs.Screen name="user" options={{ href: null }} />
+        <Tabs.Screen name="call" options={{ href: null }} />
       </Tabs>
 
       {/* Custom side drawer overlay */}

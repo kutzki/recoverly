@@ -3,10 +3,11 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
+import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
 export default function SetupWelcome() {
   const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(20)).current;
+  const translateY = useRef(new Animated.Value(24)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -31,23 +32,22 @@ export default function SetupWelcome() {
 
   return (
     <LinearGradient
-      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
+      // Blue-tinted gradient matching Figma: light blue → soft purple → white
+      colors={['#D6EEFF', '#EDE6FF', '#FFFFFF']}
+      start={{ x: 0.1, y: 0 }}
+      end={{ x: 0.9, y: 1 }}
       style={styles.container}
     >
-      {/* Logo */}
-      <View style={styles.logoWrap}>
-        <View style={styles.logoOuter}>
-          <View style={styles.logoMid}>
-            <View style={styles.logoInner} />
-          </View>
-        </View>
-        <Text style={styles.logoText}>recoverly</Text>
-      </View>
-
+      {/* ── Centered text block ── */}
       <Animated.View style={[styles.textWrap, { opacity, transform: [{ translateY }] }]}>
         <Text style={styles.welcomeLabel}>Welcome</Text>
         <View style={styles.divider} />
-        <Text style={styles.subtitle}>Let's start with some basics.</Text>
+        <Text style={styles.subtitle}>Let's start with some basics</Text>
+      </Animated.View>
+
+      {/* ── Logo pinned to the bottom (matches Figma position) ── */}
+      <Animated.View style={[styles.logoWrap, { opacity }]}>
+        <RecoverlyLogo size={44} showWordmark />
       </Animated.View>
     </LinearGradient>
   );
@@ -58,51 +58,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 48,
-  },
-  logoWrap: {
-    alignItems: 'center',
-    gap: 14,
-  },
-  logoOuter: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoMid: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: Colors.primary,
-    opacity: 0.35,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoInner: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: Colors.primary,
-    opacity: 0.9,
-  },
-  logoText: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.primary,
-    letterSpacing: -0.8,
   },
   textWrap: {
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
   },
   welcomeLabel: {
-    fontSize: 38,
+    fontSize: 50,
     fontWeight: '700',
     color: Colors.text,
-    letterSpacing: -1,
+    letterSpacing: -1.5,
+    fontFamily: 'GeneralSans-Semibold',
   },
   divider: {
     width: 40,
@@ -114,6 +80,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 17,
     color: Colors.textMuted,
-    fontWeight: '400',
+    fontFamily: 'GeneralSans-Regular',
+    letterSpacing: 0.2,
+  },
+  logoWrap: {
+    position: 'absolute',
+    bottom: 52,
+    alignItems: 'center',
   },
 });

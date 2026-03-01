@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -98,10 +99,11 @@ export default function SignUp() {
 
           {/* Logo */}
           <View style={styles.logoRow}>
-            <View style={styles.logoCircle}>
-              <View style={styles.logoInner} />
-            </View>
-            <Text style={styles.logoText}>recoverly</Text>
+            <Image
+              source={require('../../assets/logo-horizontal.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </View>
 
           <Text style={styles.title}>Create your account</Text>
@@ -218,33 +220,14 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   logoRow: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 48,
     marginBottom: 32,
-    gap: 10,
   },
-  logoCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoInner: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: Colors.primary,
-    opacity: 0.6,
-  },
-  logoText: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: Colors.primary,
-    letterSpacing: -0.5,
+  logoImage: {
+    width: 210,
+    height: 55,
   },
   title: {
     fontSize: 26,
