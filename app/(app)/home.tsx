@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { SobrietyCounter } from '../../components/ui/SobrietyCounter';
 import { StreakDots } from '../../components/ui/StreakDots';
 import { useAuthStore } from '../../store/auth';
@@ -255,11 +256,11 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 15,
     color: Colors.textMuted,
-    fontFamily: 'GeneralSans-Regular',
+    fontFamily: Fonts.generalSans,
   },
   name: {
     fontSize: 24,
-    fontFamily: 'GeneralSans-Semibold',
+    fontFamily: Fonts.generalSansSemiBold,
     color: Colors.text,
     marginTop: 2,
   },
@@ -310,7 +311,7 @@ const styles = StyleSheet.create({
   quickLabel: {
     fontSize: 11,
     color: Colors.white,
-    fontFamily: 'GeneralSans-Medium',
+    fontFamily: Fonts.generalSansMedium,
     textAlign: 'center',
   },
 
@@ -330,7 +331,7 @@ const styles = StyleSheet.create({
   reminderSectionLabel: {
     fontSize: 13,
     color: Colors.cardCyanText,
-    fontFamily: 'GeneralSans-Medium',
+    fontFamily: Fonts.generalSansMedium,
   },
   reminderArrowBtn: {
     width: 30,
@@ -349,7 +350,7 @@ const styles = StyleSheet.create({
   },
   reminderTitle: {
     fontSize: 22,
-    fontFamily: 'GeneralSans-Bold',
+    fontFamily: Fonts.generalSansBold,
     color: Colors.text,
     lineHeight: 30,
     marginBottom: 12,
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
   reminderWeekLabel: {
     fontSize: 12,
     color: Colors.textMuted,
-    fontFamily: 'GeneralSans-Regular',
+    fontFamily: Fonts.generalSans,
     marginBottom: 6,
   },
   thumbTap: {
@@ -371,9 +372,9 @@ const styles = StyleSheet.create({
 
   /* ─── Upcoming Events ─── */
   sectionLabel: {
-    fontSize: 15,
-    fontFamily: 'GeneralSans-Semibold',
-    color: Colors.textMuted,
+    fontSize: 17,
+    fontFamily: Fonts.generalSansSemiBold,
+    color: Colors.text,
     marginBottom: 12,
   },
   eventsRow: {
@@ -423,7 +424,7 @@ const styles = StyleSheet.create({
   },
   eventAvatarInitial: {
     fontSize: 20,
-    fontFamily: 'GeneralSans-Semibold',
+    fontFamily: Fonts.generalSansSemiBold,
     color: Colors.primary,
   },
   eventArrowBtn: {
@@ -436,13 +437,13 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 15,
-    fontFamily: 'GeneralSans-Semibold',
+    fontFamily: Fonts.generalSansSemiBold,
     color: Colors.text,
     marginBottom: 4,
   },
   eventLocation: {
     fontSize: 11,
-    fontFamily: 'GeneralSans-Regular',
+    fontFamily: Fonts.generalSans,
     color: Colors.textMuted,
     lineHeight: 16,
   },

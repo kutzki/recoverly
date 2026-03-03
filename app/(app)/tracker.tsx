@@ -108,7 +108,7 @@ export default function Tracker() {
 
         {/* ── Gradient hero header ── */}
         <LinearGradient
-          colors={['#7B2FE0', '#9747FF', '#C084FC']}
+          colors={[Colors.primaryDark, Colors.primary, Colors.primaryMid]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.hero}
@@ -300,11 +300,9 @@ const styles = StyleSheet.create({
   /* ── Section label ── */
   sectionLabel: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 10 },
   sectionLabelText: {
-    fontSize: 12,
+    fontSize: 17,
     fontFamily: Fonts.generalSansBold,
-    color: Colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    color: Colors.text,
   },
 
   /* ── Stats flat card ── */

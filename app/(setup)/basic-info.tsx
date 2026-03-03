@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuthStore } from '../../store/auth';
 import { checkUsernameAvailable } from '../../services/supabase';
 
@@ -391,19 +392,19 @@ const styles = StyleSheet.create({
   },
   caption: {
     fontSize: 16,
-    fontFamily: 'GeneralSans-Regular',
-    color: '#a91cff',
+    fontFamily: Fonts.generalSans,
+    color: Colors.primary,
     lineHeight: 24,
   },
   heading: {
     fontSize: 18,
-    fontFamily: 'GeneralSans-Semibold',
-    color: '#000',
+    fontFamily: Fonts.generalSansSemiBold,
+    color: Colors.primary,
     lineHeight: 27,
   },
   sub: {
     fontSize: 16,
-    fontFamily: 'GeneralSans-Regular',
+    fontFamily: Fonts.generalSans,
     color: 'rgba(0,0,0,0.5)',
     lineHeight: 24,
   },
@@ -415,7 +416,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    fontFamily: 'GeneralSans-Medium',
+    fontFamily: Fonts.generalSansMedium,
     color: '#121212',
     letterSpacing: 0.375,
   },
@@ -442,7 +443,7 @@ const styles = StyleSheet.create({
   placeholder: { color: 'rgba(0,0,0,0.35)' },
   hint: {
     fontSize: 12,
-    fontFamily: 'GeneralSans-Medium',
+    fontFamily: Fonts.generalSansMedium,
     color: 'rgba(0,0,0,0.5)',
     lineHeight: 20,
   },
@@ -452,7 +453,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#40c64e',
+    backgroundColor: Colors.successGreen,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -3,13 +3,14 @@ export const Colors = {
   primary:       '#9747FF',
   primaryDark:   '#7B2FE0',
   primaryLight:  '#E8D5F5',
-  primaryMid:    '#C49BFF',
+  primaryMid:    '#C084FC',
   accent:        '#FF47C7',
   accentLight:   '#FFD6F5',
 
   // ─── Semantic ─────────────────────────────────────────────────────────────
   success:       '#4BFFC8',
   successDark:   '#00C896',
+  successGreen:  '#40c64e',
   warning:       '#FFB347',
   error:         '#FF4747',
 
@@ -24,9 +25,9 @@ export const Colors = {
   card:          '#FFFFFF',
   border:        '#E8E8E8',
 
-  // ─── Auth gradient ────────────────────────────────────────────────────────
-  gradientStart: '#F0E6FF',
-  gradientMid:   '#FFE6F8',
+  // ─── Auth / Onboarding gradient (blue-lavender, per Figma) ──────────────
+  gradientStart: '#D6EEFF',
+  gradientMid:   '#EDE6FF',
   gradientEnd:   '#FFFFFF',
 
   // ─── Overlays ─────────────────────────────────────────────────────────────

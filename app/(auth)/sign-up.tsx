@@ -10,7 +10,6 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -18,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 import { useAuth } from '../../hooks/useAuth';
+import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
 function getPasswordStrength(pw: string): { label: string; color: string; pct: string } | null {
   if (!pw) return null;
@@ -62,7 +62,7 @@ export default function SignUp() {
       const result = await signUp(trimmedEmail, password);
       if (result.token === 'pending_email_confirmation') {
         Alert.alert(
-          'Check your email 📬',
+          'Check your email',
           `We sent a confirmation link to ${trimmedEmail}. Please verify your email then sign in.`,
           [{ text: 'Go to Sign In', onPress: () => router.replace('/(auth)/sign-in') }]
         );
@@ -75,13 +75,14 @@ export default function SignUp() {
   };
 
   const handleGoogle = () => {
-    // SSO — placeholder for Google OAuth
     Alert.alert('Coming soon', 'Google sign-in will be available in the next update.');
   };
 
   return (
     <LinearGradient
       colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
+      start={{ x: 0.1, y: 0 }}
+      end={{ x: 0.9, y: 1 }}
       style={styles.container}
     >
       <KeyboardAvoidingView
@@ -93,30 +94,25 @@ export default function SignUp() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Back */}
+          {/* Back — filled purple circle */}
           <TouchableOpacity style={styles.back} onPress={() => router.back()} accessibilityLabel="Go back">
-            <Ionicons name="chevron-back" size={24} color={Colors.primary} />
+            <View style={styles.backCircle}>
+              <Ionicons name="chevron-back" size={20} color={Colors.white} />
+            </View>
           </TouchableOpacity>
 
-          {/* Logo */}
-          <View style={styles.logoRow}>
-            <Image
-              source={require('../../assets/logo-horizontal.png')}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          </View>
-
-          <Text style={styles.title}>Create your account</Text>
+          {/* Title */}
+          <Text style={styles.title}>Sign up</Text>
           <Text style={styles.subtitle}>Join thousands on their recovery journey</Text>
 
           {/* Email */}
+          <Text style={styles.fieldLabel}>Email</Text>
           <View style={[styles.inputWrap, focusedField === 'email' && styles.inputFocused]}>
             <Ionicons name="mail-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Email address"
-              placeholderTextColor={Colors.textMuted}
+              placeholder="your@email.com"
+              placeholderTextColor={Colors.textLight}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -129,12 +125,13 @@ export default function SignUp() {
           </View>
 
           {/* Password */}
+          <Text style={styles.fieldLabel}>Password</Text>
           <View style={[styles.inputWrap, focusedField === 'password' && styles.inputFocused]}>
             <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
             <TextInput
               style={[styles.input, styles.passwordInput]}
-              placeholder="Password"
-              placeholderTextColor={Colors.textMuted}
+              placeholder="••••••••"
+              placeholderTextColor={Colors.textLight}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -163,6 +160,24 @@ export default function SignUp() {
             </View>
           )}
 
+          {/* Or divider */}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Continue with Google */}
+          <TouchableOpacity
+            style={styles.googleBtn}
+            onPress={handleGoogle}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="logo-google" size={18} color="#4285F4" />
+            <Text style={styles.googleText}>Continue with Google</Text>
+            <View style={styles.soonChip}><Text style={styles.soonChipText}>SOON</Text></View>
+          </TouchableOpacity>
+
           {/* Proceed */}
           <TouchableOpacity
             style={[styles.proceedBtn, isLoading && styles.proceedDisabled]}
@@ -184,6 +199,11 @@ export default function SignUp() {
               <Text style={styles.signinLink}>Sign in</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Logo at bottom */}
+          <View style={styles.logoWrap}>
+            <RecoverlyLogo size={36} showWordmark />
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -199,38 +219,48 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingBottom: 40,
   },
+
+  /* Back button — filled purple circle */
   back: {
     position: 'absolute',
-    top: 0,
-    left: -8,
+    top: 12,
+    left: 20,
     zIndex: 10,
-    padding: 10,
-    minWidth: 44,
-    minHeight: 44,
+  },
+  backCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoRow: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 48,
-    marginBottom: 32,
-  },
-  logoImage: {
-    width: 210,
-    height: 55,
-  },
+
+  /* Title */
   title: {
     fontSize: 26,
-    fontFamily: Fonts.generalSansBold,
-    color: Colors.text,
+    fontFamily: Fonts.generalSansSemiBold,
+    color: Colors.primary,
+    textAlign: 'center',
+    marginTop: 44,
     marginBottom: 6,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: Colors.textMuted,
+    textAlign: 'center',
     marginBottom: 32,
   },
+
+  /* Field label */
+  fieldLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.generalSansMedium,
+    color: Colors.text,
+    marginBottom: 6,
+  },
+
+  /* Input */
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -239,7 +269,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.border,
     paddingHorizontal: 14,
-    marginBottom: 14,
+    marginBottom: 18,
     height: 52,
   },
   inputFocused: {
@@ -259,78 +289,14 @@ const styles = StyleSheet.create({
   eyeBtn: {
     padding: 4,
   },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-    gap: 12,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  dividerText: {
-    color: Colors.textMuted,
-    fontSize: 13,
-  },
-  googleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    height: 52,
-    marginBottom: 16,
-  },
-  googleText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  proceedBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    height: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  proceedDisabled: {
-    opacity: 0.7,
-  },
-  proceedText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontFamily: Fonts.generalSansBold,
-  },
-  signinRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  signinLabel: {
-    color: Colors.textMuted,
-    fontSize: 14,
-  },
-  signinLink: {
-    color: Colors.primary,
-    fontSize: 14,
-    fontFamily: Fonts.generalSansSemiBold,
-  },
-  googleBtnDisabled: { opacity: 0.5 },
-  googleTextDisabled: { fontSize: 15, fontWeight: '600', color: Colors.textMuted, flex: 1 },
-  soonChip: { backgroundColor: Colors.border, borderRadius: 4, paddingHorizontal: 7, paddingVertical: 2 },
-  soonChipText: { fontSize: 10, fontWeight: '700', color: Colors.textMuted },
+
+  /* Password strength */
   strengthWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginTop: -8,
-    marginBottom: 12,
+    marginTop: -12,
+    marginBottom: 16,
   },
   strengthTrack: {
     flex: 1,
@@ -345,8 +311,101 @@ const styles = StyleSheet.create({
   },
   strengthLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: Fonts.generalSansMedium,
     minWidth: 44,
     textAlign: 'right',
+  },
+
+  /* Or divider */
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    color: Colors.textMuted,
+    fontSize: 13,
+  },
+
+  /* Google button */
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: Colors.white,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    height: 52,
+    marginBottom: 20,
+  },
+  googleText: {
+    fontSize: 15,
+    fontFamily: Fonts.generalSansMedium,
+    color: Colors.text,
+  },
+  soonChip: {
+    backgroundColor: Colors.border,
+    borderRadius: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  soonChipText: {
+    fontSize: 10,
+    fontFamily: Fonts.generalSansBold,
+    color: Colors.textMuted,
+  },
+
+  /* Proceed button — full pill */
+  proceedBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 999,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  proceedDisabled: {
+    opacity: 0.7,
+  },
+  proceedText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontFamily: Fonts.generalSansBold,
+  },
+
+  /* Sign in link */
+  signinRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  signinLabel: {
+    color: Colors.textMuted,
+    fontSize: 14,
+  },
+  signinLink: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontFamily: Fonts.generalSansSemiBold,
+  },
+
+  /* Logo at bottom */
+  logoWrap: {
+    alignItems: 'center',
+    paddingBottom: 8,
   },
 });

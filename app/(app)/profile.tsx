@@ -49,7 +49,7 @@ export default function Profile() {
         {/* ── Cover + Avatar ── */}
         <View style={styles.coverWrap}>
           <LinearGradient
-            colors={['#7B2FE0', '#9747FF', '#C084FC']}
+            colors={[Colors.primaryDark, Colors.primary, Colors.primaryMid]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.cover}

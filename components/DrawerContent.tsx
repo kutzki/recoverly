@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuthStore } from '../store/auth';
 import { Colors } from '../constants/colors';
+import { Fonts } from '../constants/fonts';
 
 interface NavItem {
   label: string;
@@ -46,6 +47,11 @@ function DrawerContent({ onClose }: { onClose: () => void }) {
 
   return (
     <View style={styles.container}>
+      {/* Close button */}
+      <TouchableOpacity style={styles.closeBtn} onPress={onClose} accessibilityLabel="Close menu">
+        <Ionicons name="chevron-back" size={22} color={Colors.white} />
+      </TouchableOpacity>
+
       {/* Profile Header */}
       <TouchableOpacity style={styles.profile} onPress={() => navigate('/(app)/profile')} accessibilityLabel="View your profile">
         <View style={styles.avatar}>
@@ -109,22 +115,32 @@ export default DrawerContent;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white, paddingTop: 60, paddingHorizontal: 20 },
+  closeBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: 20,
+  },
   profile: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 20 },
   avatar: {
     width: 48, height: 48, borderRadius: 24,
     backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: { color: Colors.primary, fontSize: 20, fontWeight: '700' },
-  name: { fontSize: 16, fontWeight: '700', color: Colors.text },
+  avatarText: { color: Colors.primary, fontSize: 20, fontFamily: Fonts.generalSansBold },
+  name: { fontSize: 16, fontFamily: Fonts.generalSansBold, color: Colors.text },
   viewProfile: { fontSize: 13, color: Colors.primary, marginTop: 2 },
   divider: { height: 1, backgroundColor: Colors.border, marginVertical: 12 },
   navItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 13, gap: 14 },
   navIcon: { width: 32, alignItems: 'center' },
-  navLabel: { fontSize: 15, color: Colors.text, fontWeight: '500', flex: 1 },
+  navLabel: { fontSize: 15, color: Colors.text, fontFamily: Fonts.generalSansMedium, flex: 1 },
   badge: {
     backgroundColor: Colors.primary, borderRadius: 10,
     paddingHorizontal: 7, paddingVertical: 2,
   },
-  badgeText: { color: Colors.white, fontSize: 11, fontWeight: '700' },
+  badgeText: { color: Colors.white, fontSize: 11, fontFamily: Fonts.generalSansBold },
   logout: { marginTop: 4 },
 });

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuthStore } from '../../store/auth';
 import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
@@ -47,7 +48,7 @@ export default function ThankYou() {
 
   return (
     <LinearGradient
-      colors={['#D6EEFF', '#EDE6FF', '#FFFFFF']}
+      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
       start={{ x: 0.1, y: 0 }}
       end={{ x: 0.9, y: 1 }}
       style={styles.container}
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.text,
     letterSpacing: -1.5,
-    fontFamily: 'GeneralSans-Semibold',
+    fontFamily: Fonts.generalSansSemiBold,
   },
   subtitleRow: {
     flexDirection: 'row',
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: Colors.primary,
-    fontFamily: 'GeneralSans-Regular',
+    fontFamily: Fonts.generalSans,
     letterSpacing: 0.1,
   },
   loadDot: {

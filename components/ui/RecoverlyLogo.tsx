@@ -1,6 +1,7 @@
 import React from 'react';
 import Svg, { Defs, LinearGradient, Stop, Rect, Mask, Circle, Text as SvgText } from 'react-native-svg';
 import { View } from 'react-native';
+import { Fonts } from '../../constants/fonts';
 
 interface RecoverlyLogoProps {
   /** Size of the flower icon in dp (default 40) */
@@ -60,7 +61,7 @@ export function RecoverlyLogo({ size = 40, showWordmark = true }: RecoverlyLogoP
             textAnchor="middle"
             fill="url(#wordGrad)"
             fontSize={wordmarkFontSize}
-            fontFamily="GeneralSans-Semibold"
+            fontFamily={Fonts.generalSansSemiBold}
             letterSpacing="0.4"
           >
             Recoverly

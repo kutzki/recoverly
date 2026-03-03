@@ -2,6 +2,7 @@ import React from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 'react-native-svg';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 interface Props {
   days: number;
@@ -98,7 +99,7 @@ export function SobrietyCounter({ days, goal = 90 }: Props) {
           y={numBaseY}
           textAnchor="middle"
           fontSize={numFontSize}
-          fontFamily="GeneralSans-Bold"
+          fontFamily={Fonts.generalSansBold}
           fill={Colors.text}
         >
           {days}
@@ -110,7 +111,7 @@ export function SobrietyCounter({ days, goal = 90 }: Props) {
           y={lblBaseY}
           textAnchor="middle"
           fontSize={lblFontSize}
-          fontFamily="GeneralSans-Regular"
+          fontFamily={Fonts.generalSans}
           fill={Colors.textMuted}
         >
           Days

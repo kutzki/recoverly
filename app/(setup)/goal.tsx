@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 26,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.primary,
     marginBottom: 8,
   },
   sub: {
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     backgroundColor: Colors.primary,
-    borderRadius: 12,
+    borderRadius: 999,
     height: 52,
   },
   submitDisabled: { opacity: 0.4 },

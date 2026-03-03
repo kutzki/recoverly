@@ -131,21 +131,22 @@ export default function Challenges() {
           These questions will help us tailor your experience and provide the most relevant resources.
         </Text>
 
-        {/* Next */}
-        <TouchableOpacity
-          style={[styles.nextBtn, (selected.length === 0 || saving) && styles.nextDisabled]}
-          onPress={handleNext}
-          disabled={selected.length === 0 || saving}
-        >
-          {saving
-            ? <ActivityIndicator color={Colors.white} />
-            : <>
-                <Text style={styles.nextText}>Continue</Text>
-                <Ionicons name="arrow-forward" size={18} color={Colors.white} />
-              </>
-          }
-        </TouchableOpacity>
+        {/* Spacer so content clears the absolute button */}
+        <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Next — black circle, absolute at bottom (matches Figma) */}
+      <TouchableOpacity
+        style={[styles.nextBtn, (selected.length === 0 || saving) && styles.nextDisabled]}
+        onPress={handleNext}
+        disabled={selected.length === 0 || saving}
+        activeOpacity={0.85}
+      >
+        {saving
+          ? <ActivityIndicator color="#fff" />
+          : <Ionicons name="arrow-forward" size={22} color="#fff" />
+        }
+      </TouchableOpacity>
     </LinearGradient>
   );
 }
@@ -253,18 +254,20 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   nextBtn: {
-    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    height: 52,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  nextDisabled: { opacity: 0.4 },
-  nextText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '700',
-  },
+  nextDisabled: { opacity: 0.35 },
 });

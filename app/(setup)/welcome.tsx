@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
 export default function SetupWelcome() {
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.text,
     letterSpacing: -1.5,
-    fontFamily: 'GeneralSans-Semibold',
+    fontFamily: Fonts.generalSansSemiBold,
   },
   divider: {
     width: 40,
@@ -79,8 +80,8 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 17,
-    color: Colors.textMuted,
-    fontFamily: 'GeneralSans-Regular',
+    color: Colors.primary,
+    fontFamily: Fonts.generalSans,
     letterSpacing: 0.2,
   },
   logoWrap: {
