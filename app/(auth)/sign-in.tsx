@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../services/supabase';
 
@@ -88,7 +89,7 @@ export default function SignIn() {
           showsVerticalScrollIndicator={false}
         >
           {/* Back */}
-          <TouchableOpacity style={styles.back} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.back} onPress={() => router.back()} accessibilityLabel="Go back">
             <Ionicons name="chevron-back" size={24} color={Colors.primary} />
           </TouchableOpacity>
 
@@ -151,20 +152,6 @@ export default function SignIn() {
             <Text style={styles.forgotText}>Forgot password?</Text>
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Google — coming soon */}
-          <TouchableOpacity style={[styles.googleBtn, styles.googleBtnDisabled]} onPress={handleGoogle} activeOpacity={0.6}>
-            <Ionicons name="logo-google" size={20} color={Colors.textMuted} />
-            <Text style={styles.googleTextDisabled}>Continue with Google</Text>
-            <View style={styles.soonChip}><Text style={styles.soonChipText}>Soon</Text></View>
-          </TouchableOpacity>
-
           {/* Sign in */}
           <TouchableOpacity
             style={[styles.signInBtn, isLoading && styles.btnDisabled]}
@@ -206,7 +193,11 @@ const styles = StyleSheet.create({
     top: 0,
     left: -8,
     zIndex: 10,
-    padding: 4,
+    padding: 10,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoRow: {
     alignItems: 'center',
@@ -220,7 +211,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontWeight: '700',
+    fontFamily: Fonts.generalSansBold,
     color: Colors.text,
     marginBottom: 6,
   },
@@ -265,7 +256,7 @@ const styles = StyleSheet.create({
   forgotText: {
     color: Colors.primary,
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: Fonts.generalSansMedium,
   },
   dividerRow: {
     flexDirection: 'row',
@@ -317,7 +308,7 @@ const styles = StyleSheet.create({
   signInText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: Fonts.generalSansBold,
   },
   signupRow: {
     flexDirection: 'row',
@@ -331,6 +322,6 @@ const styles = StyleSheet.create({
   signupLink: {
     color: Colors.primary,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: Fonts.generalSansSemiBold,
   },
 });

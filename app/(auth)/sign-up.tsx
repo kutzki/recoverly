@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuth } from '../../hooks/useAuth';
 
 function getPasswordStrength(pw: string): { label: string; color: string; pct: string } | null {
@@ -24,10 +25,10 @@ function getPasswordStrength(pw: string): { label: string; color: string; pct: s
   const hasNumber = /[0-9]/.test(pw);
   const hasSpecial = /[^A-Za-z0-9]/.test(pw);
   const score = (pw.length >= 8 ? 1 : 0) + (hasUpper ? 1 : 0) + (hasNumber ? 1 : 0) + (hasSpecial ? 1 : 0);
-  if (score <= 1) return { label: 'Weak', color: '#EF4444', pct: '25%' };
-  if (score === 2) return { label: 'Fair', color: '#F59E0B', pct: '50%' };
-  if (score === 3) return { label: 'Good', color: '#3B82F6', pct: '75%' };
-  return { label: 'Strong', color: '#10B981', pct: '100%' };
+  if (score <= 1) return { label: 'Weak', color: Colors.feedLike, pct: '25%' };
+  if (score === 2) return { label: 'Fair', color: Colors.feedAmber, pct: '50%' };
+  if (score === 3) return { label: 'Good', color: Colors.goalBlue, pct: '75%' };
+  return { label: 'Strong', color: Colors.goalGreen, pct: '100%' };
 }
 
 export default function SignUp() {
@@ -93,7 +94,7 @@ export default function SignUp() {
           showsVerticalScrollIndicator={false}
         >
           {/* Back */}
-          <TouchableOpacity style={styles.back} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.back} onPress={() => router.back()} accessibilityLabel="Go back">
             <Ionicons name="chevron-back" size={24} color={Colors.primary} />
           </TouchableOpacity>
 
@@ -162,20 +163,6 @@ export default function SignUp() {
             </View>
           )}
 
-          {/* Divider */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Google — coming soon */}
-          <TouchableOpacity style={[styles.googleBtn, styles.googleBtnDisabled]} onPress={handleGoogle} activeOpacity={0.6}>
-            <Ionicons name="logo-google" size={20} color={Colors.textMuted} />
-            <Text style={styles.googleTextDisabled}>Continue with Google</Text>
-            <View style={styles.soonChip}><Text style={styles.soonChipText}>Soon</Text></View>
-          </TouchableOpacity>
-
           {/* Proceed */}
           <TouchableOpacity
             style={[styles.proceedBtn, isLoading && styles.proceedDisabled]}
@@ -217,7 +204,11 @@ const styles = StyleSheet.create({
     top: 0,
     left: -8,
     zIndex: 10,
-    padding: 4,
+    padding: 10,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoRow: {
     alignItems: 'center',
@@ -231,7 +222,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontWeight: '700',
+    fontFamily: Fonts.generalSansBold,
     color: Colors.text,
     marginBottom: 6,
   },
@@ -314,7 +305,7 @@ const styles = StyleSheet.create({
   proceedText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: Fonts.generalSansBold,
   },
   signinRow: {
     flexDirection: 'row',
@@ -328,7 +319,7 @@ const styles = StyleSheet.create({
   signinLink: {
     color: Colors.primary,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: Fonts.generalSansSemiBold,
   },
   googleBtnDisabled: { opacity: 0.5 },
   googleTextDisabled: { fontSize: 15, fontWeight: '600', color: Colors.textMuted, flex: 1 },

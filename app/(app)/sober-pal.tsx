@@ -14,6 +14,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { getStreamChatClient, getOrCreateDMChannel, searchUsers } from '../../services/streamChat';
 import { useAuthStore } from '../../store/auth';
 
@@ -173,11 +174,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  backBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.text },
   scroll: { padding: 20 },
   intro: { fontSize: 14, color: Colors.textMuted, lineHeight: 22, marginBottom: 24 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontFamily: Fonts.generalSansBold, color: Colors.text, marginBottom: 12 },
   emptyState: { alignItems: 'center', gap: 10, paddingVertical: 32 },
   emptyText: { fontSize: 14, color: Colors.textMuted },
   palCard: {
@@ -208,17 +209,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  palAvatarText: { fontSize: 18, fontWeight: '700', color: Colors.primary },
+  palAvatarText: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.primary },
   palInfo: { flex: 1 },
-  palName: { fontSize: 15, fontWeight: '700', color: Colors.text },
+  palName: { fontSize: 15, fontFamily: Fonts.generalSansBold, color: Colors.text },
   palMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  palDays: { fontSize: 12, color: Colors.primary, fontWeight: '500' },
+  palDays: { fontSize: 12, color: Colors.primary, fontFamily: Fonts.generalSansMedium },
   palLocation: { fontSize: 12, color: Colors.textMuted, marginTop: 1 },
   palActions: { flexDirection: 'row', gap: 6 },
   palActionBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
@@ -233,5 +234,5 @@ const styles = StyleSheet.create({
     height: 50,
     marginTop: 16,
   },
-  findBtnText: { color: Colors.white, fontWeight: '700', fontSize: 15 },
+  findBtnText: { color: Colors.white, fontFamily: Fonts.generalSansBold, fontSize: 15 },
 });

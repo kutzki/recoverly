@@ -10,102 +10,88 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { Fonts } from '../../../constants/fonts';
 
 const CRISIS_OPTIONS = [
-  {
-    id: 'feel-like-using',
-    label: 'I Feel Like Using',
-    icon: 'alert-circle-outline' as const,
-    color: '#FF6B6B',
-  },
-  {
-    id: 'just-relapsed',
-    label: 'Just Relapsed',
-    icon: 'refresh-circle-outline' as const,
-    color: '#FF9F43',
-  },
-  {
-    id: 'self-harm',
-    label: 'Self-Harm',
-    icon: 'heart-dislike-outline' as const,
-    color: '#EE5A24',
-  },
-  {
-    id: 'bad-day',
-    label: 'Having a Bad Day',
-    icon: 'cloudy-outline' as const,
-    color: '#778CA3',
-  },
-  {
-    id: 'feeling-anxious',
-    label: 'Feeling Anxious',
-    icon: 'pulse-outline' as const,
-    color: '#A55EEA',
-  },
+  { id: 'feel-like-using',  label: 'I Feel Like Using' },
+  { id: 'just-relapsed',    label: 'Just Relapsed' },
+  { id: 'self-harm',        label: 'Self-Harm' },
+  { id: 'bad-day',          label: 'Having a Bad Day' },
+  { id: 'feeling-anxious',  label: 'Feeling Anxious' },
 ] as const;
 
 export default function SOSMain() {
-  const handleBack = () => {
-    router.back();
-  };
-
-  const callCrisisLine = () => {
-    Alert.alert(
-      'Call Crisis Line',
-      'Call the SAMHSA National Helpline: 1-800-662-4357 (24/7, free)',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Call Now', onPress: () => Linking.openURL('tel:18006624357') },
-      ]
-    );
-  };
-
-  const findMeeting = () => {
-    router.push('/(app)/meetings');
-  };
-
   return (
-    <SafeAreaView style={styles.safe}>
-      <TouchableOpacity
-        style={styles.backBtn}
-        onPress={handleBack}
-        accessibilityLabel="Go back"
-      >
-        <Ionicons name="chevron-back" size={24} color={Colors.primary} />
-      </TouchableOpacity>
+    <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.sosIconWrap}>
-            <Ionicons name="alert" size={32} color={Colors.white} />
+
+        {/* ── Gradient hero header ── */}
+        <LinearGradient
+          colors={['#7B2FE0', '#9747FF', '#C084FC']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.hero}
+        >
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color="rgba(255,255,255,0.9)" />
+          </TouchableOpacity>
+
+          <View style={styles.sosBadge}>
+            <Ionicons name="alert" size={30} color="#fff" />
           </View>
-          <Text style={styles.title}>Sober SOS</Text>
-          <Text style={styles.subtitle}>You're not alone. Choose what's happening:</Text>
+          <Text style={styles.heroTitle}>What is Your Emergency?</Text>
+          <Text style={styles.heroSub}>Click below for immediate help</Text>
+
+          {/* ── Two quick-action cards ── */}
+          <View style={styles.quickRow}>
+            <TouchableOpacity
+              style={styles.quickCard}
+              onPress={() => router.push('/(app)/meetings')}
+              activeOpacity={0.85}
+            >
+              <View style={styles.quickCardBadge}>
+                <Ionicons name="open-outline" size={13} color={Colors.primary} />
+              </View>
+              <Ionicons name="people" size={28} color={Colors.primary} style={{ marginTop: 10 }} />
+              <Text style={styles.quickCardLabel}>{'Meeting\nNow'}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickCard}
+              onPress={() => router.push('/(app)/inner-circle' as any)}
+              activeOpacity={0.85}
+            >
+              <View style={styles.quickCardBadge}>
+                <Ionicons name="open-outline" size={13} color={Colors.primary} />
+              </View>
+              <Ionicons name="call" size={28} color={Colors.primary} style={{ marginTop: 10 }} />
+              <Text style={styles.quickCardLabel}>{'Inner\nCircle'}</Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
+
+        {/* ── Crisis list (flat rows + dividers, Figma style) ── */}
+        <View style={styles.listCard}>
+          {CRISIS_OPTIONS.map((option, i) => (
+            <React.Fragment key={option.id}>
+              <TouchableOpacity
+                style={styles.crisisRow}
+                onPress={() => router.push(`/(app)/sos/${option.id}` as any)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.crisisText}>{option.label}</Text>
+                <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+              </TouchableOpacity>
+              {i < CRISIS_OPTIONS.length - 1 && <View style={styles.divider} />}
+            </React.Fragment>
+          ))}
         </View>
 
-        {/* Quick Actions */}
-        <View style={styles.quickRow}>
-          <TouchableOpacity style={styles.quickBtn} onPress={findMeeting}>
-            <View style={[styles.quickIcon, { backgroundColor: Colors.primaryLight }]}>
-              <Ionicons name="people" size={24} color={Colors.primary} />
-            </View>
-            <Text style={styles.quickLabel}>Meeting Now</Text>
-            <Text style={styles.quickSub}>Find a meeting nearby</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/(app)/inner-circle' as any)}>
-            <View style={[styles.quickIcon, { backgroundColor: '#FFE5E5' }]}>
-              <Ionicons name="call" size={24} color="#FF3B30" />
-            </View>
-            <Text style={styles.quickLabel}>Inner Circle</Text>
-            <Text style={styles.quickSub}>Call your contacts</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Talk to Someone — Live Video/Audio */}
+        {/* ── Talk to Someone (live call) ── */}
         <TouchableOpacity
           style={styles.talkBtn}
           onPress={() =>
@@ -117,7 +103,7 @@ export default function SOSMain() {
           activeOpacity={0.85}
         >
           <View style={styles.talkIconWrap}>
-            <Ionicons name="videocam" size={22} color="#fff" />
+            <Ionicons name="videocam" size={20} color={Colors.white} />
           </View>
           <View style={styles.talkTextWrap}>
             <Text style={styles.talkTitle}>Talk to Someone Now</Text>
@@ -126,41 +112,14 @@ export default function SOSMain() {
           <Ionicons name="chevron-forward" size={18} color={Colors.primary} />
         </TouchableOpacity>
 
-        {/* Crisis list */}
-        <Text style={styles.crisisLabel}>What's going on?</Text>
-        {CRISIS_OPTIONS.map(option => (
-          <TouchableOpacity
-            key={option.id}
-            style={styles.crisisItem}
-            onPress={() => router.push(`/(app)/sos/${option.id}` as any)}
-            activeOpacity={0.85}
-          >
-            <View style={[styles.crisisIcon, { backgroundColor: option.color + '22' }]}>
-              <Ionicons name={option.icon} size={22} color={option.color} />
-            </View>
-            <Text style={styles.crisisText}>{option.label}</Text>
-            <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
-          </TouchableOpacity>
-        ))}
-
-        {/* Emergency */}
+        {/* ── Emergency box ── */}
         <View style={styles.emergencyBox}>
-          <Ionicons name="warning-outline" size={18} color="#FF3B30" />
+          <Ionicons name="warning-outline" size={18} color={Colors.sosRedBright} />
           <Text style={styles.emergencyText}>
             In immediate danger? Call{' '}
-            <Text
-              style={styles.emergencyLink}
-              onPress={() => Linking.openURL('tel:911')}
-            >
-              911
-            </Text>
+            <Text style={styles.emergencyLink} onPress={() => Linking.openURL('tel:911')}>911</Text>
             {' '}or{' '}
-            <Text
-              style={styles.emergencyLink}
-              onPress={() => Linking.openURL('tel:988')}
-            >
-              988 Suicide & Crisis Lifeline
-            </Text>
+            <Text style={styles.emergencyLink} onPress={() => Linking.openURL('tel:988')}>988 Suicide & Crisis Lifeline</Text>
           </Text>
         </View>
 
@@ -171,73 +130,130 @@ export default function SOSMain() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  safe:   { flex: 1, backgroundColor: Colors.background },
+  scroll: { paddingBottom: 20 },
+
+  /* ── Hero ── */
+  hero: {
+    paddingTop: Platform.OS === 'android' ? 50 : 58,
+    paddingBottom: 32,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
   backBtn: {
     position: 'absolute',
-    top: Platform.OS === 'android' ? 20 : 12,
+    top: Platform.OS === 'android' ? 12 : 56,
     left: 16,
-    zIndex: 10,
     width: 36,
     height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  scroll: { paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 56 : 48 },
-  header: {
+  sosBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontFamily: Fonts.generalSansBold,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  heroSub: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
     marginBottom: 28,
-    gap: 8,
   },
-  sosIconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#FF3B30',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#FF3B30',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
-    marginBottom: 4,
-  },
-  title: { fontSize: 26, fontWeight: '700', color: Colors.text },
-  subtitle: { fontSize: 15, color: Colors.textMuted, textAlign: 'center' },
+
+  /* ── Quick cards ── */
   quickRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 28,
+    gap: 16,
   },
-  quickBtn: {
-    flex: 1,
+  quickCard: {
+    width: 130,
+    height: 130,
     backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 20,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    gap: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  quickIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+  quickCardBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quickLabel: { fontSize: 14, fontWeight: '700', color: Colors.text },
-  quickSub: { fontSize: 11, color: Colors.textMuted, textAlign: 'center' },
+  quickCardLabel: {
+    fontSize: 14,
+    fontFamily: Fonts.generalSansBold,
+    color: Colors.text,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+
+  /* ── Crisis list ── */
+  listCard: {
+    backgroundColor: Colors.white,
+    marginHorizontal: 20,
+    marginTop: 20,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  crisisRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    height: 66,
+  },
+  crisisText: {
+    fontSize: 16,
+    fontFamily: Fonts.generalSansSemiBold,
+    color: Colors.text,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.border,
+    marginLeft: 20,
+  },
+
+  /* ── Talk btn ── */
   talkBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 24,
+    marginHorizontal: 20,
+    marginTop: 12,
     gap: 14,
     borderWidth: 1.5,
     borderColor: Colors.primary + '33',
@@ -248,55 +264,30 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   talkIconWrap: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   talkTextWrap: { flex: 1 },
-  talkTitle: { fontSize: 15, fontWeight: '700', color: Colors.text },
+  talkTitle: { fontSize: 15, fontFamily: Fonts.generalSansBold, color: Colors.text },
   talkSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
-  crisisLabel: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 12,
-  },
-  crisisItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 10,
-    gap: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  crisisIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  crisisText: { flex: 1, fontSize: 15, fontWeight: '600', color: Colors.text },
+
+  /* ── Emergency box ── */
   emergencyBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
-    backgroundColor: '#FFF1F0',
+    backgroundColor: Colors.sosBgRed,
     borderRadius: 12,
     padding: 14,
-    marginTop: 8,
+    marginHorizontal: 20,
+    marginTop: 12,
     borderWidth: 1,
-    borderColor: '#FFD0CC',
+    borderColor: Colors.sosBorderRed,
   },
   emergencyText: { flex: 1, fontSize: 13, color: Colors.text, lineHeight: 20 },
-  emergencyLink: { color: '#FF3B30', fontWeight: '700' },
+  emergencyLink: { color: Colors.sosRedBright, fontFamily: Fonts.generalSansBold },
 });

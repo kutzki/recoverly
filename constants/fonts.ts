@@ -1,8 +1,9 @@
 export const Fonts = {
   // GeneralSans — primary display font
-  generalSans: 'GeneralSans-Regular',
-  generalSansBold: 'GeneralSans-Bold',
+  generalSans:         'GeneralSans-Regular',
+  generalSansMedium:   'GeneralSans-Medium',
   generalSansSemiBold: 'GeneralSans-Semibold',
+  generalSansBold:     'GeneralSans-Bold',
   // Poppins — body text
   poppins: 'Poppins-Regular',
   // Jost — secondary
@@ -10,12 +11,12 @@ export const Fonts = {
 };
 
 export const FontSizes = {
-  xs: 11,
-  sm: 13,
+  xs:   11,
+  sm:   13,
   base: 15,
-  md: 17,
-  lg: 20,
-  xl: 24,
-  xxl: 30,
+  md:   17,
+  lg:   20,
+  xl:   24,
+  xxl:  30,
   xxxl: 42,
 };

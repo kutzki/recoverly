@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ChannelList, Chat, ChannelPreviewMessenger } from 'stream-chat-react-native';
 import { Channel as ChannelType } from 'stream-chat';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { getStreamChatClient, buildChannelFilters, buildChannelSort, getOrCreateDMChannel, searchUsers } from '../../services/streamChat';
 import { useAuthStore } from '../../store/auth';
 
@@ -181,7 +182,7 @@ export default function Messages() {
           <Ionicons name="chevron-back" size={24} color={Colors.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>Messages</Text>
-        <TouchableOpacity style={styles.composeBtn} onPress={() => setComposeVisible(true)}>
+        <TouchableOpacity style={styles.composeBtn} onPress={() => setComposeVisible(true)} accessibilityLabel="Compose new message">
           <Ionicons name="create-outline" size={22} color={Colors.primary} />
         </TouchableOpacity>
       </View>
@@ -229,13 +230,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  composeBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  composeBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32 },
   loadingText: { color: Colors.textMuted, fontSize: 14 },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingTop: 80 },
-  emptyTitle: { fontSize: 17, fontWeight: '700', color: Colors.text, textAlign: 'center' },
+  emptyTitle: { fontSize: 17, fontFamily: Fonts.generalSansBold, color: Colors.text, textAlign: 'center' },
   emptySubtitle: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
   retryBtn: {
     marginTop: 8,
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 10,
   },
-  retryBtnText: { color: Colors.white, fontWeight: '700', fontSize: 14 },
+  retryBtnText: { color: Colors.white, fontFamily: Fonts.generalSansBold, fontSize: 14 },
   backLink: { marginTop: 4, paddingVertical: 8 },
   backLinkText: { color: Colors.textMuted, fontSize: 14 },
   loadingSubText: { color: Colors.textMuted, fontSize: 13, marginTop: -4 },
@@ -262,7 +263,7 @@ const modal = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  title: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.text },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -294,8 +295,8 @@ const modal = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: 18, fontWeight: '700', color: Colors.primary },
-  userName: { fontSize: 15, fontWeight: '600', color: Colors.text },
+  avatarText: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  userName: { fontSize: 15, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
   userSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
   empty: { textAlign: 'center', marginTop: 40, color: Colors.textMuted, fontSize: 14 },
 });

@@ -9,9 +9,6 @@ interface Props {
   goal?: number;
 }
 
-const ARC_BLUE  = '#B8E8FF';   // remaining arc — light blue
-const ARC_TRACK = '#EDE6FF';   // faint background track
-
 /**
  * Semicircular ∩ progress arc.
  *
@@ -59,15 +56,15 @@ export function SobrietyCounter({ days, goal = 90 }: Props) {
       <Svg width={W} height={H}>
         <Defs>
           <SvgGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0"   stopColor="#7B2FE0" />
-            <Stop offset="1"   stopColor="#A855F7" />
+            <Stop offset="0"   stopColor={Colors.arcGradStart} />
+            <Stop offset="1"   stopColor={Colors.arcGradEnd} />
           </SvgGradient>
         </Defs>
 
         {/* faint background track */}
         <Path
           d={trackPath}
-          stroke={ARC_TRACK}
+          stroke={Colors.arcTrack}
           strokeWidth={STROKE}
           fill="none"
           strokeLinecap="round"
@@ -77,7 +74,7 @@ export function SobrietyCounter({ days, goal = 90 }: Props) {
         {bluePath && (
           <Path
             d={bluePath}
-            stroke={ARC_BLUE}
+            stroke={Colors.arcBlue}
             strokeWidth={STROKE}
             fill="none"
             strokeLinecap="round"

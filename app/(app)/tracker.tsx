@@ -11,9 +11,11 @@ import {
   ActivityIndicator,
   Share,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { SobrietyCounter } from '../../components/ui/SobrietyCounter';
 import { MilestoneCard } from '../../components/ui/MilestoneCard';
 import { useProgressStore } from '../../store/progress';
@@ -22,11 +24,11 @@ import { useAuthStore } from '../../store/auth';
 import { postActivity } from '../../services/streamFeed';
 
 const MILESTONES = [
-  { label: 'First day sober', days: 1, icon: 'star-outline' as const, variant: 'grey' as const },
-  { label: '7 days sober', days: 7, icon: 'flame-outline' as const, variant: 'purple' as const },
-  { label: 'Thirty days sober', days: 30, icon: 'trophy-outline' as const, variant: 'cyan' as const },
-  { label: 'Sixty days sober', days: 60, icon: 'medal-outline' as const, variant: 'cyan' as const },
-  { label: 'Ninety days sober', days: 90, icon: 'ribbon-outline' as const, variant: 'cyan' as const },
+  { label: 'First day sober',  days: 1,  icon: 'star-outline'   as const, variant: 'grey'   as const },
+  { label: '7 days sober',     days: 7,  icon: 'flame-outline'  as const, variant: 'purple' as const },
+  { label: 'Thirty days sober',days: 30, icon: 'trophy-outline' as const, variant: 'cyan'   as const },
+  { label: 'Sixty days sober', days: 60, icon: 'medal-outline'  as const, variant: 'cyan'   as const },
+  { label: 'Ninety days sober',days: 90, icon: 'ribbon-outline' as const, variant: 'cyan'   as const },
 ];
 
 function getMilestoneDate(sobrietyStartDate: string | null | undefined, days: number): string {
@@ -39,15 +41,20 @@ function getMilestoneDate(sobrietyStartDate: string | null | undefined, days: nu
 }
 
 const MILESTONE_MESSAGES: Record<number, string> = {
-  1: 'Incredible!',
-  7: 'Keep it up!',
+  1:  'Incredible!',
+  7:  'Keep it up!',
   30: "You're a rockstar!",
   60: 'You are unstoppable!',
   90: 'Legend status!',
 };
 
 export default function Tracker() {
-  const { sobrietyStartDate, tasksCompleted, tasksTarget, checkInsCompleted, checkInsTarget, meetingsAttended, meetingsTarget } = useProgressStore();
+  const {
+    sobrietyStartDate,
+    tasksCompleted, tasksTarget,
+    checkInsCompleted, checkInsTarget,
+    meetingsAttended, meetingsTarget,
+  } = useProgressStore();
   const timer = useSobrietyTimer(sobrietyStartDate);
   const { user } = useAuthStore();
   const [sharing, setSharing] = useState(false);
@@ -89,28 +96,41 @@ export default function Tracker() {
     }
   };
 
+  const STATS = [
+    { label: 'Tasks Completed',   done: tasksCompleted,   total: tasksTarget,    icon: 'checkbox-outline'         as const },
+    { label: 'Check-ins',         done: checkInsCompleted, total: checkInsTarget, icon: 'checkmark-circle-outline' as const },
+    { label: 'Meetings Attended', done: meetingsAttended,  total: meetingsTarget, icon: 'people-outline'           as const },
+  ];
+
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={24} color={Colors.primary} />
+
+        {/* ── Gradient hero header ── */}
+        <LinearGradient
+          colors={['#7B2FE0', '#9747FF', '#C084FC']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.hero}
+        >
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color="rgba(255,255,255,0.9)" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Track Progress</Text>
-          <View style={{ width: 40 }} />
-        </View>
 
-        {/* Motivational */}
-        <Text style={styles.motivation}>You're doing amazing, keep up the great work! 🎉</Text>
+          <View style={styles.heroBadge}>
+            <Ionicons name="trophy" size={28} color="#fff" />
+          </View>
+          <Text style={styles.heroTitle}>Track Progress</Text>
+          <Text style={styles.heroSub}>You're doing amazing, keep it up! 🎉</Text>
+        </LinearGradient>
 
-        {/* Timer */}
+        {/* ── Sobriety timer card ── */}
         <View style={styles.timerCard}>
           <SobrietyCounter days={timer.days} size={190} />
           <View style={styles.timerGrid}>
             {[
-              { label: 'Days', value: String(timer.days).padStart(2, '0') },
-              { label: 'Hours', value: String(timer.hours).padStart(2, '0') },
+              { label: 'Days',    value: String(timer.days).padStart(2, '0') },
+              { label: 'Hours',   value: String(timer.hours).padStart(2, '0') },
               { label: 'Minutes', value: String(timer.minutes).padStart(2, '0') },
               { label: 'Seconds', value: String(timer.seconds).padStart(2, '0') },
             ].map((t, i) => (
@@ -140,84 +160,116 @@ export default function Tracker() {
           </TouchableOpacity>
         </View>
 
-        {/* Weekly Report */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Weekly Report</Text>
-          <View style={styles.statsGrid}>
-            {[
-              { label: 'Tasks Completed', done: tasksCompleted, total: tasksTarget, icon: 'checkbox-outline' as const },
-              { label: 'Check-ins', done: checkInsCompleted, total: checkInsTarget, icon: 'checkmark-circle-outline' as const },
-              { label: 'Meetings Attended', done: meetingsAttended, total: meetingsTarget, icon: 'people-outline' as const },
-            ].map((stat, i) => (
-              <View key={i} style={styles.statCard}>
+        {/* ── Weekly Report ── */}
+        <View style={styles.sectionLabel}>
+          <Text style={styles.sectionLabelText}>Weekly Report</Text>
+        </View>
+        <View style={styles.statsCard}>
+          {STATS.map((stat, i) => (
+            <React.Fragment key={i}>
+              <View style={styles.statRow}>
                 <View style={styles.statIconWrap}>
-                  <Ionicons name={stat.icon} size={20} color={Colors.primary} />
+                  <Ionicons name={stat.icon} size={18} color={Colors.primary} />
                 </View>
-                <Text style={styles.statValue}>
-                  <Text style={styles.statDone}>{stat.done}</Text>
-                  <Text style={styles.statSlash}>/{stat.total}</Text>
-                </Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-                <View style={styles.statTrack}>
-                  <View
-                    style={[
-                      styles.statFill,
-                      { width: `${stat.total > 0 ? (stat.done / stat.total) * 100 : 0}%` },
-                    ]}
-                  />
+                <View style={styles.statInfo}>
+                  <View style={styles.statHeader}>
+                    <Text style={styles.statLabel}>{stat.label}</Text>
+                    <Text style={styles.statValue}>
+                      <Text style={styles.statDone}>{stat.done}</Text>
+                      <Text style={styles.statSlash}>/{stat.total}</Text>
+                    </Text>
+                  </View>
+                  <View style={styles.statTrack}>
+                    <View
+                      style={[
+                        styles.statFill,
+                        { width: `${stat.total > 0 ? Math.min((stat.done / stat.total) * 100, 100) : 0}%` },
+                      ]}
+                    />
+                  </View>
                 </View>
               </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Milestones */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Milestones</Text>
-          {MILESTONES.map(m => (
-            <MilestoneCard
-              key={m.days}
-              label={m.label}
-              subtitle={`${MILESTONE_MESSAGES[m.days]} ${m.days} day${m.days > 1 ? 's' : ''} sober`}
-              date={getMilestoneDate(sobrietyStartDate, m.days)}
-              icon={m.icon}
-              variant={m.variant}
-              unlocked={timer.days >= m.days}
-            />
+              {i < STATS.length - 1 && <View style={styles.divider} />}
+            </React.Fragment>
           ))}
         </View>
 
-        <View style={{ height: 32 }} />
+        {/* ── Milestones ── */}
+        <View style={styles.sectionLabel}>
+          <Text style={styles.sectionLabelText}>Milestones</Text>
+        </View>
+        {MILESTONES.map(m => (
+          <MilestoneCard
+            key={m.days}
+            label={m.label}
+            subtitle={`${MILESTONE_MESSAGES[m.days]} ${m.days} day${m.days > 1 ? 's' : ''} sober`}
+            date={getMilestoneDate(sobrietyStartDate, m.days)}
+            icon={m.icon}
+            variant={m.variant}
+            unlocked={timer.days >= m.days}
+          />
+        ))}
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  scroll: { paddingHorizontal: 20 },
-  header: {
-    flexDirection: 'row',
+  safe:   { flex: 1, backgroundColor: Colors.background },
+  scroll: { paddingBottom: 20 },
+
+  /* ── Hero ── */
+  hero: {
+    paddingTop: Platform.OS === 'android' ? 50 : 58,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: Platform.OS === 'android' ? 16 : 12,
-    paddingBottom: 12,
   },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  motivation: {
-    fontSize: 15,
-    color: Colors.textMuted,
+  backBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 12 : 56,
+    left: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontFamily: Fonts.generalSansBold,
+    color: '#fff',
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 20,
+    marginBottom: 6,
   },
+  heroSub: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+  },
+
+  /* ── Timer card ── */
   timerCard: {
     backgroundColor: Colors.white,
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
-    marginBottom: 24,
+    marginHorizontal: 20,
+    marginTop: 20,
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
@@ -230,8 +282,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
   },
-  timerCell: { alignItems: 'center', minWidth: 64 },
-  timerValue: { fontSize: 28, fontWeight: '700', color: Colors.text },
+  timerCell:  { alignItems: 'center', minWidth: 64 },
+  timerValue: { fontSize: 28, fontFamily: Fonts.generalSansBold, color: Colors.text },
   timerLabel: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
   shareBtn: {
     flexDirection: 'row',
@@ -243,42 +295,65 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 8,
   },
-  shareText: { color: Colors.primary, fontWeight: '600', fontSize: 14 },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: Colors.text, marginBottom: 14 },
-  statsGrid: { gap: 10 },
-  statCard: {
+  shareText: { color: Colors.primary, fontFamily: Fonts.generalSansSemiBold, fontSize: 14 },
+
+  /* ── Section label ── */
+  sectionLabel: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 10 },
+  sectionLabelText: {
+    fontSize: 12,
+    fontFamily: Fonts.generalSansBold,
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+
+  /* ── Stats flat card ── */
+  statsCard: {
     backgroundColor: Colors.white,
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: 16,
+    marginHorizontal: 20,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  statRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
   },
   statIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
   },
-  statValue: { marginBottom: 2 },
-  statDone: { fontSize: 22, fontWeight: '700', color: Colors.primary },
-  statSlash: { fontSize: 16, color: Colors.textMuted },
-  statLabel: { fontSize: 13, color: Colors.textMuted, marginBottom: 8 },
+  statInfo:   { flex: 1 },
+  statHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  statLabel:  { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
+  statValue:  {},
+  statDone:   { fontSize: 14, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  statSlash:  { fontSize: 13, color: Colors.textMuted },
   statTrack: {
-    height: 4,
+    height: 5,
     backgroundColor: Colors.primaryLight,
-    borderRadius: 2,
+    borderRadius: 3,
     overflow: 'hidden',
   },
   statFill: {
-    height: 4,
+    height: 5,
     backgroundColor: Colors.primary,
-    borderRadius: 2,
+    borderRadius: 3,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.border,
+    marginLeft: 68,
   },
 });

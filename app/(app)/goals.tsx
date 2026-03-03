@@ -14,32 +14,34 @@ import {
   KeyboardAvoidingView,
   Keyboard,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { getGoals, upsertGoal, toggleGoalComplete, deleteGoal, UserGoal } from '../../services/supabase';
 import { useAuthStore } from '../../store/auth';
 
 const CATEGORIES = [
-  { key: 'recovery', label: 'Recovery', icon: 'heart-outline', color: Colors.primary },
-  { key: 'health',   label: 'Health',   icon: 'fitness-outline', color: '#10B981' },
-  { key: 'personal', label: 'Personal', icon: 'person-outline',  color: '#F59E0B' },
-  { key: 'work',     label: 'Work',     icon: 'briefcase-outline', color: '#3B82F6' },
+  { key: 'recovery', label: 'Recovery', icon: 'heart-outline',    color: Colors.primary   },
+  { key: 'health',   label: 'Health',   icon: 'fitness-outline',  color: Colors.goalGreen },
+  { key: 'personal', label: 'Personal', icon: 'person-outline',   color: Colors.goalAmber },
+  { key: 'work',     label: 'Work',     icon: 'briefcase-outline', color: Colors.goalBlue  },
 ];
 
 export default function Goals() {
   const { user } = useAuthStore();
   const userId = user?.id ?? null;
 
-  const [goals, setGoals] = useState<UserGoal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editGoal, setEditGoal] = useState<UserGoal | null>(null);
-  const [title, setTitle] = useState('');
+  const [goals, setGoals]           = useState<UserGoal[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [showModal, setShowModal]   = useState(false);
+  const [editGoal, setEditGoal]     = useState<UserGoal | null>(null);
+  const [title, setTitle]           = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('recovery');
-  const [saving, setSaving] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
+  const [category, setCategory]     = useState('recovery');
+  const [saving, setSaving]         = useState(false);
+  const [focused, setFocused]       = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
@@ -74,7 +76,7 @@ export default function Goals() {
   const handleSave = async () => {
     if (!title.trim()) { Alert.alert('Title required'); return; }
     if (!userId) return;
-    Keyboard.dismiss(); // close keyboard before modal closes to avoid layout jump
+    Keyboard.dismiss();
     setSaving(true);
     try {
       const payload: any = { title: title.trim(), description: description.trim(), category };
@@ -122,22 +124,33 @@ export default function Goals() {
     ]);
   };
 
-  const active = goals.filter(g => !g.completed);
+  const active    = goals.filter(g => !g.completed);
   const completed = goals.filter(g => g.completed);
-
-  const getCat = (key: string) => CATEGORIES.find(c => c.key === key) || CATEGORIES[0];
+  const getCat    = (key: string) => CATEGORIES.find(c => c.key === key) || CATEGORIES[0];
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
+    <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
+
+      {/* ── Gradient hero header ── */}
+      <LinearGradient
+        colors={['#7B2FE0', '#9747FF', '#C084FC']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={Colors.primary} />
+          <Ionicons name="chevron-back" size={24} color="rgba(255,255,255,0.9)" />
         </TouchableOpacity>
-        <Text style={styles.title}>My Goals</Text>
-        <TouchableOpacity style={styles.addHeaderBtn} onPress={openAdd}>
-          <Ionicons name="add" size={26} color={Colors.primary} />
+        <TouchableOpacity style={styles.addHeroBtn} onPress={openAdd}>
+          <Ionicons name="add" size={22} color="rgba(255,255,255,0.9)" />
         </TouchableOpacity>
-      </View>
+
+        <View style={styles.heroBadge}>
+          <Ionicons name="flag" size={28} color="#fff" />
+        </View>
+        <Text style={styles.heroTitle}>My Goals</Text>
+        <Text style={styles.heroSub}>Track your recovery journey</Text>
+      </LinearGradient>
 
       {loading ? (
         <View style={styles.centered}>
@@ -145,7 +158,8 @@ export default function Goals() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-          {/* Stats */}
+
+          {/* ── Stats row ── */}
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statNum}>{active.length}</Text>
@@ -153,12 +167,12 @@ export default function Goals() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
-              <Text style={[styles.statNum, { color: '#10B981' }]}>{completed.length}</Text>
+              <Text style={[styles.statNum, { color: Colors.goalGreen }]}>{completed.length}</Text>
               <Text style={styles.statLbl}>Completed</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
-              <Text style={[styles.statNum, { color: '#F59E0B' }]}>{goals.length}</Text>
+              <Text style={[styles.statNum, { color: Colors.goalAmber }]}>{goals.length}</Text>
               <Text style={styles.statLbl}>Total</Text>
             </View>
           </View>
@@ -175,68 +189,88 @@ export default function Goals() {
           ) : (
             <>
               {active.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>In Progress</Text>
-                  {active.map(g => {
-                    const cat = getCat(g.category);
-                    return (
-                      <View key={g.id} style={styles.goalCard}>
-                        <TouchableOpacity style={styles.checkbox} onPress={() => handleToggle(g)}>
-                          <Ionicons name="square-outline" size={24} color={Colors.border} />
-                        </TouchableOpacity>
-                        <View style={[styles.catDot, { backgroundColor: cat.color + '33' }]}>
-                          <Ionicons name={cat.icon as any} size={16} color={cat.color} />
-                        </View>
-                        <View style={styles.goalText}>
-                          <Text style={styles.goalTitle}>{g.title}</Text>
-                          {g.description ? <Text style={styles.goalDesc}>{g.description}</Text> : null}
-                          <Text style={[styles.goalCat, { color: cat.color }]}>{cat.label}</Text>
-                        </View>
-                        <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(g)}>
-                          <Ionicons name="pencil-outline" size={18} color={Colors.textMuted} />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.editBtn} onPress={() => handleDelete(g)}>
-                          <Ionicons name="trash-outline" size={18} color="#FF4747" />
-                        </TouchableOpacity>
-                      </View>
-                    );
-                  })}
-                </View>
+                <>
+                  <View style={styles.sectionLabel}>
+                    <Text style={styles.sectionLabelText}>In Progress</Text>
+                  </View>
+                  <View style={styles.goalsCard}>
+                    {active.map((g, i) => {
+                      const cat = getCat(g.category);
+                      return (
+                        <React.Fragment key={g.id}>
+                          <View style={styles.goalRow}>
+                            <TouchableOpacity onPress={() => handleToggle(g)} style={styles.checkbox}>
+                              <Ionicons name="square-outline" size={24} color={Colors.border} />
+                            </TouchableOpacity>
+                            <View style={[styles.catDot, { backgroundColor: cat.color + '22' }]}>
+                              <Ionicons name={cat.icon as any} size={16} color={cat.color} />
+                            </View>
+                            <View style={styles.goalText}>
+                              <Text style={styles.goalTitle}>{g.title}</Text>
+                              {g.description ? <Text style={styles.goalDesc}>{g.description}</Text> : null}
+                              <Text style={[styles.goalCat, { color: cat.color }]}>{cat.label}</Text>
+                            </View>
+                            <TouchableOpacity style={styles.iconBtn} onPress={() => openEdit(g)}>
+                              <Ionicons name="pencil-outline" size={18} color={Colors.textMuted} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.iconBtn} onPress={() => handleDelete(g)}>
+                              <Ionicons name="trash-outline" size={18} color={Colors.error} />
+                            </TouchableOpacity>
+                          </View>
+                          {i < active.length - 1 && <View style={styles.divider} />}
+                        </React.Fragment>
+                      );
+                    })}
+                  </View>
+                </>
               )}
 
               {completed.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Completed 🎉</Text>
-                  {completed.map(g => {
-                    const cat = getCat(g.category);
-                    return (
-                      <View key={g.id} style={[styles.goalCard, styles.goalCardDone]}>
-                        <TouchableOpacity style={styles.checkbox} onPress={() => handleToggle(g)}>
-                          <Ionicons name="checkmark-circle" size={24} color="#10B981" />
-                        </TouchableOpacity>
-                        <View style={[styles.catDot, { backgroundColor: cat.color + '22' }]}>
-                          <Ionicons name={cat.icon as any} size={16} color={cat.color} />
-                        </View>
-                        <View style={styles.goalText}>
-                          <Text style={[styles.goalTitle, styles.goalTitleDone]}>{g.title}</Text>
-                          <Text style={[styles.goalCat, { color: cat.color }]}>{cat.label}</Text>
-                        </View>
-                        <TouchableOpacity style={styles.editBtn} onPress={() => handleDelete(g)}>
-                          <Ionicons name="trash-outline" size={18} color={Colors.textMuted} />
-                        </TouchableOpacity>
-                      </View>
-                    );
-                  })}
-                </View>
+                <>
+                  <View style={styles.sectionLabel}>
+                    <Text style={styles.sectionLabelText}>Completed 🎉</Text>
+                  </View>
+                  <View style={styles.goalsCard}>
+                    {completed.map((g, i) => {
+                      const cat = getCat(g.category);
+                      return (
+                        <React.Fragment key={g.id}>
+                          <View style={[styles.goalRow, { opacity: 0.7 }]}>
+                            <TouchableOpacity onPress={() => handleToggle(g)} style={styles.checkbox}>
+                              <Ionicons name="checkmark-circle" size={24} color={Colors.goalGreen} />
+                            </TouchableOpacity>
+                            <View style={[styles.catDot, { backgroundColor: cat.color + '22' }]}>
+                              <Ionicons name={cat.icon as any} size={16} color={cat.color} />
+                            </View>
+                            <View style={styles.goalText}>
+                              <Text style={[styles.goalTitle, styles.goalTitleDone]}>{g.title}</Text>
+                              <Text style={[styles.goalCat, { color: cat.color }]}>{cat.label}</Text>
+                            </View>
+                            <TouchableOpacity style={styles.iconBtn} onPress={() => handleDelete(g)}>
+                              <Ionicons name="trash-outline" size={18} color={Colors.textMuted} />
+                            </TouchableOpacity>
+                          </View>
+                          {i < completed.length - 1 && <View style={styles.divider} />}
+                        </React.Fragment>
+                      );
+                    })}
+                  </View>
+                </>
               )}
             </>
           )}
 
-          <View style={{ height: 32 }} />
+          {/* ── Add Goal button ── */}
+          <TouchableOpacity style={styles.addBtn} onPress={openAdd} activeOpacity={0.85}>
+            <Ionicons name="add-circle-outline" size={20} color={Colors.primary} />
+            <Text style={styles.addBtnText}>Add Goal</Text>
+          </TouchableOpacity>
+
+          <View style={{ height: 40 }} />
         </ScrollView>
       )}
 
-      {/* Add/Edit Modal */}
+      {/* ── Add/Edit Modal ── */}
       <Modal visible={showModal} animationType="slide" presentationStyle="pageSheet">
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <SafeAreaView style={styles.modalSafe}>
@@ -292,7 +326,7 @@ export default function Goals() {
                     onPress={() => setCategory(c.key)}
                   >
                     <Ionicons name={c.icon as any} size={16} color={category === c.key ? c.color : Colors.textMuted} />
-                    <Text style={[styles.catBtnLabel, category === c.key && { color: c.color, fontWeight: '700' }]}>
+                    <Text style={[styles.catBtnLabel, category === c.key && { color: c.color, fontFamily: Fonts.generalSansBold }]}>
                       {c.label}
                     </Text>
                   </TouchableOpacity>
@@ -307,29 +341,72 @@ export default function Goals() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 16 : 12,
-    paddingBottom: 12,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  addHeaderBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  scroll: { paddingHorizontal: 20, paddingTop: 20 },
+  safe:     { flex: 1, backgroundColor: Colors.background },
+  scroll:   { paddingBottom: 20 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+
+  /* ── Hero ── */
+  hero: {
+    paddingTop: Platform.OS === 'android' ? 50 : 58,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  backBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 12 : 56,
+    left: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addHeroBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 12 : 56,
+    right: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontFamily: Fonts.generalSansBold,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  heroSub: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+  },
+
+  /* ── Stats row ── */
   statsRow: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 20,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 4,
     alignItems: 'center',
     justifyContent: 'space-around',
     shadowColor: '#000',
@@ -338,33 +415,41 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  statBox: { alignItems: 'center' },
-  statNum: { fontSize: 22, fontWeight: '800', color: Colors.primary },
-  statLbl: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  statBox:     { alignItems: 'center' },
+  statNum:     { fontSize: 22, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  statLbl:     { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
   statDivider: { width: 1, height: 32, backgroundColor: Colors.border },
-  emptyState: { alignItems: 'center', gap: 12, paddingVertical: 50 },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  emptySub: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
-  emptyBtn: { backgroundColor: Colors.primary, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 12, marginTop: 8 },
-  emptyBtnText: { color: Colors.white, fontWeight: '700', fontSize: 14 },
-  section: { marginBottom: 20 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 12 },
-  goalCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+
+  /* ── Section label ── */
+  sectionLabel: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
+  sectionLabelText: {
+    fontSize: 12,
+    fontFamily: Fonts.generalSansBold,
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+
+  /* ── Goals flat card ── */
+  goalsCard: {
     backgroundColor: Colors.white,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    gap: 10,
+    borderRadius: 16,
+    marginHorizontal: 20,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  goalCardDone: { opacity: 0.7 },
-  checkbox: { width: 28 },
+  goalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  checkbox:      { width: 28, alignItems: 'center' },
   catDot: {
     width: 36,
     height: 36,
@@ -372,13 +457,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  goalText: { flex: 1 },
-  goalTitle: { fontSize: 14, fontWeight: '600', color: Colors.text },
+  goalText:      { flex: 1 },
+  goalTitle:     { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
   goalTitleDone: { textDecorationLine: 'line-through', color: Colors.textMuted },
-  goalDesc: { fontSize: 12, color: Colors.textMuted, marginTop: 2, lineHeight: 17 },
-  goalCat: { fontSize: 11, fontWeight: '700', marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.3 },
-  editBtn: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  modalSafe: { flex: 1, backgroundColor: Colors.white },
+  goalDesc:      { fontSize: 12, color: Colors.textMuted, marginTop: 2, lineHeight: 17 },
+  goalCat:       { fontSize: 11, fontFamily: Fonts.generalSansBold, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.3 },
+  iconBtn:       { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  divider:       { height: StyleSheet.hairlineWidth, backgroundColor: Colors.border, marginLeft: 88 },
+
+  /* ── Empty state ── */
+  emptyState:   { alignItems: 'center', gap: 12, paddingVertical: 50, paddingHorizontal: 24 },
+  emptyTitle:   { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  emptySub:     { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  emptyBtn:     { backgroundColor: Colors.primary, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 12, marginTop: 8 },
+  emptyBtnText: { color: Colors.white, fontFamily: Fonts.generalSansBold, fontSize: 14 },
+
+  /* ── Add Goal button ── */
+  addBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    borderStyle: 'dashed',
+    borderRadius: 14,
+    height: 50,
+    marginHorizontal: 20,
+    marginTop: 16,
+  },
+  addBtnText: { color: Colors.primary, fontFamily: Fonts.generalSansSemiBold, fontSize: 15 },
+
+  /* ── Modal ── */
+  modalSafe:   { flex: 1, backgroundColor: Colors.white },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -389,10 +500,10 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   modalCancel: { fontSize: 16, color: Colors.textMuted },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: Colors.text },
-  modalSave: { fontSize: 16, fontWeight: '700', color: Colors.primary },
-  modalBody: { padding: 20 },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 },
+  modalTitle:  { fontSize: 17, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  modalSave:   { fontSize: 16, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  modalBody:   { padding: 20 },
+  fieldLabel:  { fontSize: 13, fontFamily: Fonts.generalSansBold, color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 },
   inputWrap: {
     backgroundColor: Colors.background,
     borderRadius: 12,
@@ -402,10 +513,10 @@ const styles = StyleSheet.create({
     minHeight: 52,
     justifyContent: 'center',
   },
-  inputMulti: { paddingVertical: 12, justifyContent: 'flex-start' },
+  inputMulti:   { paddingVertical: 12, justifyContent: 'flex-start' },
   inputFocused: { borderColor: Colors.primary },
-  input: { fontSize: 15, color: Colors.text },
-  catRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
+  input:        { fontSize: 15, color: Colors.text },
+  catRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   catBtn: {
     flexDirection: 'row',
     alignItems: 'center',

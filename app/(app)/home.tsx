@@ -10,6 +10,7 @@ import {
   Alert,
   Platform,
   Animated,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -27,30 +28,32 @@ import BottomSheet from '@gorhom/bottom-sheet';
 
 const thumbsUp = require('../../assets/images/thumbs-up.png');
 
+const SCREEN_W = Dimensions.get('window').width;
+
 /* ─── Quick-action buttons ─── */
 const QUICK_ACTIONS = [
-  { id: 'meeting',   label: 'Meeting',   icon: 'people-outline' as const,   route: '/(app)/meetings' },
-  { id: 'awards',    label: 'Awards',    icon: 'trophy-outline' as const,    route: '/(app)/profile' },
-  { id: 'tracker',   label: 'Tracker',   icon: 'bar-chart-outline' as const, route: '/(app)/tracker' },
-  { id: 'checklist', label: 'Checklist', icon: 'checkbox-outline' as const,  action: 'checklist' },
-  { id: 'journal',   label: 'Journal',   icon: 'journal-outline' as const,   action: 'journal' },
+  { id: 'meeting',   label: 'Meeting',   icon: 'people-outline' as const,      route: '/(app)/meetings' },
+  { id: 'awards',    label: 'Awards',    icon: 'trophy-outline' as const,       route: '/(app)/profile' },
+  { id: 'tracker',   label: 'Tracker',   icon: 'bar-chart-outline' as const,    route: '/(app)/tracker' },
+  { id: 'checklist', label: 'Checklist', icon: 'checkbox-outline' as const,     action: 'checklist' },
+  { id: 'journal',   label: 'Journal',   icon: 'journal-outline' as const,      action: 'journal' },
 ] as const;
 
-/* ─── Upcoming-event cards ─── */
+/* ─── Upcoming events cards ─── */
 const UPCOMING_EVENTS = [
   {
-    id: 'meeting',
-    title: 'Find a Meeting',
-    subtitle: 'AA · NA · SMART Recovery',
-    emoji: '🤝',
-    route: '/(app)/meetings',
+    id: 'new-connections',
+    title: 'New Connections',
+    location: 'Los Angeles County',
+    imageUri: null as string | null,
+    route: '/(app)/sober-pal',
   },
   {
-    id: 'pal',
-    title: 'Sober Pal',
-    subtitle: 'Connect with someone',
-    emoji: '💜',
-    route: '/(app)/sober-pal',
+    id: 'abandon-non',
+    title: 'Abandon Non-Users',
+    location: 'Toronto, Canada',
+    imageUri: null as string | null,
+    route: '/(app)/meetings',
   },
 ];
 
@@ -97,7 +100,7 @@ export default function Home() {
 
   return (
     <LinearGradient
-      colors={['#E8DCFF', '#F1EBFF', '#F8F5FF', Colors.background]}
+      colors={[Colors.cardTintPurpleLight, Colors.cardTintPurpleMid, Colors.cardTintPurpleFaint, Colors.background]}
       locations={[0, 0.2, 0.45, 1]}
       start={{ x: 0.1, y: 0 }}
       end={{ x: 0.9, y: 0.5 }}
@@ -112,43 +115,38 @@ export default function Home() {
           {/* ── Header ── */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.greeting}>Welcome,</Text>
+              <Text style={styles.greeting}>Welcome Back,</Text>
               <Text style={styles.name}>{displayName}</Text>
             </View>
-            <TouchableOpacity style={styles.menuBtn} onPress={openDrawer}>
-              <Ionicons name="menu" size={24} color={Colors.text} />
+            <TouchableOpacity style={styles.menuBtn} onPress={openDrawer} accessibilityLabel="Open menu">
+              <Ionicons name="reorder-three-outline" size={26} color={Colors.text} />
             </TouchableOpacity>
           </View>
 
-          {/* ── Sobriety arc (progress-based) ── */}
+          {/* ── Sobriety arc ── */}
           <View style={styles.arcWrap}>
             <SobrietyCounter days={timer.days} goal={90} />
           </View>
 
-          {/* ── Quick-action buttons ── */}
-          <View style={styles.quickRow}>
+          {/* ── Quick-action cards (horizontal scroll) ── */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.quickScrollContent}
+            style={styles.quickScroll}
+          >
             {QUICK_ACTIONS.map(action => (
               <TouchableOpacity
                 key={action.id}
-                style={styles.quickBtnOuter}
+                style={styles.quickCard}
                 onPress={() => handleQuickAction(action)}
                 activeOpacity={0.78}
               >
-                <LinearGradient
-                  colors={['#9E58FF', '#7B2FE0']}
-                  start={{ x: 0.5, y: 0 }}
-                  end={{ x: 0.5, y: 1 }}
-                  style={styles.quickBtnGrad}
-                >
-                  {/* icon circle — gives the "coin in holder" depth */}
-                  <View style={styles.quickIconCircle}>
-                    <Ionicons name={action.icon} size={20} color="#fff" />
-                  </View>
-                  <Text style={styles.quickLabel}>{action.label}</Text>
-                </LinearGradient>
+                <Ionicons name={action.icon} size={26} color={Colors.white} />
+                <Text style={styles.quickLabel}>{action.label}</Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
 
           {/* ── Daily Reminder card ── */}
           <View style={styles.reminderCard}>
@@ -172,7 +170,6 @@ export default function Home() {
                 <StreakDots streak={weeklyStreak} />
               </View>
 
-              {/* 3D thumbs-up — tappable, animated */}
               <TouchableOpacity onPress={handleCheckIn} activeOpacity={0.85} style={styles.thumbTap}>
                 <Animated.Image
                   source={thumbsUp}
@@ -184,27 +181,47 @@ export default function Home() {
           </View>
 
           {/* ── Upcoming Events ── */}
-          <Text style={styles.sectionTitle}>Upcoming Events</Text>
+          <Text style={styles.sectionLabel}>Upcoming Events</Text>
           <View style={styles.eventsRow}>
-            {UPCOMING_EVENTS.map(event => (
-              <TouchableOpacity
-                key={event.id}
-                style={styles.eventCard}
-                onPress={() => router.push(event.route as any)}
-                activeOpacity={0.82}
-              >
-                {/* top row: logo + arrow */}
-                <View style={styles.eventCardTop}>
-                  <View style={styles.eventLogoCircle}>
-                    <Text style={styles.eventEmoji}>{event.emoji}</Text>
-                  </View>
-                  <View style={styles.eventArrowBtn}>
-                    <Ionicons name="open-outline" size={13} color={Colors.primary} />
-                  </View>
-                </View>
-                <Text style={styles.eventTitle}>{event.title}</Text>
-                <Text style={styles.eventSub}>{event.subtitle}</Text>
-              </TouchableOpacity>
+            {UPCOMING_EVENTS.map(item => (
+              // Outer View carries the shadow; inner wrapper clips gradient to rounded corners
+              <View key={item.id} style={styles.eventCardShadow}>
+                <TouchableOpacity
+                  style={styles.eventCardWrapper}
+                  onPress={() => router.push(item.route as any)}
+                  activeOpacity={0.82}
+                >
+                  <LinearGradient
+                    colors={['rgba(171,49,240,0.18)', 'rgba(204,115,254,0.18)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={styles.eventCard}
+                  >
+                    {/* Top row: avatar + arrow */}
+                    <View style={styles.eventCardTop}>
+                      <View style={styles.eventAvatar}>
+                        {item.imageUri ? (
+                          <Image
+                            source={{ uri: item.imageUri }}
+                            style={styles.eventAvatarImg}
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <Text style={styles.eventAvatarInitial}>
+                            {item.title.charAt(0)}
+                          </Text>
+                        )}
+                      </View>
+                      <View style={styles.eventArrowBtn}>
+                        <Ionicons name="arrow-forward" size={13} color={Colors.primary} />
+                      </View>
+                    </View>
+
+                    <Text style={styles.eventTitle} numberOfLines={1}>{item.title}</Text>
+                    <Text style={styles.eventLocation}>{item.location}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
             ))}
           </View>
 
@@ -218,6 +235,9 @@ export default function Home() {
     </LinearGradient>
   );
 }
+
+/* ─── CARD_W: width showing 4 full buttons + peek of 5th ─── */
+const CARD_W = Math.floor((SCREEN_W - 40 - 3 * 12) / 4.3);
 
 const styles = StyleSheet.create({
   safe:          { flex: 1, backgroundColor: 'transparent' },
@@ -233,74 +253,73 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   greeting: {
-    fontSize: 16,
-    color: Colors.text,
-    fontFamily: 'GeneralSans-Medium',
+    fontSize: 15,
+    color: Colors.textMuted,
+    fontFamily: 'GeneralSans-Regular',
   },
   name: {
     fontSize: 24,
     fontFamily: 'GeneralSans-Semibold',
     color: Colors.text,
-    marginTop: 1,
+    marginTop: 2,
   },
   menuBtn: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 22,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    elevation: 3,
   },
 
   /* ─── Arc ─── */
   arcWrap: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
 
-  /* ─── Quick-action buttons ─── */
-  quickRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
+  /* ─── Quick-action cards ─── */
+  quickScroll: {
+    marginHorizontal: -20,
     marginBottom: 20,
   },
-  quickBtnOuter: {
-    flex: 1,
-    borderRadius: 18,
-    overflow: 'hidden',
-    shadowColor: '#7B2FE0',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+  quickScrollContent: {
+    paddingHorizontal: 20,
+    gap: 12,
   },
-  quickBtnGrad: {
-    paddingTop: 14,
+  quickCard: {
+    width: CARD_W,
+    paddingTop: 16,
     paddingBottom: 12,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  quickIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    shadowColor: Colors.primaryDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
   quickLabel: {
-    fontSize: 10,
-    color: '#fff',
-    fontFamily: 'GeneralSans-Regular',
+    fontSize: 11,
+    color: Colors.white,
+    fontFamily: 'GeneralSans-Medium',
     textAlign: 'center',
   },
 
   /* ─── Daily Reminder card ─── */
   reminderCard: {
-    backgroundColor: '#C0EEFF',
+    backgroundColor: Colors.cardTintBlue,
     borderRadius: 22,
     padding: 18,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   reminderHeader: {
     flexDirection: 'row',
@@ -310,7 +329,7 @@ const styles = StyleSheet.create({
   },
   reminderSectionLabel: {
     fontSize: 13,
-    color: '#3d8ab5',
+    color: Colors.cardCyanText,
     fontFamily: 'GeneralSans-Medium',
   },
   reminderArrowBtn: {
@@ -343,7 +362,7 @@ const styles = StyleSheet.create({
   },
   thumbTap: {
     marginLeft: 8,
-    marginBottom: -4,   // let it kiss the card bottom edge
+    marginBottom: -4,
   },
   thumbImage: {
     width: 110,
@@ -351,49 +370,67 @@ const styles = StyleSheet.create({
   },
 
   /* ─── Upcoming Events ─── */
-  sectionTitle: {
-    fontSize: 20,
+  sectionLabel: {
+    fontSize: 15,
     fontFamily: 'GeneralSans-Semibold',
-    color: Colors.text,
+    color: Colors.textMuted,
     marginBottom: 12,
   },
   eventsRow: {
     flexDirection: 'row',
     gap: 12,
   },
-  eventCard: {
+  // Outer shell — carries shadow on both platforms
+  eventCardShadow: {
     flex: 1,
-    backgroundColor: Colors.white,
     borderRadius: 20,
-    padding: 14,
-    shadowColor: '#9747FF',
+    backgroundColor: Colors.white,
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.09,
     shadowRadius: 10,
     elevation: 3,
   },
+  // Inner shell — clips gradient to rounded corners
+  eventCardWrapper: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  eventCard: {
+    padding: 14,
+    minHeight: 139,
+    justifyContent: 'flex-end',
+  },
   eventCardTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 20,
+    marginBottom: 18,
   },
-  eventLogoCircle: {
+  eventAvatar: {
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  eventEmoji: {
-    fontSize: 22,
+  eventAvatarImg: {
+    width: 46,
+    height: 46,
+  },
+  eventAvatarInitial: {
+    fontSize: 20,
+    fontFamily: 'GeneralSans-Semibold',
+    color: Colors.primary,
   },
   eventArrowBtn: {
     width: 28,
     height: 28,
-    borderRadius: 9,
-    backgroundColor: Colors.primaryLight,
+    borderRadius: 14,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -403,7 +440,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 4,
   },
-  eventSub: {
+  eventLocation: {
     fontSize: 11,
     fontFamily: 'GeneralSans-Regular',
     color: Colors.textMuted,

@@ -10,9 +10,11 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 // Returns "Today", "Tomorrow", or the day name for a given day-of-week (0=Sun)
 function getRelativeDayLabel(targetDow: number): string {
@@ -28,10 +30,11 @@ const MEETINGS = [
     id: '1',
     org: 'New Connections – AA',
     type: 'aa',
-    dow: 1, // Monday
+    dow: 1,
     time: '7:00 PM',
     address: 'Find a local meeting at aa.org',
     format: 'In-Person',
+    icon: 'people-outline' as const,
     color: Colors.primary,
     url: 'https://www.aa.org/find-a-meeting',
   },
@@ -39,10 +42,11 @@ const MEETINGS = [
     id: '2',
     org: 'New Connections – AA',
     type: 'aa',
-    dow: 3, // Wednesday
+    dow: 3,
     time: '10:00 AM',
     address: 'Find a local meeting at aa.org',
     format: 'Hybrid',
+    icon: 'people-outline' as const,
     color: Colors.primary,
     url: 'https://www.aa.org/find-a-meeting',
   },
@@ -50,10 +54,11 @@ const MEETINGS = [
     id: '3',
     org: 'Narcotics Anonymous',
     type: 'na',
-    dow: 4, // Thursday
+    dow: 4,
     time: '6:30 PM',
     address: 'Find a local meeting at na.org',
     format: 'Online',
+    icon: 'globe-outline' as const,
     color: Colors.accent,
     url: 'https://www.na.org/meetingsearch/',
   },
@@ -61,10 +66,11 @@ const MEETINGS = [
     id: '4',
     org: 'SMART Recovery',
     type: 'smart',
-    dow: 5, // Friday
+    dow: 5,
     time: '12:00 PM',
     address: 'Find a local meeting at smartrecovery.org',
     format: 'In-Person',
+    icon: 'bulb-outline' as const,
     color: Colors.success,
     url: 'https://www.smartrecovery.org/community/calendar.php',
   },
@@ -72,16 +78,24 @@ const MEETINGS = [
     id: '5',
     org: 'Narcotics Anonymous – Online',
     type: 'na',
-    dow: 6, // Saturday
+    dow: 6,
     time: '8:00 PM',
     address: 'Online via na.org',
     format: 'Online',
+    icon: 'globe-outline' as const,
     color: Colors.accent,
     url: 'https://www.na.org/meetingsearch/',
   },
 ];
 
 type FilterType = 'all' | 'aa' | 'na' | 'online';
+
+const FILTERS: { key: FilterType; label: string }[] = [
+  { key: 'all',    label: 'All' },
+  { key: 'aa',     label: 'AA' },
+  { key: 'na',     label: 'NA' },
+  { key: 'online', label: 'Online' },
+];
 
 export default function Meetings() {
   const [filter, setFilter] = useState<FilterType>('all');
@@ -99,103 +113,121 @@ export default function Meetings() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color={Colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Meetings</Text>
-        <View style={{ width: 36 }} />
-      </View>
-
+    <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* Info banner */}
-        <View style={styles.noticeBanner}>
-          <Ionicons name="information-circle-outline" size={18} color={Colors.primary} />
-          <Text style={styles.noticeText}>
-            Tap any meeting card to find real meetings near you via the official website.
-          </Text>
+        {/* ── Gradient hero header ── */}
+        <LinearGradient
+          colors={['#7B2FE0', '#9747FF', '#C084FC']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.hero}
+        >
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color="rgba(255,255,255,0.9)" />
+          </TouchableOpacity>
+
+          <View style={styles.heroBadge}>
+            <Ionicons name="calendar" size={28} color="#fff" />
+          </View>
+          <Text style={styles.heroTitle}>Meetings</Text>
+          <Text style={styles.heroSub}>Active meetings happening right now</Text>
+        </LinearGradient>
+
+        {/* ── Filter chips ── */}
+        <View style={styles.filtersWrap}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersList}>
+            {FILTERS.map(f => (
+              <TouchableOpacity
+                key={f.key}
+                style={[styles.filterChip, filter === f.key && styles.filterActive]}
+                onPress={() => setFilter(f.key)}
+              >
+                <Text style={[styles.filterText, filter === f.key && styles.filterActiveText]}>
+                  {f.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
-        {/* Filters */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersRow}>
-          {([
-            { key: 'all' as FilterType, label: 'All' },
-            { key: 'aa' as FilterType, label: 'AA' },
-            { key: 'na' as FilterType, label: 'NA' },
-            { key: 'online' as FilterType, label: 'Online' },
-          ]).map(f => (
-            <TouchableOpacity
-              key={f.key}
-              style={[styles.filterChip, filter === f.key && styles.filterActive]}
-              onPress={() => setFilter(f.key)}
-            >
-              <Text style={[styles.filterText, filter === f.key && styles.filterActiveText]}>
-                {f.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        {/* ── Section label ── */}
+        <View style={styles.sectionLabelWrap}>
+          <Text style={styles.sectionLabel}>
+            {filter === 'all' ? 'All Meetings' : filter === 'online' ? 'Online Meetings' : filter.toUpperCase() + ' Meetings'}
+          </Text>
+          <Text style={styles.sectionCount}>{filtered.length} results</Text>
+        </View>
 
-        <Text style={styles.sectionTitle}>
-          {filter === 'all' ? 'All Meetings' : filter === 'online' ? 'Online Meetings' : filter.toUpperCase() + ' Meetings'}
-        </Text>
+        {/* ── Meeting cards ── */}
+        <View style={styles.cardsList}>
+          {filtered.length === 0 ? (
+            <View style={styles.empty}>
+              <Ionicons name="calendar-outline" size={44} color={Colors.primaryLight} />
+              <Text style={styles.emptyText}>No meetings match this filter.</Text>
+            </View>
+          ) : (
+            filtered.map(meeting => (
+              <TouchableOpacity
+                key={meeting.id}
+                style={styles.meetingCard}
+                activeOpacity={0.85}
+                onPress={() => openUrl(meeting.url)}
+              >
+                {/* Icon badge */}
+                <View style={[styles.meetingIconWrap, { backgroundColor: meeting.color + '18' }]}>
+                  <Ionicons name={meeting.icon} size={26} color={meeting.color} />
+                </View>
 
-        {filtered.length === 0 ? (
-          <View style={styles.empty}>
-            <Ionicons name="calendar-outline" size={44} color={Colors.primaryLight} />
-            <Text style={styles.emptyText}>No meetings match this filter.</Text>
-          </View>
-        ) : (
-          filtered.map(meeting => (
-            <TouchableOpacity
-              key={meeting.id}
-              style={styles.meetingCard}
-              activeOpacity={0.85}
-              onPress={() => openUrl(meeting.url)}
-            >
-              <View style={[styles.meetingBadge, { backgroundColor: meeting.color }]}>
-                <Text style={styles.meetingBadgeText}>{meeting.type.toUpperCase()}</Text>
-              </View>
-              <View style={styles.meetingInfo}>
-                <Text style={styles.meetingOrg} numberOfLines={1}>{meeting.org}</Text>
-                <View style={styles.meetingMeta}>
-                  <Ionicons name="calendar-outline" size={13} color={Colors.textMuted} />
-                  <Text style={styles.meetingTime}>
-                    {getRelativeDayLabel(meeting.dow)} · {meeting.time}
-                  </Text>
+                {/* Info */}
+                <View style={styles.meetingInfo}>
+                  <Text style={styles.meetingOrg} numberOfLines={1}>{meeting.org}</Text>
+                  <View style={styles.meetingMetaRow}>
+                    <Ionicons name="calendar-outline" size={12} color={Colors.textMuted} />
+                    <Text style={styles.meetingMetaText}>
+                      {getRelativeDayLabel(meeting.dow)} · {meeting.time}
+                    </Text>
+                  </View>
+                  <View style={styles.meetingMetaRow}>
+                    <Ionicons name="location-outline" size={12} color={Colors.textMuted} />
+                    <Text style={styles.meetingMetaText} numberOfLines={1}>{meeting.address}</Text>
+                  </View>
+                  <View style={[styles.formatBadge, { backgroundColor: meeting.color + '18' }]}>
+                    <Text style={[styles.formatText, { color: meeting.color }]}>{meeting.format}</Text>
+                  </View>
                 </View>
-                <View style={styles.meetingMeta}>
-                  <Ionicons name="location-outline" size={13} color={Colors.textMuted} />
-                  <Text style={styles.meetingAddress} numberOfLines={1}>{meeting.address}</Text>
-                </View>
-                <View style={styles.formatChip}>
-                  <Text style={styles.formatText}>{meeting.format}</Text>
-                </View>
-              </View>
-              <Ionicons name="open-outline" size={16} color={Colors.textMuted} />
-            </TouchableOpacity>
-          ))
-        )}
 
-        {/* Find more */}
-        <View style={styles.findMoreSection}>
-          <Text style={styles.findMoreTitle}>Find More Meetings</Text>
+                {/* Active dot + external link */}
+                <View style={styles.meetingRight}>
+                  <View style={[styles.activeDot, { backgroundColor: meeting.format === 'Online' ? Colors.success : meeting.color }]} />
+                  <Ionicons name="open-outline" size={16} color={Colors.textMuted} />
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
+        </View>
+
+        {/* ── Find More Meetings ── */}
+        <View style={styles.sectionLabelWrap}>
+          <Text style={styles.sectionLabel}>Find More Meetings</Text>
+        </View>
+        <View style={styles.cardsList}>
           {[
-            { label: 'AA Meeting Finder', url: 'https://www.aa.org/find-a-meeting', color: Colors.primary },
-            { label: 'NA Meeting Search', url: 'https://www.na.org/meetingsearch/', color: Colors.accent },
-            { label: 'SMART Recovery Calendar', url: 'https://www.smartrecovery.org/community/calendar.php', color: Colors.success },
+            { label: 'AA Meeting Finder',          url: 'https://www.aa.org/find-a-meeting',                           color: Colors.primary, icon: 'people-outline' as const },
+            { label: 'NA Meeting Search',           url: 'https://www.na.org/meetingsearch/',                           color: Colors.accent,  icon: 'globe-outline' as const },
+            { label: 'SMART Recovery Calendar',    url: 'https://www.smartrecovery.org/community/calendar.php',        color: Colors.success, icon: 'bulb-outline' as const },
           ].map(link => (
             <TouchableOpacity
               key={link.label}
-              style={styles.findMoreCard}
+              style={styles.linkCard}
               onPress={() => openUrl(link.url)}
               activeOpacity={0.85}
             >
-              <Ionicons name="globe-outline" size={18} color={link.color} />
-              <Text style={[styles.findMoreLabel, { color: link.color }]}>{link.label}</Text>
-              <Ionicons name="chevron-forward" size={14} color={Colors.textMuted} />
+              <View style={[styles.linkIconWrap, { backgroundColor: link.color + '18' }]}>
+                <Ionicons name={link.icon} size={20} color={link.color} />
+              </View>
+              <Text style={[styles.linkLabel, { color: link.color }]}>{link.label}</Text>
+              <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
             </TouchableOpacity>
           ))}
         </View>
@@ -207,98 +239,154 @@ export default function Meetings() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
+  safe:   { flex: 1, backgroundColor: Colors.background },
+  scroll: { paddingBottom: 20 },
+
+  /* ── Hero ── */
+  hero: {
+    paddingTop: Platform.OS === 'android' ? 50 : 58,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 16 : 12,
-    paddingBottom: 12,
+  },
+  backBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 12 : 56,
+    left: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontFamily: Fonts.generalSansBold,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  heroSub: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+  },
+
+  /* ── Filters ── */
+  filtersWrap: {
+    paddingTop: 16,
+    paddingBottom: 4,
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.border,
   },
-  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  scroll: { padding: 20 },
-  noticeBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-  },
-  noticeText: { flex: 1, fontSize: 13, color: Colors.primaryDark, lineHeight: 19 },
-  filtersRow: { marginBottom: 20 },
+  filtersList: { paddingHorizontal: 16, gap: 8 },
   filterChip: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.white,
-    marginRight: 8,
+    backgroundColor: Colors.background,
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
   filterActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  filterText: { fontSize: 13, color: Colors.textMuted, fontWeight: '500' },
-  filterActiveText: { color: Colors.white, fontWeight: '700' },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 12 },
-  empty: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40, gap: 10 },
-  emptyText: { fontSize: 14, color: Colors.textMuted },
+  filterText: { fontSize: 13, color: Colors.textMuted, fontFamily: Fonts.generalSansMedium },
+  filterActiveText: { color: Colors.white, fontFamily: Fonts.generalSansBold },
+
+  /* ── Section labels ── */
+  sectionLabelWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  sectionLabel: {
+    fontSize: 15,
+    fontFamily: Fonts.generalSansBold,
+    color: Colors.text,
+  },
+  sectionCount: {
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+
+  /* ── Cards list ── */
+  cardsList: { paddingHorizontal: 20, gap: 10 },
+
+  /* ── Meeting card ── */
   meetingCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
-    marginBottom: 10,
     gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  meetingBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  meetingIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  meetingBadgeText: { color: Colors.white, fontSize: 11, fontWeight: '700' },
   meetingInfo: { flex: 1 },
-  meetingOrg: { fontSize: 14, fontWeight: '700', color: Colors.text, marginBottom: 4 },
-  meetingMeta: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 2 },
-  meetingTime: { fontSize: 12, color: Colors.textMuted },
-  meetingAddress: { flex: 1, fontSize: 12, color: Colors.textMuted },
-  formatChip: {
+  meetingOrg: { fontSize: 14, fontFamily: Fonts.generalSansBold, color: Colors.text, marginBottom: 4 },
+  meetingMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
+  meetingMetaText: { flex: 1, fontSize: 12, color: Colors.textMuted },
+  formatBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.primaryLight,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 2,
     marginTop: 4,
   },
-  formatText: { fontSize: 11, color: Colors.primary, fontWeight: '600' },
-  findMoreSection: { marginTop: 24 },
-  findMoreTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 10 },
-  findMoreCard: {
+  formatText: { fontSize: 11, fontFamily: Fonts.generalSansBold },
+  meetingRight: { alignItems: 'center', gap: 8 },
+  activeDot: { width: 7, height: 7, borderRadius: 4 },
+
+  /* ── Link card ── */
+  linkCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
     backgroundColor: Colors.white,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
-    marginBottom: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
-    shadowRadius: 3,
+    shadowRadius: 4,
     elevation: 1,
   },
-  findMoreLabel: { flex: 1, fontSize: 14, fontWeight: '600' },
+  linkIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  linkLabel: { flex: 1, fontSize: 14, fontFamily: Fonts.generalSansSemiBold },
+
+  /* ── Empty ── */
+  empty: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40, gap: 10 },
+  emptyText: { fontSize: 14, color: Colors.textMuted },
 });

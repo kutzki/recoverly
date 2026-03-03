@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { DrawerProvider, useDrawer } from '../../components/DrawerContext';
 import DrawerContent from '../../components/DrawerContent';
 
@@ -55,7 +56,7 @@ function AppLayout() {
           },
           tabBarLabelStyle: {
             fontSize: 11,
-            fontWeight: '500',
+            fontFamily: Fonts.generalSansMedium,
           },
         }}
       >
@@ -86,7 +87,7 @@ function AppLayout() {
             title: 'SOS',
             tabBarIcon: () => <SOSTabIcon />,
             tabBarLabel: () => (
-              <Text style={{ fontSize: 10, fontWeight: '700', color: Colors.primary }}>Sober SOS</Text>
+              <Text style={{ fontSize: 10, fontFamily: Fonts.generalSansBold, color: Colors.primary }}>Sober SOS</Text>
             ),
           }}
         />

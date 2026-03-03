@@ -14,9 +14,11 @@ import {
   Modal,
   KeyboardAvoidingView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuthStore } from '../../store/auth';
 
 interface Contact { name: string; phone: string; }
@@ -86,21 +88,53 @@ export default function InnerCircle() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={Colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Inner Circle</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
+    <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.infoBanner}>
-          <Ionicons name="people-outline" size={20} color={Colors.primary} />
-          <Text style={styles.infoText}>
-            Your inner circle are trusted people you can contact during a crisis. They appear in your SOS screen for quick calling.
-          </Text>
+
+        {/* ── Gradient hero header ── */}
+        <LinearGradient
+          colors={['#7B2FE0', '#9747FF', '#C084FC']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.hero}
+        >
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color="rgba(255,255,255,0.9)" />
+          </TouchableOpacity>
+
+          <View style={styles.heroBadge}>
+            <Ionicons name="people" size={28} color="#fff" />
+          </View>
+          <Text style={styles.heroTitle}>Inner Circle</Text>
+          <Text style={styles.heroSub}>People you can call in a moment of need</Text>
+        </LinearGradient>
+
+        {/* ── Send call link card ── */}
+        <View style={styles.callLinkCard}>
+          <View style={styles.callLinkIconWrap}>
+            <Ionicons name="videocam" size={28} color={Colors.primary} />
+          </View>
+          <View style={styles.callLinkText}>
+            <Text style={styles.callLinkTitle}>Send a Video Call Link</Text>
+            <Text style={styles.callLinkSub}>All members of your inner circle will receive a call link</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.callLinkBtn}
+            onPress={() =>
+              router.push({
+                pathname: '/(app)/call/[callId]' as any,
+                params: { callId: 'inner_circle_room', type: 'default', calleeName: encodeURIComponent('Inner Circle') },
+              })
+            }
+            activeOpacity={0.85}
+          >
+            <Ionicons name="call" size={18} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Contacts section ── */}
+        <View style={styles.sectionLabel}>
+          <Text style={styles.sectionLabelText}>Contacts</Text>
         </View>
 
         {contacts.length === 0 ? (
@@ -110,40 +144,51 @@ export default function InnerCircle() {
             <Text style={styles.emptySub}>Add trusted people you can reach out to in difficult moments.</Text>
           </View>
         ) : (
-          <View style={styles.contactList}>
+          <View style={styles.contactsCard}>
             {contacts.map((c, i) => (
-              <View key={i} style={styles.contactCard}>
-                <View style={styles.contactAvatar}>
-                  <Text style={styles.contactInitial}>{c.name[0]?.toUpperCase()}</Text>
+              <React.Fragment key={i}>
+                <View style={styles.contactRow}>
+                  {/* Avatar */}
+                  <View style={styles.contactAvatar}>
+                    <Text style={styles.contactInitial}>{c.name[0]?.toUpperCase()}</Text>
+                  </View>
+                  {/* Info */}
+                  <View style={styles.contactInfo}>
+                    <Text style={styles.contactName}>{c.name}</Text>
+                    <Text style={styles.contactPhone}>{c.phone}</Text>
+                  </View>
+                  {/* Call button */}
+                  <TouchableOpacity style={styles.callBtn} onPress={() => handleCall(c.phone)} activeOpacity={0.8}>
+                    <Ionicons name="call" size={17} color={Colors.white} />
+                  </TouchableOpacity>
+                  {/* Edit */}
+                  <TouchableOpacity style={styles.iconBtn} onPress={() => openEdit(i)}>
+                    <Ionicons name="pencil-outline" size={18} color={Colors.textMuted} />
+                  </TouchableOpacity>
+                  {/* Remove */}
+                  <TouchableOpacity style={styles.iconBtn} onPress={() => handleRemove(i)}>
+                    <Ionicons name="trash-outline" size={18} color={Colors.error} />
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.contactInfo}>
-                  <Text style={styles.contactName}>{c.name}</Text>
-                  <Text style={styles.contactPhone}>{c.phone}</Text>
-                </View>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => handleCall(c.phone)}>
-                  <Ionicons name="call-outline" size={20} color={Colors.primary} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => openEdit(i)}>
-                  <Ionicons name="pencil-outline" size={20} color={Colors.textMuted} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => handleRemove(i)}>
-                  <Ionicons name="trash-outline" size={20} color="#FF4747" />
-                </TouchableOpacity>
-              </View>
+                {i < contacts.length - 1 && <View style={styles.divider} />}
+              </React.Fragment>
             ))}
           </View>
         )}
 
+        {/* ── Add Contact button ── */}
         <TouchableOpacity style={styles.addBtn} onPress={openAdd} activeOpacity={0.85}>
           <Ionicons name="add-circle-outline" size={20} color={Colors.primary} />
           <Text style={styles.addBtnText}>Add Contact</Text>
         </TouchableOpacity>
 
+        {/* ── Save button ── */}
         {contacts.length > 0 && (
           <TouchableOpacity
             style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
             onPress={handleSave}
             disabled={saving}
+            activeOpacity={0.85}
           >
             {saving
               ? <ActivityIndicator color={Colors.white} />
@@ -155,7 +200,7 @@ export default function InnerCircle() {
         <View style={{ height: 40 }} />
       </ScrollView>
 
-      {/* Add/Edit Modal */}
+      {/* ── Add/Edit Modal ── */}
       <Modal visible={showModal} animationType="slide" presentationStyle="pageSheet">
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <SafeAreaView style={styles.modalSafe}>
@@ -204,61 +249,151 @@ export default function InnerCircle() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  header: {
+  safe:   { flex: 1, backgroundColor: Colors.background },
+  scroll: { paddingBottom: 20 },
+
+  /* ── Hero ── */
+  hero: {
+    paddingTop: Platform.OS === 'android' ? 50 : 58,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  backBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 12 : 56,
+    left: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontFamily: Fonts.generalSansBold,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  heroSub: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+  },
+
+  /* ── Call link card ── */
+  callLinkCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 16 : 12,
-    paddingBottom: 12,
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 20,
+    gap: 12,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1.5,
+    borderColor: Colors.primary + '33',
   },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
-  scroll: { padding: 20 },
-  infoBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
-  },
-  infoText: { flex: 1, fontSize: 13, color: Colors.primary, lineHeight: 19 },
-  empty: { alignItems: 'center', gap: 12, paddingVertical: 40 },
-  emptyTitle: { fontSize: 17, fontWeight: '700', color: Colors.text },
-  emptySub: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
-  contactList: { gap: 10, marginBottom: 16 },
-  contactCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
+  callLinkIconWrap: {
+    width: 52,
+    height: 52,
     borderRadius: 14,
-    padding: 14,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  contactAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  contactInitial: { fontSize: 18, fontWeight: '700', color: Colors.primary },
+  callLinkText: { flex: 1 },
+  callLinkTitle: { fontSize: 14, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  callLinkSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2, lineHeight: 17 },
+  callLinkBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /* ── Section label ── */
+  sectionLabel: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
+  sectionLabelText: {
+    fontSize: 12,
+    fontFamily: Fonts.generalSansBold,
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+
+  /* ── Contacts flat card ── */
+  contactsCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    marginHorizontal: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  contactAvatar: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contactInitial: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.primary },
   contactInfo: { flex: 1 },
-  contactName: { fontSize: 15, fontWeight: '600', color: Colors.text },
-  contactPhone: { fontSize: 13, color: Colors.textMuted, marginTop: 2 },
+  contactName: { fontSize: 15, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
+  contactPhone: { fontSize: 13, color: Colors.textMuted, marginTop: 1 },
+  callBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.border,
+    marginLeft: 72,
+  },
+
+  /* ── Empty ── */
+  empty: { alignItems: 'center', gap: 12, paddingVertical: 40, paddingHorizontal: 24 },
+  emptyTitle: { fontSize: 17, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  emptySub: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
+
+  /* ── Add / Save buttons ── */
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -269,18 +404,23 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderRadius: 14,
     height: 50,
-    marginBottom: 16,
+    marginHorizontal: 20,
+    marginTop: 16,
   },
-  addBtnText: { color: Colors.primary, fontWeight: '600', fontSize: 15 },
+  addBtnText: { color: Colors.primary, fontFamily: Fonts.generalSansSemiBold, fontSize: 15 },
   saveBtn: {
     backgroundColor: Colors.primary,
     borderRadius: 14,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: 20,
+    marginTop: 12,
   },
   saveBtnDisabled: { opacity: 0.7 },
-  saveBtnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
+  saveBtnText: { color: Colors.white, fontFamily: Fonts.generalSansBold, fontSize: 16 },
+
+  /* ── Add/Edit Modal ── */
   modalSafe: { flex: 1, backgroundColor: Colors.white },
   modalHeader: {
     flexDirection: 'row',
@@ -292,8 +432,8 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   modalCancel: { fontSize: 16, color: Colors.textMuted },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: Colors.text },
-  modalSave: { fontSize: 16, fontWeight: '700', color: Colors.primary },
+  modalTitle: { fontSize: 17, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  modalSave: { fontSize: 16, fontFamily: Fonts.generalSansBold, color: Colors.primary },
   modalBody: { padding: 20, gap: 14 },
   inputWrap: {
     flexDirection: 'row',
