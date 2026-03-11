@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppState, AppStateStatus, StyleSheet, View } from 'react-native';
+import { AppState, AppStateStatus, StyleSheet } from 'react-native';
 import { OverlayProvider } from 'stream-chat-react-native';
 import {
   useFonts,
@@ -23,7 +23,7 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_600SemiBold,
@@ -49,8 +49,10 @@ export default function RootLayout() {
     return () => sub.remove();
   }, []);
 
-  // Hold render until fonts are ready to prevent a flash of unstyled text
-  if (!fontsLoaded) return <View style={styles.root} />;
+  // Keep the native splash screen visible while fonts load.
+  // Return null (not a View) so expo-router knows to hold the splash.
+  // If font loading errors, proceed anyway with system font fallback.
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <GestureHandlerRootView style={styles.root}>
