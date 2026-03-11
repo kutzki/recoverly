@@ -1,5 +1,6 @@
 import React, { ComponentProps } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { OverlayProvider } from 'stream-chat-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -185,8 +186,10 @@ const drawerStyles = StyleSheet.create({
 
 export default function AppLayoutWrapper() {
   return (
-    <DrawerProvider>
-      <AppLayout />
-    </DrawerProvider>
+    <OverlayProvider>
+      <DrawerProvider>
+        <AppLayout />
+      </DrawerProvider>
+    </OverlayProvider>
   );
 }

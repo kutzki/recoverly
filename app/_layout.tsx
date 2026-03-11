@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppState, AppStateStatus, StyleSheet } from 'react-native';
-import { OverlayProvider } from 'stream-chat-react-native';
 import {
   useFonts,
   Poppins_400Regular,
@@ -57,7 +56,6 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-      <OverlayProvider>
         <QueryClientProvider client={queryClient}>
           <ErrorBoundary>
             <StatusBar style="dark" />
@@ -70,7 +68,6 @@ export default function RootLayout() {
             </Stack>
           </ErrorBoundary>
         </QueryClientProvider>
-      </OverlayProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

@@ -3,7 +3,7 @@
     "buildCacheProvider": "eas",
     "name": "recoverly",
     "slug": "recoverly",
-    "version": "1.0.33",
+    "version": "1.0.34",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,7 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.recoverly.app",
-      "versionCode": 10033,
+      "versionCode": 10034,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",
