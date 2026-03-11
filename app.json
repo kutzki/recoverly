@@ -3,11 +3,11 @@
     "buildCacheProvider": "eas",
     "name": "recoverly",
     "slug": "recoverly",
-    "version": "1.0.32",
+    "version": "1.0.33",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "scheme": "recoverly",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -24,7 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.recoverly.app",
-      "versionCode": 10032,
+      "versionCode": 10033,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",

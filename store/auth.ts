@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { connectStreamChat, disconnectStreamChat } from '../services/streamChat';
 import { connectStreamFeed, disconnectStreamFeed } from '../services/streamFeed';
-import { initStreamVideo, disconnectStreamVideo } from '../services/streamVideo';
+import { disconnectStreamVideo } from '../services/streamVideo';
 import { supabase, getProfile } from '../services/supabase';
 import { authService } from '../services/auth';
 import { useProgressStore } from './progress';
@@ -45,11 +45,8 @@ async function connectStreamServices(user: User) {
   } catch (err) {
     console.warn('[Auth] StreamFeed connect failed:', err);
   }
-  try {
-    await initStreamVideo(user.id, user.name);
-  } catch (err) {
-    console.warn('[Auth] StreamVideo connect failed:', err);
-  }
+  // StreamVideo (WebRTC) is initialized lazily on the call screen to avoid
+  // loading libwebrtc.so at app startup, which causes a 5-second ANR.
 }
 
 async function disconnectStreamServices() {
