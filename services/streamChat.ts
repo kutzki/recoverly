@@ -56,7 +56,10 @@ export async function connectStreamChat(
       id: userId,
       name: userName,
       image: userImage,
-      // Custom fields visible to other users for discovery
+      // Custom fields visible to other users for discovery.
+      // stream-chat v9 types don't expose extension points on UserResponse
+      // for custom fields even though the SDK fully supports them at runtime.
+      // @ts-expect-error stream-chat custom user fields — valid at runtime
       days_sober: daysSober,
       challenges: challenges ?? [],
     },
@@ -113,6 +116,9 @@ export async function createGroupChannel(
 ): Promise<Channel> {
   if (!chatClient) throw new Error('StreamChat not connected');
 
+  // stream-chat v9 types don't expose the 2-arg overload (type, data) for
+  // channels without an explicit ID — but it's fully supported at runtime.
+  // @ts-expect-error stream-chat channel overload — valid at runtime
   const channel = chatClient.channel(CHANNEL_TYPE_TEAM, {
     name,
     members: [...new Set([creatorId, ...memberIds])],
@@ -131,6 +137,7 @@ export async function joinCommunityChannel(channelId: string, name?: string): Pr
   if (!chatClient) throw new Error('StreamChat not connected');
 
   const channel = chatClient.channel(CHANNEL_TYPE_LIVESTREAM, channelId, {
+    // @ts-expect-error stream-chat ChannelData doesn't expose `name` in types — valid at runtime
     name: name ?? channelId,
   });
 

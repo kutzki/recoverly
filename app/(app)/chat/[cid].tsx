@@ -43,6 +43,7 @@ export default function ChannelScreen() {
         await ch.watch();
 
         // Resolve display name
+        // @ts-expect-error stream-chat ChannelData doesn't expose `name` in types — valid at runtime
         let name = ch.data?.name as string | undefined;
         if (!name) {
           // For DMs, show the other participant's name
