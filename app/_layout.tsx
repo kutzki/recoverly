@@ -16,11 +16,6 @@ import { Jost_400Regular, Jost_500Medium } from '@expo-google-fonts/jost';
 import { useAuthStore } from '../store/auth';
 import { useChecklistStore } from '../store/checklist';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { initSentry, Sentry } from '../services/sentry';
-
-// Initialise Sentry at module load — before any component renders.
-// This ensures native crashes and ANRs are captured even on cold start.
-initSentry();
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 2, staleTime: 1000 * 60 * 5 } },
@@ -80,6 +75,4 @@ function RootLayout() {
 
 const styles = StyleSheet.create({ root: { flex: 1 } });
 
-// Sentry.wrap adds its own error boundary and enables React component
-// stack traces in crash reports.
-export default Sentry.wrap(RootLayout);
+export default RootLayout;
