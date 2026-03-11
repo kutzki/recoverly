@@ -6,11 +6,14 @@ import { useAuthStore } from '../store/auth';
 import { Colors } from '../constants/colors';
 
 export default function SplashScreen() {
-  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const isLoading = useAuthStore((s) => s.isLoading);
 
   useEffect(() => {
     if (isLoading) return;
+    // Read state at callback time, not as deps — avoids re-arming the timer on
+    // every store update and guarantees we navigate exactly once after load.
     const timer = setTimeout(() => {
+      const { isAuthenticated, user } = useAuthStore.getState();
       if (isAuthenticated && user) {
         // isProfileComplete is now persisted to DB.
         // Also use a heuristic fallback for existing accounts created before this
@@ -20,17 +23,13 @@ export default function SplashScreen() {
           Boolean(user.sobrietyStartDate) ||
           (user.challenges && user.challenges.length > 0) ||
           Boolean(user.shortTermGoal);
-        if (profileDone) {
-          router.replace('/(app)/home');
-        } else {
-          router.replace('/(setup)/welcome');
-        }
+        router.replace(profileDone ? '/(app)/home' : '/(setup)/welcome');
       } else {
         router.replace('/(onboarding)/slide-1');
       }
     }, 2200);
     return () => clearTimeout(timer);
-  }, [isLoading, isAuthenticated, user]);
+  }, [isLoading]);
 
   return (
     <LinearGradient

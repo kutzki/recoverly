@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import type { RelativePathString } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
 import { Fonts } from '../../../constants/fonts';
@@ -80,7 +81,7 @@ export default function SOSMain() {
             <React.Fragment key={option.id}>
               <TouchableOpacity
                 style={styles.crisisRow}
-                onPress={() => router.push(`/(app)/sos/${option.id}` as any)}
+                onPress={() => router.push(`/(app)/sos/${option.id}` as RelativePathString)}
                 activeOpacity={0.7}
               >
                 <Text style={styles.crisisText}>{option.label}</Text>

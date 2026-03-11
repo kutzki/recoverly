@@ -126,7 +126,7 @@ export default function Tracker() {
 
         {/* ── Sobriety timer card ── */}
         <View style={styles.timerCard}>
-          <SobrietyCounter days={timer.days} size={190} />
+          <SobrietyCounter days={timer.days} />
           <View style={styles.timerGrid}>
             {[
               { label: 'Days',    value: String(timer.days).padStart(2, '0') },

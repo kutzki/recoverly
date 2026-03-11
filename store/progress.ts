@@ -10,6 +10,12 @@ function getAuthUserId(): string | null {
 
 const PROGRESS_KEY = 'user_progress';
 
+// Shape of what we actually persist to SecureStore (superset of ProgressState fields)
+interface PersistedProgress extends Partial<ProgressState> {
+  lastCheckInDate?: string;
+  weekStart?: string;
+}
+
 interface ProgressState {
   sobrietyStartDate: string | null;
   weeklyStreak: boolean[];
@@ -42,7 +48,7 @@ function currentMondayKey() {
   return d.toISOString().split('T')[0];
 }
 
-function persist(partial: Partial<ProgressState>) {
+function persist(partial: PersistedProgress) {
   SecureStore.getItemAsync(PROGRESS_KEY).then(raw => {
     const current = raw ? JSON.parse(raw) : {};
     SecureStore.setItemAsync(PROGRESS_KEY, JSON.stringify({ ...current, ...partial })).catch((err) => { console.warn('[Progress] persist write error:', err); });
@@ -80,7 +86,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     set(next);
     // Include weekStart so that loadProgress never incorrectly resets the streak
     // on the next launch (if weekStart is missing it looks like a new week)
-    persist({ ...next, lastCheckInDate: todayKey(), weekStart: currentMondayKey() } as any);
+    persist({ ...next, lastCheckInDate: todayKey(), weekStart: currentMondayKey() });
     // Sync check-in to Supabase in background (synchronous userId lookup)
     const userId = getAuthUserId();
     if (userId) {
@@ -134,7 +140,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       // Always persist current weekStart so subsequent launches don't
       // incorrectly see a missing weekStart and reset the streak.
       if (saved.weekStart !== currentMonday) {
-        persist({ weekStart: currentMonday, weeklyStreak: weekStreak } as any);
+        persist({ weekStart: currentMonday, weeklyStreak: weekStreak });
       }
     } catch (err) {
       console.warn('[Progress] loadProgress error:', err);

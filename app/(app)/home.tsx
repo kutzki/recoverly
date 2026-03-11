@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import type { RelativePathString } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
@@ -90,7 +91,7 @@ export default function Home() {
 
   const handleQuickAction = useCallback((action: typeof QUICK_ACTIONS[number]) => {
     if ('route' in action && action.route) {
-      router.push(action.route as any);
+      router.push(action.route as RelativePathString);
     } else if ('action' in action) {
       if (action.action === 'checklist') checklistRef.current?.expand();
       else if (action.action === 'journal') journalRef.current?.expand();

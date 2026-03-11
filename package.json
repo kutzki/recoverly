@@ -1,6 +1,6 @@
 {
   "name": "recoverly",
-  "version": "1.0.0",
+  "version": "1.0.29",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -8,7 +8,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:android": "eas build --platform android",
-    "build:preview": "eas build --platform android --profile preview"
+    "build:preview": "eas build --platform android --profile preview",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json}\""
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -54,7 +56,15 @@
     "@babel/core": "^7.26.0",
     "@resvg/resvg-js": "^2.6.2",
     "@types/react": "~19.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
     "babel-preset-expo": "~54.0.10",
+    "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-native": "^5.0.0",
+    "prettier": "^3.8.1",
     "sharp": "^0.34.5",
     "typescript": "~5.9.2"
   },

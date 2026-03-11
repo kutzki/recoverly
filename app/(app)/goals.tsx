@@ -1,5 +1,5 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -79,8 +79,12 @@ export default function Goals() {
     Keyboard.dismiss();
     setSaving(true);
     try {
-      const payload: any = { title: title.trim(), description: description.trim(), category };
-      if (editGoal) payload.id = editGoal.id;
+      const payload: Partial<UserGoal> & { title: string } = {
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        ...(editGoal ? { id: editGoal.id } : {}),
+      };
       await upsertGoal(userId, payload);
       await load();
       setShowModal(false);
@@ -124,9 +128,9 @@ export default function Goals() {
     ]);
   };
 
-  const active    = goals.filter(g => !g.completed);
-  const completed = goals.filter(g => g.completed);
-  const getCat    = (key: string) => CATEGORIES.find(c => c.key === key) || CATEGORIES[0];
+  const active    = useMemo(() => goals.filter(g => !g.completed), [goals]);
+  const completed = useMemo(() => goals.filter(g => g.completed), [goals]);
+  const getCat    = useCallback((key: string) => CATEGORIES.find(c => c.key === key) ?? CATEGORIES[0], []);
 
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>

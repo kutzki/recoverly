@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 
-const SUPABASE_URL = 'https://fccuedbmgszbklxuodic.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_ej2C0xQ8XJItbVLGYW4Lng_PZNtU_rd';
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Use expo-secure-store as the Supabase auth storage adapter
 // This ensures the session is encrypted and survives app restarts
@@ -81,6 +81,7 @@ export async function insertCheckin(userId: string, date: string): Promise<void>
 
   if (error) {
     console.warn('[Supabase] insertCheckin error:', error.message);
+    throw error;
   }
 }
 
@@ -100,7 +101,7 @@ export async function getCheckins(userId: string, since: string): Promise<string
 
 /**
  * Returns true if the given username (without @) is not yet taken.
- * Fails open (returns true) on network error to avoid blocking the user.
+ * Throws on network/server error so callers can handle it explicitly.
  */
 export async function checkUsernameAvailable(username: string): Promise<boolean> {
   const { data, error } = await supabase
@@ -110,7 +111,7 @@ export async function checkUsernameAvailable(username: string): Promise<boolean>
     .maybeSingle();
   if (error) {
     console.warn('[Supabase] checkUsernameAvailable error:', error.message);
-    return true; // fail open
+    throw error;
   }
   return !data;
 }
@@ -150,7 +151,7 @@ export async function insertCrisisIncident(
     actions_completed: actionsCompleted,
     notes,
   });
-  if (error) console.warn('[Supabase] insertCrisisIncident error:', error.message);
+  if (error) { console.warn('[Supabase] insertCrisisIncident error:', error.message); throw error; }
 }
 
 export async function getCrisisHistory(userId: string, limit = 20): Promise<CrisisIncident[]> {
@@ -209,12 +210,12 @@ export async function toggleGoalComplete(goalId: string, completed: boolean): Pr
     .from('user_goals')
     .update({ completed, completed_at: completed ? new Date().toISOString() : null })
     .eq('id', goalId);
-  if (error) console.warn('[Supabase] toggleGoalComplete error:', error.message);
+  if (error) { console.warn('[Supabase] toggleGoalComplete error:', error.message); throw error; }
 }
 
 export async function deleteGoal(goalId: string): Promise<void> {
   const { error } = await supabase.from('user_goals').delete().eq('id', goalId);
-  if (error) console.warn('[Supabase] deleteGoal error:', error.message);
+  if (error) { console.warn('[Supabase] deleteGoal error:', error.message); throw error; }
 }
 
 // ─── Favorites ────────────────────────────────────────────────────────────────
@@ -255,7 +256,7 @@ export async function addFavorite(
 
 export async function removeFavorite(favoriteId: string): Promise<void> {
   const { error } = await supabase.from('user_favorites').delete().eq('id', favoriteId);
-  if (error) console.warn('[Supabase] removeFavorite error:', error.message);
+  if (error) { console.warn('[Supabase] removeFavorite error:', error.message); throw error; }
 }
 
 // ─── Journal entries ───────────────────────────────────────────────────────────
@@ -307,10 +308,10 @@ export async function updateJournalEntry(
     .from('journal_entries')
     .update(updates)
     .eq('id', entryId);
-  if (error) console.warn('[Supabase] updateJournalEntry error:', error.message);
+  if (error) { console.warn('[Supabase] updateJournalEntry error:', error.message); throw error; }
 }
 
 export async function deleteJournalEntry(entryId: string): Promise<void> {
   const { error } = await supabase.from('journal_entries').delete().eq('id', entryId);
-  if (error) console.warn('[Supabase] deleteJournalEntry error:', error.message);
+  if (error) { console.warn('[Supabase] deleteJournalEntry error:', error.message); throw error; }
 }

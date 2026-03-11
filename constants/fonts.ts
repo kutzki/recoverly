@@ -1,13 +1,9 @@
 export const Fonts = {
-  // GeneralSans — primary display font
+  // GeneralSans — sole font family in use
   generalSans:         'GeneralSans-Regular',
   generalSansMedium:   'GeneralSans-Medium',
   generalSansSemiBold: 'GeneralSans-Semibold',
   generalSansBold:     'GeneralSans-Bold',
-  // Poppins — body text
-  poppins: 'Poppins-Regular',
-  // Jost — secondary
-  jost: 'Jost-Regular',
 };
 
 export const FontSizes = {

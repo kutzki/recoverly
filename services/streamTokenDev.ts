@@ -8,6 +8,13 @@
  * When backend is ready, remove this file and call POST /api/stream-token instead.
  */
 export function generateDevToken(userId: string): string {
+  if (!__DEV__) {
+    throw new Error(
+      '[generateDevToken] This function must only be used in development. ' +
+      'Call your backend token endpoint instead.'
+    );
+  }
+
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
     .replace(/=/g, '')
     .replace(/\+/g, '-')

@@ -1,10 +1,8 @@
-// Stream configuration
-// API key is safe to expose in client — secret stays server-side only
-export const STREAM_API_KEY = 'z7u626zrtzxj';
-
-// App ID — find in Stream Dashboard → your app → App ID (numeric)
-// Required for Activity Feeds SDK. Fill in from your dashboard.
-export const STREAM_APP_ID = '1220960';
+// Stream configuration — values loaded from environment variables.
+// Set EXPO_PUBLIC_STREAM_API_KEY and EXPO_PUBLIC_STREAM_APP_ID in .env (local)
+// or via `eas secret:create` for CI/production builds.
+export const STREAM_API_KEY = process.env.EXPO_PUBLIC_STREAM_API_KEY!;
+export const STREAM_APP_ID  = process.env.EXPO_PUBLIC_STREAM_APP_ID!;
 
 // Token endpoint on your backend (add this route when backend is ready)
 export const STREAM_TOKEN_ENDPOINT = 'https://recoverly-api.vercel.app/api/stream-token';

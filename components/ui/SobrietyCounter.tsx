@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 'react-native-svg';
 import { Colors } from '../../constants/colors';
@@ -20,37 +20,41 @@ interface Props {
  *   progressX = cx - r · cos(p · π)
  *   progressY = cy - r · sin(p · π)
  */
-export function SobrietyCounter({ days, goal = 90 }: Props) {
+const STROKE = 13; // arc stroke width — constant, not per-render
+
+export const SobrietyCounter = React.memo(function SobrietyCounter({ days, goal = 90 }: Props) {
   const { width: screenWidth } = useWindowDimensions();
-  const p = Math.min(days / goal, 1);   // progress 0 → 1
 
-  const W      = screenWidth - 40;      // content width (20 px padding each side)
-  const STROKE = 13;
-  const PAD    = STROKE / 2 + 8;
-  const r      = W / 2 - PAD;
-  const cx     = W / 2;
-  const cy     = r + STROKE / 2 + 8;
-  const H      = cy + STROKE / 2 + 8;
+  const { W, H, cx, trackPath, purplePath, bluePath, numFontSize, lblFontSize, numBaseY, lblBaseY } =
+    useMemo(() => {
+      const p      = Math.min(days / goal, 1);
+      const _W     = screenWidth - 40;
+      const PAD    = STROKE / 2 + 8;
+      const r      = _W / 2 - PAD;
+      const _cx    = _W / 2;
+      const _cy    = r + STROKE / 2 + 8;
+      const _H     = _cy + STROKE / 2 + 8;
 
-  // Progress endpoint on the arc
-  const progX = cx - r * Math.cos(p * Math.PI);
-  const progY = cy - r * Math.sin(p * Math.PI);
+      const progX = _cx - r * Math.cos(p * Math.PI);
+      const progY = _cy - r * Math.sin(p * Math.PI);
 
-  // Paths (large-arc-flag always 0: each segment ≤ 180°)
-  const trackPath  = `M ${PAD} ${cy} A ${r} ${r} 0 0 1 ${W - PAD} ${cy}`;
-  const purplePath = p > 0.001
-    ? `M ${PAD} ${cy} A ${r} ${r} 0 0 1 ${progX} ${progY}`
-    : null;
-  const bluePath   = p < 0.999
-    ? `M ${progX} ${progY} A ${r} ${r} 0 0 1 ${W - PAD} ${cy}`
-    : null;
+      const _trackPath  = `M ${PAD} ${_cy} A ${r} ${r} 0 0 1 ${_W - PAD} ${_cy}`;
+      const _purplePath = p > 0.001 ? `M ${PAD} ${_cy} A ${r} ${r} 0 0 1 ${progX} ${progY}` : null;
+      const _bluePath   = p < 0.999 ? `M ${progX} ${progY} A ${r} ${r} 0 0 1 ${_W - PAD} ${_cy}` : null;
 
-  const numFontSize = Math.round(r * 0.42);
-  const lblFontSize = Math.round(r * 0.18);
+      const _numFontSize = Math.round(r * 0.42);
+      const _lblFontSize = Math.round(r * 0.18);
+      const midY         = (_cy - r + _cy) / 2;
+      const _numBaseY    = midY + _numFontSize * 0.36;
+      const _lblBaseY    = _numBaseY + _numFontSize * 0.65 + 4;
 
-  const midY     = (cy - r + cy) / 2;
-  const numBaseY = midY + numFontSize * 0.36;
-  const lblBaseY = numBaseY + numFontSize * 0.65 + 4;
+      return {
+        W: _W, H: _H, cx: _cx,
+        trackPath: _trackPath, purplePath: _purplePath, bluePath: _bluePath,
+        numFontSize: _numFontSize, lblFontSize: _lblFontSize,
+        numBaseY: _numBaseY, lblBaseY: _lblBaseY,
+      };
+    }, [days, goal, screenWidth]);
 
   return (
     <View>
@@ -119,4 +123,4 @@ export function SobrietyCounter({ days, goal = 90 }: Props) {
       </Svg>
     </View>
   );
-}
+});

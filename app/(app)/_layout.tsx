@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import { Fonts } from '../../constants/fonts';
 import { DrawerProvider, useDrawer } from '../../components/DrawerContext';
 import DrawerContent from '../../components/DrawerContent';
 
-function TabBarIcon({ name, color, size }: { name: any; color: string; size: number }) {
+function TabBarIcon({ name, color, size }: { name: ComponentProps<typeof Ionicons>['name']; color: string; size: number }) {
   return <Ionicons name={name} size={size} color={color} />;
 }
 

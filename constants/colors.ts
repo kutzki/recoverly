@@ -35,8 +35,8 @@ export const Colors = {
 
   // ─── Milestone ────────────────────────────────────────────────────────────
   milestoneGrey:   '#E8E0F0',
-  milestonePurple: '#9747FF',
-  milestoneCyan:   '#4BFFC8',
+  milestonePurple: '#9747FF', // alias of primary
+  milestoneCyan:   '#4BFFC8', // alias of success
 
   // ─── SOS / Crisis screen ──────────────────────────────────────────────────
   sosRed:        '#FF6B6B',
@@ -49,7 +49,7 @@ export const Colors = {
   sosRedBright:  '#FF3B30',
 
   // ─── Feed / Activity ──────────────────────────────────────────────────────
-  feedAmber:     '#F59E0B',
+  feedAmber:     '#F59E0B', // alias of goalAmber
   feedCyan:      '#06B6D4',
   feedLike:      '#EF4444',
 
@@ -68,7 +68,7 @@ export const Colors = {
   // ─── Sobriety arc / Progress ──────────────────────────────────────────────
   arcBlue:       '#B8E8FF',
   arcTrack:      '#EDE6FF',
-  arcGradStart:  '#7B2FE0',
+  arcGradStart:  '#7B2FE0', // alias of primaryDark
   arcGradEnd:    '#A855F7',
 
   // ─── Home hero gradient fill ──────────────────────────────────────────────

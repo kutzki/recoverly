@@ -19,7 +19,7 @@ import { Fonts } from '../../constants/fonts';
 import { useAuth } from '../../hooks/useAuth';
 import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
-function getPasswordStrength(pw: string): { label: string; color: string; pct: string } | null {
+function getPasswordStrength(pw: string): { label: string; color: string; pct: `${number}%` } | null {
   if (!pw) return null;
   const hasUpper = /[A-Z]/.test(pw);
   const hasNumber = /[0-9]/.test(pw);
