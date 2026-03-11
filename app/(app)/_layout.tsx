@@ -1,4 +1,4 @@
-import React, { ComponentProps, useState, useEffect } from 'react';
+import React, { ComponentProps } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { OverlayProvider } from 'stream-chat-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -184,32 +184,7 @@ const drawerStyles = StyleSheet.create({
   },
 });
 
-/**
- * Defer OverlayProvider mount until 100 ms after first paint.
- *
- * On Android with new architecture (JSI), stream-chat-react-native's
- * OverlayProvider triggers synchronous native-module initialisation on the
- * UI thread during mount.  If this coincides with the app's own startup
- * sequence the combined blocking time exceeds Android's 5-second ANR
- * threshold.  Delaying the mount by 100 ms lets the first frame complete
- * and satisfies Android's "app is alive" check before the heavy init runs.
- */
 export default function AppLayoutWrapper() {
-  const [overlayReady, setOverlayReady] = useState(false);
-
-  useEffect(() => {
-    const id = setTimeout(() => setOverlayReady(true), 100);
-    return () => clearTimeout(id);
-  }, []);
-
-  if (!overlayReady) {
-    return (
-      <DrawerProvider>
-        <AppLayout />
-      </DrawerProvider>
-    );
-  }
-
   return (
     <OverlayProvider>
       <DrawerProvider>

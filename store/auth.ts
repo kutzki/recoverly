@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { connectStreamChat, disconnectStreamChat } from '../services/streamChat';
 import { connectStreamFeed, disconnectStreamFeed } from '../services/streamFeed';
-import { disconnectStreamVideo } from '../services/streamVideo';
 import { supabase, getProfile } from '../services/supabase';
 import { authService } from '../services/auth';
 import { useProgressStore } from './progress';
@@ -52,7 +51,6 @@ async function connectStreamServices(user: User) {
 async function disconnectStreamServices() {
   await disconnectStreamChat().catch(() => {});
   disconnectStreamFeed();
-  await disconnectStreamVideo().catch(() => {});
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
