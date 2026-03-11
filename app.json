@@ -51,8 +51,7 @@
       "expo-router",
       "expo-font",
       "expo-secure-store",
-      "expo-image-picker",
-      "@stream-io/video-react-native-sdk"
+      "expo-image-picker"
     ],
     "experiments": {
       "typedRoutes": true
