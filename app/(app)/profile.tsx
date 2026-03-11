@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
   },
-  editPillText: { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: '#fff' },
+  editPillText: { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: '#fff' },
 
   /* ── Avatar ── */
   avatarWrap: {
@@ -301,11 +301,11 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  avatarText: { fontSize: 34, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  avatarText: { fontSize: 34, fontFamily: Fonts.poppinsBold, color: Colors.primary },
 
   /* ── Name / Bio ── */
   nameSection: { alignItems: 'center', paddingHorizontal: 24, marginTop: 10, marginBottom: 16 },
-  name: { fontSize: 22, fontFamily: Fonts.generalSansBold, color: Colors.text, marginBottom: 2 },
+  name: { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 2 },
   username: { fontSize: 14, color: Colors.textMuted, marginBottom: 6 },
   bio: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20, marginBottom: 6 },
   bioPlaceholder: { fontSize: 14, color: Colors.textLight, textAlign: 'center', fontStyle: 'italic', marginBottom: 6 },
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
   },
   statCol: { alignItems: 'center', flex: 1 },
   statDivider: { width: 1, backgroundColor: Colors.border },
-  statValue: { fontSize: 22, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  statValue: { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.text },
   statLabel: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
 
   /* ── Connect / Following row ── */
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingVertical: 9,
   },
-  followingBtnText: { fontSize: 14, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  followingBtnText: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   friendAvatars: { flexDirection: 'row', alignItems: 'center' },
   friendAvatar: {
     width: 32,
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   friendAvatarMoreText: {
     fontSize: 14,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.primary,
   },
 
@@ -384,9 +384,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  sectionTitle: { fontSize: 16, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  sectionTitle: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.text },
   sectionMeta: { fontSize: 13, color: Colors.textMuted },
-  sectionAction: { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: Colors.primary },
+  sectionAction: { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.primary },
 
   /* ── Badge grid ── */
   badgeGrid: {
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   },
   badge: { alignItems: 'center', width: 44, gap: 3, position: 'relative' },
   badgeEmoji: { fontSize: 26 },
-  badgeLabel: { fontSize: 9, color: Colors.text, textAlign: 'center', fontFamily: Fonts.generalSansMedium },
+  badgeLabel: { fontSize: 9, color: Colors.text, textAlign: 'center', fontFamily: Fonts.poppinsMedium },
   badgeLabelLocked: { color: Colors.textMuted },
   badgeCheck: {
     position: 'absolute',
@@ -440,8 +440,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sponsorInitial: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.primary },
-  sponsorName: { fontSize: 15, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
+  sponsorInitial: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.primary },
+  sponsorName: { fontSize: 15, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   sponsorPhone: { fontSize: 13, color: Colors.textMuted, marginTop: 2 },
   addSponsorBtn: {
     flexDirection: 'row',
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 20,
   },
-  addSponsorText: { color: Colors.primary, fontFamily: Fonts.generalSansSemiBold, fontSize: 14 },
+  addSponsorText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold, fontSize: 14 },
 
   /* ── Account Info ── */
   infoCard: {
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   },
   infoContent: { flex: 1 },
   infoLabel: { fontSize: 11, color: Colors.textMuted },
-  infoValue: { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
+  infoValue: { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   infoDivider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: Colors.border,

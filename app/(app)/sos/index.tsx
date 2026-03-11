@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 22,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: '#fff',
     textAlign: 'center',
     marginBottom: 6,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   quickCardLabel: {
     fontSize: 14,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
     textAlign: 'center',
     lineHeight: 18,
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   crisisText: {
     fontSize: 16,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.text,
   },
   divider: {
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   talkTextWrap: { flex: 1 },
-  talkTitle: { fontSize: 15, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  talkTitle: { fontSize: 15, fontFamily: Fonts.poppinsBold, color: Colors.text },
   talkSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
 
   /* ── Emergency box ── */
@@ -290,5 +290,5 @@ const styles = StyleSheet.create({
     borderColor: Colors.sosBorderRed,
   },
   emergencyText: { flex: 1, fontSize: 13, color: Colors.text, lineHeight: 20 },
-  emergencyLink: { color: Colors.sosRedBright, fontFamily: Fonts.generalSansBold },
+  emergencyLink: { color: Colors.sosRedBright, fontFamily: Fonts.poppinsBold },
 });

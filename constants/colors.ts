@@ -1,9 +1,9 @@
 export const Colors = {
   // ─── Brand ────────────────────────────────────────────────────────────────
-  primary:       '#9747FF',
-  primaryDark:   '#7B2FE0',
+  primary:       '#b740ff', // Figma quick-action / brand primary
+  primaryDark:   '#ab31f0', // Figma panic button gradient start
   primaryLight:  '#E8D5F5',
-  primaryMid:    '#C084FC',
+  primaryMid:    '#cc73fe', // Figma panic button gradient end
   accent:        '#FF47C7',
   accentLight:   '#FFD6F5',
 
@@ -35,7 +35,7 @@ export const Colors = {
 
   // ─── Milestone ────────────────────────────────────────────────────────────
   milestoneGrey:   '#E8E0F0',
-  milestonePurple: '#9747FF', // alias of primary
+  milestonePurple: '#b740ff', // alias of primary
   milestoneCyan:   '#4BFFC8', // alias of success
 
   // ─── SOS / Crisis screen ──────────────────────────────────────────────────
@@ -68,9 +68,9 @@ export const Colors = {
   // ─── Sobriety arc / Progress ──────────────────────────────────────────────
   arcBlue:       '#B8E8FF',
   arcTrack:      '#EDE6FF',
-  arcGradStart:  '#7B2FE0', // alias of primaryDark
+  arcGradStart:  '#ab31f0', // alias of primaryDark
   arcGradEnd:    '#A855F7',
 
   // ─── Home hero gradient fill ──────────────────────────────────────────────
-  gradFillPurple: '#9E58FF',
+  gradFillPurple: '#b740ff', // alias of primary
 };

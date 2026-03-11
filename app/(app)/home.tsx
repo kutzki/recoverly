@@ -257,11 +257,11 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 15,
     color: Colors.textMuted,
-    fontFamily: Fonts.generalSans,
+    fontFamily: Fonts.jost,
   },
   name: {
-    fontSize: 24,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontSize: 16,
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.text,
     marginTop: 2,
   },
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   quickLabel: {
     fontSize: 11,
     color: Colors.white,
-    fontFamily: Fonts.generalSansMedium,
+    fontFamily: Fonts.poppinsMedium,
     textAlign: 'center',
   },
 
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   reminderSectionLabel: {
     fontSize: 13,
     color: Colors.cardCyanText,
-    fontFamily: Fonts.generalSansMedium,
+    fontFamily: Fonts.jostMedium,
   },
   reminderArrowBtn: {
     width: 30,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   reminderTitle: {
     fontSize: 22,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
     lineHeight: 30,
     marginBottom: 12,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   reminderWeekLabel: {
     fontSize: 12,
     color: Colors.textMuted,
-    fontFamily: Fonts.generalSans,
+    fontFamily: Fonts.jost,
     marginBottom: 6,
   },
   thumbTap: {
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   /* ─── Upcoming Events ─── */
   sectionLabel: {
     fontSize: 17,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.text,
     marginBottom: 12,
   },
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   },
   eventAvatarInitial: {
     fontSize: 20,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.primary,
   },
   eventArrowBtn: {
@@ -438,13 +438,13 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 15,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.text,
     marginBottom: 4,
   },
   eventLocation: {
     fontSize: 11,
-    fontFamily: Fonts.generalSans,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     lineHeight: 16,
   },

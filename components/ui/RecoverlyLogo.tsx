@@ -61,7 +61,7 @@ export function RecoverlyLogo({ size = 40, showWordmark = true }: RecoverlyLogoP
             textAnchor="middle"
             fill="url(#wordGrad)"
             fontSize={wordmarkFontSize}
-            fontFamily={Fonts.generalSansSemiBold}
+            fontFamily={Fonts.poppinsSemiBold}
             letterSpacing="0.4"
           >
             Recoverly

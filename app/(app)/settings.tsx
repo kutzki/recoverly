@@ -263,12 +263,12 @@ const styles = StyleSheet.create({
   },
   avatarLetter: {
     fontSize: 28,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: '#fff',
   },
   heroGreeting: {
     fontSize: 22,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: '#fff',
     marginBottom: 4,
   },
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   },
   sectionLabelText: {
     fontSize: 12,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   rowLabel: {
     fontSize: 15,
     color: Colors.text,
-    fontFamily: Fonts.generalSans,
+    fontFamily: Fonts.poppins,
   },
 
   /* ── Sign out / delete ── */
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     color: Colors.error,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
     fontSize: 15,
   },
   deleteBtn: {

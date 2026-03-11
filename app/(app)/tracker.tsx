@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 22,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: '#fff',
     textAlign: 'center',
     marginBottom: 6,
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   timerCell:  { alignItems: 'center', minWidth: 64 },
-  timerValue: { fontSize: 28, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  timerValue: { fontSize: 28, fontFamily: Fonts.poppinsBold, color: Colors.text },
   timerLabel: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
   shareBtn: {
     flexDirection: 'row',
@@ -295,13 +295,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 8,
   },
-  shareText: { color: Colors.primary, fontFamily: Fonts.generalSansSemiBold, fontSize: 14 },
+  shareText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold, fontSize: 14 },
 
   /* ── Section label ── */
   sectionLabel: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 10 },
   sectionLabelText: {
     fontSize: 17,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
   },
 
@@ -334,9 +334,9 @@ const styles = StyleSheet.create({
   },
   statInfo:   { flex: 1 },
   statHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  statLabel:  { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
+  statLabel:  { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   statValue:  {},
-  statDone:   { fontSize: 14, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  statDone:   { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   statSlash:  { fontSize: 13, color: Colors.textMuted },
   statTrack: {
     height: 5,

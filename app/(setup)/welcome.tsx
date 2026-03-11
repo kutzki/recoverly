@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.text,
     letterSpacing: -1.5,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
   },
   divider: {
     width: 40,
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 17,
     color: Colors.primary,
-    fontFamily: Fonts.generalSans,
+    fontFamily: Fonts.poppins,
     letterSpacing: 0.2,
   },
   logoWrap: {

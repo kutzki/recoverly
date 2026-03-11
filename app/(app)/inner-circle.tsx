@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 22,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: '#fff',
     textAlign: 'center',
     marginBottom: 6,
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   callLinkText: { flex: 1 },
-  callLinkTitle: { fontSize: 14, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  callLinkTitle: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.text },
   callLinkSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2, lineHeight: 17 },
   callLinkBtn: {
     width: 44,
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   sectionLabel: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
   sectionLabelText: {
     fontSize: 12,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
@@ -369,9 +369,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  contactInitial: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  contactInitial: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   contactInfo: { flex: 1 },
-  contactName: { fontSize: 15, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
+  contactName: { fontSize: 15, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   contactPhone: { fontSize: 13, color: Colors.textMuted, marginTop: 1 },
   callBtn: {
     width: 38,
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
 
   /* ── Empty ── */
   empty: { alignItems: 'center', gap: 12, paddingVertical: 40, paddingHorizontal: 24 },
-  emptyTitle: { fontSize: 17, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  emptyTitle: { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text },
   emptySub: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
 
   /* ── Add / Save buttons ── */
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 16,
   },
-  addBtnText: { color: Colors.primary, fontFamily: Fonts.generalSansSemiBold, fontSize: 15 },
+  addBtnText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold, fontSize: 15 },
   saveBtn: {
     backgroundColor: Colors.primary,
     borderRadius: 14,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   saveBtnDisabled: { opacity: 0.7 },
-  saveBtnText: { color: Colors.white, fontFamily: Fonts.generalSansBold, fontSize: 16 },
+  saveBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 16 },
 
   /* ── Add/Edit Modal ── */
   modalSafe: { flex: 1, backgroundColor: Colors.white },
@@ -432,8 +432,8 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   modalCancel: { fontSize: 16, color: Colors.textMuted },
-  modalTitle: { fontSize: 17, fontFamily: Fonts.generalSansBold, color: Colors.text },
-  modalSave: { fontSize: 16, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  modalTitle: { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  modalSave: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   modalBody: { padding: 20, gap: 14 },
   inputWrap: {
     flexDirection: 'row',

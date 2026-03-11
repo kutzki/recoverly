@@ -4,8 +4,16 @@ import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppState, AppStateStatus, StyleSheet } from 'react-native';
+import { AppState, AppStateStatus, StyleSheet, View } from 'react-native';
 import { OverlayProvider } from 'stream-chat-react-native';
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
+import { Jost_400Regular, Jost_500Medium } from '@expo-google-fonts/jost';
 import { useAuthStore } from '../store/auth';
 import { useChecklistStore } from '../store/checklist';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -15,6 +23,15 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+    Jost_400Regular,
+    Jost_500Medium,
+  });
+
   const loadStoredAuth = useAuthStore((s) => s.loadStoredAuth);
   const loadChecklist = useChecklistStore((s) => s.loadChecklist);
   const appState = useRef<AppStateStatus>(AppState.currentState);
@@ -31,6 +48,9 @@ export default function RootLayout() {
     });
     return () => sub.remove();
   }, []);
+
+  // Hold render until fonts are ready to prevent a flash of unstyled text
+  if (!fontsLoaded) return <View style={styles.root} />;
 
   return (
     <GestureHandlerRootView style={styles.root}>

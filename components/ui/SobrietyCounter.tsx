@@ -103,7 +103,7 @@ export const SobrietyCounter = React.memo(function SobrietyCounter({ days, goal 
           y={numBaseY}
           textAnchor="middle"
           fontSize={numFontSize}
-          fontFamily={Fonts.generalSansBold}
+          fontFamily={Fonts.poppinsBold}
           fill={Colors.text}
         >
           {days}
@@ -115,7 +115,7 @@ export const SobrietyCounter = React.memo(function SobrietyCounter({ days, goal 
           y={lblBaseY}
           textAnchor="middle"
           fontSize={lblFontSize}
-          fontFamily={Fonts.generalSans}
+          fontFamily={Fonts.jost}
           fill={Colors.textMuted}
         >
           Days

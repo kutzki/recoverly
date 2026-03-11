@@ -392,19 +392,19 @@ const styles = StyleSheet.create({
   },
   caption: {
     fontSize: 16,
-    fontFamily: Fonts.generalSans,
+    fontFamily: Fonts.poppins,
     color: Colors.primary,
     lineHeight: 24,
   },
   heading: {
     fontSize: 18,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.primary,
     lineHeight: 27,
   },
   sub: {
     fontSize: 16,
-    fontFamily: Fonts.generalSans,
+    fontFamily: Fonts.poppins,
     color: 'rgba(0,0,0,0.5)',
     lineHeight: 24,
   },
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    fontFamily: Fonts.generalSansMedium,
+    fontFamily: Fonts.poppinsMedium,
     color: '#121212',
     letterSpacing: 0.375,
   },
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
   placeholder: { color: 'rgba(0,0,0,0.35)' },
   hint: {
     fontSize: 12,
-    fontFamily: Fonts.generalSansMedium,
+    fontFamily: Fonts.poppinsMedium,
     color: 'rgba(0,0,0,0.5)',
     lineHeight: 20,
   },

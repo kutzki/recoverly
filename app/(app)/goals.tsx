@@ -330,7 +330,7 @@ export default function Goals() {
                     onPress={() => setCategory(c.key)}
                   >
                     <Ionicons name={c.icon as any} size={16} color={category === c.key ? c.color : Colors.textMuted} />
-                    <Text style={[styles.catBtnLabel, category === c.key && { color: c.color, fontFamily: Fonts.generalSansBold }]}>
+                    <Text style={[styles.catBtnLabel, category === c.key && { color: c.color, fontFamily: Fonts.poppinsBold }]}>
                       {c.label}
                     </Text>
                   </TouchableOpacity>
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 22,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: '#fff',
     textAlign: 'center',
     marginBottom: 6,
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   statBox:     { alignItems: 'center' },
-  statNum:     { fontSize: 22, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  statNum:     { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   statLbl:     { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
   statDivider: { width: 1, height: 32, backgroundColor: Colors.border },
 
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   sectionLabel: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
   sectionLabelText: {
     fontSize: 12,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
@@ -462,19 +462,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   goalText:      { flex: 1 },
-  goalTitle:     { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
+  goalTitle:     { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   goalTitleDone: { textDecorationLine: 'line-through', color: Colors.textMuted },
   goalDesc:      { fontSize: 12, color: Colors.textMuted, marginTop: 2, lineHeight: 17 },
-  goalCat:       { fontSize: 11, fontFamily: Fonts.generalSansBold, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.3 },
+  goalCat:       { fontSize: 11, fontFamily: Fonts.poppinsBold, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.3 },
   iconBtn:       { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   divider:       { height: StyleSheet.hairlineWidth, backgroundColor: Colors.border, marginLeft: 88 },
 
   /* ── Empty state ── */
   emptyState:   { alignItems: 'center', gap: 12, paddingVertical: 50, paddingHorizontal: 24 },
-  emptyTitle:   { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.text },
+  emptyTitle:   { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   emptySub:     { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
   emptyBtn:     { backgroundColor: Colors.primary, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 12, marginTop: 8 },
-  emptyBtnText: { color: Colors.white, fontFamily: Fonts.generalSansBold, fontSize: 14 },
+  emptyBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 14 },
 
   /* ── Add Goal button ── */
   addBtn: {
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 16,
   },
-  addBtnText: { color: Colors.primary, fontFamily: Fonts.generalSansSemiBold, fontSize: 15 },
+  addBtnText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold, fontSize: 15 },
 
   /* ── Modal ── */
   modalSafe:   { flex: 1, backgroundColor: Colors.white },
@@ -504,10 +504,10 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   modalCancel: { fontSize: 16, color: Colors.textMuted },
-  modalTitle:  { fontSize: 17, fontFamily: Fonts.generalSansBold, color: Colors.text },
-  modalSave:   { fontSize: 16, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  modalTitle:  { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  modalSave:   { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   modalBody:   { padding: 20 },
-  fieldLabel:  { fontSize: 13, fontFamily: Fonts.generalSansBold, color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 },
+  fieldLabel:  { fontSize: 13, fontFamily: Fonts.poppinsBold, color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 },
   inputWrap: {
     backgroundColor: Colors.background,
     borderRadius: 12,

@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.text,
     letterSpacing: -1.5,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
   },
   subtitleRow: {
     flexDirection: 'row',
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: Colors.primary,
-    fontFamily: Fonts.generalSans,
+    fontFamily: Fonts.poppins,
     letterSpacing: 0.1,
   },
   loadDot: {

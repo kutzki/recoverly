@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 22,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: '#fff',
     textAlign: 'center',
     marginBottom: 6,
@@ -302,8 +302,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   filterActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  filterText: { fontSize: 13, color: Colors.textMuted, fontFamily: Fonts.generalSansMedium },
-  filterActiveText: { color: Colors.white, fontFamily: Fonts.generalSansBold },
+  filterText: { fontSize: 13, color: Colors.textMuted, fontFamily: Fonts.poppinsMedium },
+  filterActiveText: { color: Colors.white, fontFamily: Fonts.poppinsBold },
 
   /* ── Section labels ── */
   sectionLabelWrap: {
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 15,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
   },
   sectionCount: {
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   meetingInfo: { flex: 1 },
-  meetingOrg: { fontSize: 14, fontFamily: Fonts.generalSansBold, color: Colors.text, marginBottom: 4 },
+  meetingOrg: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 4 },
   meetingMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
   meetingMetaText: { flex: 1, fontSize: 12, color: Colors.textMuted },
   formatBadge: {
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     marginTop: 4,
   },
-  formatText: { fontSize: 11, fontFamily: Fonts.generalSansBold },
+  formatText: { fontSize: 11, fontFamily: Fonts.poppinsBold },
   meetingRight: { alignItems: 'center', gap: 8 },
   activeDot: { width: 7, height: 7, borderRadius: 4 },
 
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  linkLabel: { flex: 1, fontSize: 14, fontFamily: Fonts.generalSansSemiBold },
+  linkLabel: { flex: 1, fontSize: 14, fontFamily: Fonts.poppinsSemiBold },
 
   /* ── Empty ── */
   empty: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40, gap: 10 },

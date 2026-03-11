@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   /* Title */
   title: {
     fontSize: 26,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.primary,
     textAlign: 'center',
     marginTop: 44,
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   /* Field label */
   fieldLabel: {
     fontSize: 13,
-    fontFamily: Fonts.generalSansMedium,
+    fontFamily: Fonts.poppinsMedium,
     color: Colors.text,
     marginBottom: 6,
   },
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   },
   strengthLabel: {
     fontSize: 12,
-    fontFamily: Fonts.generalSansMedium,
+    fontFamily: Fonts.poppinsMedium,
     minWidth: 44,
     textAlign: 'right',
   },
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   googleText: {
     fontSize: 15,
-    fontFamily: Fonts.generalSansMedium,
+    fontFamily: Fonts.poppinsMedium,
     color: Colors.text,
   },
   soonChip: {
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   soonChipText: {
     fontSize: 10,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
     color: Colors.textMuted,
   },
 
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
   proceedText: {
     color: Colors.white,
     fontSize: 16,
-    fontFamily: Fonts.generalSansBold,
+    fontFamily: Fonts.poppinsBold,
   },
 
   /* Sign in link */
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   signinLink: {
     color: Colors.primary,
     fontSize: 14,
-    fontFamily: Fonts.generalSansSemiBold,
+    fontFamily: Fonts.poppinsSemiBold,
   },
 
   /* Logo at bottom */

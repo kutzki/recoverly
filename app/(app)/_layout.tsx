@@ -1,5 +1,6 @@
 import React, { ComponentProps } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
@@ -13,26 +14,44 @@ function TabBarIcon({ name, color, size }: { name: ComponentProps<typeof Ionicon
 
 function SOSTabIcon() {
   return (
-    <View style={sosStyles.wrap}>
-      <Ionicons name="alert" size={20} color={Colors.white} />
+    <View style={sosStyles.container}>
+      <LinearGradient
+        colors={[Colors.primaryDark, Colors.primaryMid]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={sosStyles.pill}
+      >
+        <Ionicons name="alert" size={18} color={Colors.white} />
+      </LinearGradient>
+      <Text style={sosStyles.label}>Panic{'\n'}Button</Text>
     </View>
   );
 }
 
 const sosStyles = StyleSheet.create({
-  wrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: Colors.primary,
+  container: {
+    alignItems: 'center',
+    marginBottom: Platform.OS === 'ios' ? 10 : 14,
+  },
+  pill: {
+    width: 116,
+    height: 34,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Platform.OS === 'ios' ? 14 : 18,
-    shadowColor: Colors.primary,
+    shadowColor: Colors.primaryDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 8,
+  },
+  label: {
+    fontSize: 10,
+    fontFamily: Fonts.poppinsMedium,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 13,
+    marginTop: 3,
   },
 });
 
@@ -56,7 +75,7 @@ function AppLayout() {
           },
           tabBarLabelStyle: {
             fontSize: 11,
-            fontFamily: Fonts.generalSansMedium,
+            fontFamily: Fonts.poppinsMedium,
           },
         }}
       >
@@ -86,9 +105,7 @@ function AppLayout() {
           options={{
             title: 'SOS',
             tabBarIcon: () => <SOSTabIcon />,
-            tabBarLabel: () => (
-              <Text style={{ fontSize: 10, fontFamily: Fonts.generalSansBold, color: Colors.primary }}>Sober SOS</Text>
-            ),
+            tabBarLabel: () => null,
           }}
         />
         <Tabs.Screen
