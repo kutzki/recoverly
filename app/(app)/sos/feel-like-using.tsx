@@ -13,6 +13,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { Fonts } from '../../../constants/fonts';
 import { useAuthStore } from '../../../store/auth';
 
 const ACTIONS = [
@@ -199,8 +200,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 4,
   },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.text },
-  subtitle: { fontSize: 15, color: Colors.textMuted, textAlign: 'center' },
+  title: { fontSize: 24, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  subtitle: { fontSize: 15, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center' },
   actionsWrap: { gap: 10, marginBottom: 28 },
   actionRow: {
     flexDirection: 'row',
@@ -229,7 +230,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderColor: Colors.white,
   },
-  actionNumText: { fontSize: 12, fontWeight: '700', color: Colors.primary },
+  actionNumText: { fontSize: 12, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   actionIconWrap: {
     width: 36,
     height: 36,
@@ -238,11 +239,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: Colors.text },
+  actionLabel: { flex: 1, fontSize: 15, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   actionLabelDone: { color: Colors.white },
   sponsorSection: { marginBottom: 20 },
-  sponsorHeading: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 6 },
-  sponsorSub: { fontSize: 13, color: Colors.textMuted, lineHeight: 20, marginBottom: 16 },
+  sponsorHeading: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 6 },
+  sponsorSub: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted, lineHeight: 20, marginBottom: 16 },
   sponsorCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderStyle: 'dashed',
   },
-  noSponsorText: { flex: 1, fontSize: 14, color: Colors.textMuted },
+  noSponsorText: { flex: 1, fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted },
   sponsorAvatar: {
     width: 52,
     height: 52,
@@ -278,11 +279,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sponsorAvatarText: { fontSize: 22, fontWeight: '700', color: Colors.primary },
+  sponsorAvatarText: { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   sponsorInfo: { flex: 1 },
-  sponsorName: { fontSize: 17, fontWeight: '700', color: Colors.text },
-  sponsorRole: { fontSize: 13, color: Colors.textMuted },
-  sponsorNumber: { fontSize: 15, color: Colors.primary, fontWeight: '600', marginTop: 2 },
+  sponsorName: { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  sponsorRole: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
+  sponsorNumber: { fontSize: 15, fontFamily: Fonts.poppinsSemiBold, color: Colors.primary, marginTop: 2 },
   callIcon: {
     width: 48,
     height: 48,
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
-  outlineBtnText: { color: Colors.primary, fontWeight: '600', fontSize: 15 },
+  outlineBtnText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold, fontSize: 15 },
   completeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -310,5 +311,5 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     height: 50,
   },
-  completeBtnText: { color: Colors.white, fontWeight: '700', fontSize: 15 },
+  completeBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 15 },
 });

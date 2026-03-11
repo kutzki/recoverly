@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 interface Props {
   label: string;
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   textCol: { flex: 1 },
-  subtitle: { fontSize: 13, fontWeight: '700', marginBottom: 1 },
-  label: { fontSize: 12, opacity: 0.8 },
-  date: { fontSize: 12, fontWeight: '600', opacity: 0.8 },
+  subtitle: { fontSize: 13, fontFamily: Fonts.poppinsBold, marginBottom: 1 },
+  label: { fontSize: 12, fontFamily: Fonts.jost, opacity: 0.8 },
+  date: { fontSize: 12, fontFamily: Fonts.poppinsSemiBold, opacity: 0.8 },
 });

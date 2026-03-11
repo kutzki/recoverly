@@ -15,6 +15,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuthStore } from '../../store/auth';
 
 export default function SponsorScreen() {
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  title: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   scroll: { padding: 20 },
   infoBanner: {
     flexDirection: 'row',
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 20,
   },
-  infoText: { flex: 1, fontSize: 13, color: Colors.primary, lineHeight: 19 },
+  infoText: { flex: 1, fontSize: 13, fontFamily: Fonts.jost, color: Colors.primary, lineHeight: 19 },
   callCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -212,12 +213,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   callText: { flex: 1 },
-  callName: { fontSize: 16, fontWeight: '700', color: Colors.text },
-  callNumber: { fontSize: 13, color: Colors.textMuted, marginTop: 2 },
-  callNow: { fontSize: 14, fontWeight: '700', color: Colors.primary },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 16 },
+  callName: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  callNumber: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
+  callNow: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.primary },
+  sectionTitle: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 16 },
   fieldWrap: { marginBottom: 16 },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 },
+  fieldLabel: { fontSize: 13, fontFamily: Fonts.poppinsBold, color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
   },
   inputFocused: { borderColor: Colors.primary },
   inputIcon: { marginRight: 10 },
-  input: { flex: 1, fontSize: 15, color: Colors.text },
+  input: { flex: 1, fontSize: 15, fontFamily: Fonts.jost, color: Colors.text },
   saveBtn: {
     backgroundColor: Colors.primary,
     borderRadius: 14,
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   saveBtnDisabled: { opacity: 0.7 },
-  saveBtnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
+  saveBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 16 },
   removeBtn: { alignItems: 'center', paddingVertical: 12 },
-  removeText: { color: Colors.textMuted, fontSize: 14, textDecorationLine: 'underline' },
+  removeText: { color: Colors.textMuted, fontSize: 14, fontFamily: Fonts.jost, textDecorationLine: 'underline' },
 });

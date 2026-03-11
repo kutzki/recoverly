@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useChecklistStore } from '../../store/checklist';
 
 const ChecklistSheet = forwardRef<BottomSheet>((_, ref) => {
@@ -95,15 +96,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  title: { fontSize: 20, fontWeight: '700', color: Colors.text },
+  title: { fontSize: 20, fontFamily: Fonts.poppinsBold, color: Colors.text },
   badge: {
     backgroundColor: Colors.primaryLight,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  badgeText: { color: Colors.primary, fontWeight: '700', fontSize: 13 },
-  subtitle: { fontSize: 14, color: Colors.textMuted, marginBottom: 16, lineHeight: 20 },
+  badgeText: { color: Colors.primary, fontFamily: Fonts.poppinsBold, fontSize: 13 },
+  subtitle: { fontSize: 14, color: Colors.textMuted, marginBottom: 16, lineHeight: 20, fontFamily: Fonts.jost },
   progressTrack: {
     height: 4,
     backgroundColor: Colors.primaryLight,
@@ -145,9 +146,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   itemInfo: { flex: 1 },
-  itemLabel: { fontSize: 14, fontWeight: '600', color: Colors.text },
+  itemLabel: { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   itemLabelDone: { color: Colors.primary },
-  itemProgress: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  itemProgress: { fontSize: 12, color: Colors.textMuted, marginTop: 2, fontFamily: Fonts.jost },
   toggle: {
     width: 44,
     height: 24,

@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 export default function OnboardingSlide2() {
   return (
@@ -74,8 +75,8 @@ const styles = StyleSheet.create({
   lockBubble: { top: 20, left: 60 },
   dbBubble: { bottom: 30, right: 60 },
   content: { flex: 1, paddingHorizontal: 28, paddingBottom: 50, justifyContent: 'flex-end' },
-  body: { fontSize: 16, color: Colors.text, lineHeight: 24, marginBottom: 32 },
-  accent: { color: Colors.primary, fontWeight: '600' },
+  body: { fontSize: 16, fontFamily: Fonts.jost, color: Colors.text, lineHeight: 24, marginBottom: 32 },
+  accent: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
   dots: { flexDirection: 'row', gap: 8, marginBottom: 30 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primaryLight },
   dotActive: { width: 22, backgroundColor: Colors.primary },

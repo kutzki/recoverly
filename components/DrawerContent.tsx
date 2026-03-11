@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   avatarText: { color: Colors.primary, fontSize: 20, fontFamily: Fonts.poppinsBold },
   name: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.text },
-  viewProfile: { fontSize: 13, color: Colors.primary, marginTop: 2 },
+  viewProfile: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.primary, marginTop: 2 },
   divider: { height: 1, backgroundColor: Colors.border, marginVertical: 12 },
   navItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 13, gap: 14 },
   navIcon: { width: 32, alignItems: 'center' },

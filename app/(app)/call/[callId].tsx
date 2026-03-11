@@ -21,6 +21,7 @@ import {
 import InCallManager from 'react-native-incall-manager';
 import { initStreamVideo } from '../../../services/streamVideo';
 import { useAuthStore } from '../../../store/auth';
+import { Fonts } from '../../../constants/fonts';
 
 // ─── Inner call controls (used inside StreamCall context) ────────────────────
 function CallControls({
@@ -309,8 +310,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
   },
-  loadingName: { fontSize: 22, fontWeight: '700', color: '#fff' },
-  loadingStatus: { fontSize: 15, color: 'rgba(255,255,255,0.6)' },
+  loadingName: { fontSize: 22, fontFamily: Fonts.poppinsBold, color: '#fff' },
+  loadingStatus: { fontSize: 15, fontFamily: Fonts.jost, color: 'rgba(255,255,255,0.6)' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -319,8 +320,8 @@ const styles = StyleSheet.create({
   },
   backBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   headerInfo: { flex: 1, alignItems: 'center' },
-  calleeName: { fontSize: 18, fontWeight: '700', color: '#fff' },
-  callStatus: { fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
+  calleeName: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: '#fff' },
+  callStatus: { fontSize: 13, fontFamily: Fonts.jost, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
   overlay: { flex: 1 },
   remoteVideoArea: { flex: 1 },
   remoteVideo: { flex: 1, borderRadius: 0 },
@@ -338,7 +339,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  waitingText: { fontSize: 16, color: 'rgba(255,255,255,0.7)' },
+  waitingText: { fontSize: 16, fontFamily: Fonts.jost, color: 'rgba(255,255,255,0.7)' },
   localPip: {
     position: 'absolute',
     top: 16,

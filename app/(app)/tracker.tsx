@@ -258,6 +258,7 @@ const styles = StyleSheet.create({
   },
   heroSub: {
     fontSize: 14,
+    fontFamily: Fonts.jost,
     color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
   },
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
   },
   timerCell:  { alignItems: 'center', minWidth: 64 },
   timerValue: { fontSize: 28, fontFamily: Fonts.poppinsBold, color: Colors.text },
-  timerLabel: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
+  timerLabel: { fontSize: 11, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
   shareBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
   statLabel:  { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   statValue:  {},
   statDone:   { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.primary },
-  statSlash:  { fontSize: 13, color: Colors.textMuted },
+  statSlash:  { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
   statTrack: {
     height: 5,
     backgroundColor: Colors.primaryLight,

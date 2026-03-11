@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useProgressStore } from '../../store/progress';
 import { useAuthStore } from '../../store/auth';
 
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: '#fff',
     textAlign: 'center',
     marginBottom: 6,
@@ -206,6 +207,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
     lineHeight: 20,
+    fontFamily: Fonts.jost,
   },
 
   /* ── Recommendations card ── */
@@ -226,6 +228,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textMuted,
     marginBottom: 4,
+    fontFamily: Fonts.jost,
   },
   actionRow: {
     flexDirection: 'row',
@@ -255,7 +258,7 @@ const styles = StyleSheet.create({
   actionLabel: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.text,
   },
   actionLabelDone: {
@@ -286,7 +289,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 12,
   },
-  tipText: { flex: 1, fontSize: 13, color: Colors.primaryDark, lineHeight: 20 },
+  tipText: { flex: 1, fontSize: 13, color: Colors.primaryDark, lineHeight: 20, fontFamily: Fonts.jost },
 
   /* ── Buttons ── */
   selfHelpBtn: {
@@ -301,7 +304,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 12,
   },
-  selfHelpBtnText: { color: Colors.text, fontWeight: '600', fontSize: 15 },
+  selfHelpBtnText: { color: Colors.text, fontFamily: Fonts.poppinsSemiBold, fontSize: 15 },
   completeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -313,5 +316,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 10,
   },
-  completeBtnText: { color: Colors.white, fontWeight: '700', fontSize: 15 },
+  completeBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 15 },
 });

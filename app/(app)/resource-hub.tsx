@@ -13,6 +13,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 const RESOURCES = [
   {
@@ -105,11 +106,11 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  title: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   scroll: { padding: 20 },
-  intro: { fontSize: 14, color: Colors.textMuted, lineHeight: 22, marginBottom: 24 },
+  intro: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, lineHeight: 22, marginBottom: 24 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: Colors.text, marginBottom: 10 },
+  sectionTitle: { fontSize: 15, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 10 },
   resourceCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -132,6 +133,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   resourceInfo: { flex: 1 },
-  resourceTitle: { fontSize: 14, fontWeight: '700', color: Colors.text },
-  resourceSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  resourceTitle: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  resourceSub: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
 });

@@ -234,10 +234,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   composeBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32 },
-  loadingText: { color: Colors.textMuted, fontSize: 14 },
+  loadingText: { color: Colors.textMuted, fontSize: 14, fontFamily: Fonts.jost },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingTop: 80 },
   emptyTitle: { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text, textAlign: 'center' },
-  emptySubtitle: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  emptySubtitle: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
   retryBtn: {
     marginTop: 8,
     backgroundColor: Colors.primary,
@@ -247,8 +247,8 @@ const styles = StyleSheet.create({
   },
   retryBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 14 },
   backLink: { marginTop: 4, paddingVertical: 8 },
-  backLinkText: { color: Colors.textMuted, fontSize: 14 },
-  loadingSubText: { color: Colors.textMuted, fontSize: 13, marginTop: -4 },
+  backLinkText: { color: Colors.textMuted, fontSize: 14, fontFamily: Fonts.jost },
+  loadingSubText: { color: Colors.textMuted, fontSize: 13, fontFamily: Fonts.jost, marginTop: -4 },
 });
 
 const modal = StyleSheet.create({
@@ -276,7 +276,7 @@ const modal = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  input: { flex: 1, fontSize: 15, color: Colors.text },
+  input: { flex: 1, fontSize: 15, fontFamily: Fonts.jost, color: Colors.text },
   userRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -297,6 +297,6 @@ const modal = StyleSheet.create({
   },
   avatarText: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   userName: { fontSize: 15, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
-  userSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
-  empty: { textAlign: 'center', marginTop: 40, color: Colors.textMuted, fontSize: 14 },
+  userSub: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
+  empty: { textAlign: 'center', marginTop: 40, fontFamily: Fonts.jost, color: Colors.textMuted, fontSize: 14 },
 });

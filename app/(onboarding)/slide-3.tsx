@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 const { width } = Dimensions.get('window');
 
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
   },
   headline: {
     fontSize: 28,
-    fontWeight: '800',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
     lineHeight: 36,
     marginBottom: 24,
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  featureLabel: { fontSize: 14, color: Colors.text, fontWeight: '500' },
+  featureLabel: { fontSize: 14, fontFamily: Fonts.poppinsMedium, color: Colors.text },
 
   dots: { flexDirection: 'row', gap: 8, marginBottom: 28 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primaryLight },
@@ -202,9 +203,9 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
   },
-  primaryBtnText: { fontSize: 16, fontWeight: '700', color: Colors.white },
+  primaryBtnText: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.white },
 
   secondaryBtn: { alignItems: 'center', paddingVertical: 4 },
-  secondaryBtnText: { fontSize: 14, color: Colors.textMuted },
-  signInLink: { color: Colors.primary, fontWeight: '600' },
+  secondaryBtnText: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted },
+  signInLink: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
 });

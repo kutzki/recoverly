@@ -247,6 +247,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     textAlign: 'center',
     marginBottom: 32,
@@ -281,6 +282,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
+    fontFamily: Fonts.jost,
     color: Colors.text,
   },
   passwordInput: {
@@ -331,6 +333,7 @@ const styles = StyleSheet.create({
   dividerText: {
     color: Colors.textMuted,
     fontSize: 13,
+    fontFamily: Fonts.jost,
   },
 
   /* Google button */
@@ -396,6 +399,7 @@ const styles = StyleSheet.create({
   signinLabel: {
     color: Colors.textMuted,
     fontSize: 14,
+    fontFamily: Fonts.jost,
   },
   signinLink: {
     color: Colors.primary,

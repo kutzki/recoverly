@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
+import { Fonts } from '../constants/fonts';
 
 interface Props {
   children: React.ReactNode;
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
     textAlign: 'center',
     marginTop: 4,
@@ -75,6 +76,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 8,
+    fontFamily: Fonts.jost,
   },
   btn: {
     flexDirection: 'row',
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: Colors.white,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     fontSize: 14,
   },
 });

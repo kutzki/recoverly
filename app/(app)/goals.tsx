@@ -398,6 +398,7 @@ const styles = StyleSheet.create({
   },
   heroSub: {
     fontSize: 14,
+    fontFamily: Fonts.jost,
     color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
   },
@@ -421,7 +422,7 @@ const styles = StyleSheet.create({
   },
   statBox:     { alignItems: 'center' },
   statNum:     { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.primary },
-  statLbl:     { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  statLbl:     { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
   statDivider: { width: 1, height: 32, backgroundColor: Colors.border },
 
   /* ── Section label ── */
@@ -464,7 +465,7 @@ const styles = StyleSheet.create({
   goalText:      { flex: 1 },
   goalTitle:     { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   goalTitleDone: { textDecorationLine: 'line-through', color: Colors.textMuted },
-  goalDesc:      { fontSize: 12, color: Colors.textMuted, marginTop: 2, lineHeight: 17 },
+  goalDesc:      { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2, lineHeight: 17 },
   goalCat:       { fontSize: 11, fontFamily: Fonts.poppinsBold, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.3 },
   iconBtn:       { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   divider:       { height: StyleSheet.hairlineWidth, backgroundColor: Colors.border, marginLeft: 88 },
@@ -472,7 +473,7 @@ const styles = StyleSheet.create({
   /* ── Empty state ── */
   emptyState:   { alignItems: 'center', gap: 12, paddingVertical: 50, paddingHorizontal: 24 },
   emptyTitle:   { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
-  emptySub:     { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  emptySub:     { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
   emptyBtn:     { backgroundColor: Colors.primary, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 12, marginTop: 8 },
   emptyBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 14 },
 
@@ -503,7 +504,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  modalCancel: { fontSize: 16, color: Colors.textMuted },
+  modalCancel: { fontSize: 16, fontFamily: Fonts.jost, color: Colors.textMuted },
   modalTitle:  { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text },
   modalSave:   { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   modalBody:   { padding: 20 },
@@ -519,7 +520,7 @@ const styles = StyleSheet.create({
   },
   inputMulti:   { paddingVertical: 12, justifyContent: 'flex-start' },
   inputFocused: { borderColor: Colors.primary },
-  input:        { fontSize: 15, color: Colors.text },
+  input:        { fontSize: 15, fontFamily: Fonts.jost, color: Colors.text },
   catRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   catBtn: {
     flexDirection: 'row',
@@ -532,5 +533,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
-  catBtnLabel: { fontSize: 13, color: Colors.textMuted },
+  catBtnLabel: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
 });

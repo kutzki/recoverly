@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuthStore } from '../../store/auth';
 
 export default function Goal() {
@@ -157,15 +158,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: 2,
   },
-  progressLabel: { color: Colors.textMuted, fontSize: 12 },
+  progressLabel: { color: Colors.textMuted, fontSize: 12, fontFamily: Fonts.jost },
   heading: {
     fontSize: 26,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.primary,
     marginBottom: 8,
   },
   sub: {
     fontSize: 15,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     lineHeight: 22,
     marginBottom: 28,
@@ -189,17 +191,19 @@ const styles = StyleSheet.create({
   },
   goalTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
   },
   goalInput: {
     fontSize: 15,
+    fontFamily: Fonts.jost,
     color: Colors.text,
     lineHeight: 22,
     minHeight: 120,
   },
   charCount: {
     fontSize: 11,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     textAlign: 'right',
     marginTop: 8,
@@ -213,7 +217,7 @@ const styles = StyleSheet.create({
   },
   tipsTitle: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.primary,
     marginBottom: 4,
   },
@@ -233,6 +237,7 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 13,
+    fontFamily: Fonts.jost,
     color: Colors.primary,
     lineHeight: 19,
   },
@@ -249,6 +254,6 @@ const styles = StyleSheet.create({
   submitText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
   },
 });

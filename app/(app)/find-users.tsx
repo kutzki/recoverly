@@ -14,6 +14,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { getOrCreateDMChannel, searchUsers } from '../../services/streamChat';
 import { followUser } from '../../services/streamFeed';
 import { useAuthStore } from '../../store/auth';
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  title: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   tabs: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
@@ -305,8 +306,8 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabActive: { borderBottomColor: Colors.primary },
-  tabLabel: { fontSize: 13, fontWeight: '500', color: Colors.textMuted },
-  tabLabelActive: { color: Colors.primary, fontWeight: '700' },
+  tabLabel: { fontSize: 13, fontFamily: Fonts.poppinsMedium, color: Colors.textMuted },
+  tabLabelActive: { color: Colors.primary, fontFamily: Fonts.poppinsBold },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -319,7 +320,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  searchInput: { flex: 1, fontSize: 15, color: Colors.text },
+  searchInput: { flex: 1, fontSize: 15, fontFamily: Fonts.jost, color: Colors.text },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   list: { paddingVertical: 8, flexGrow: 1 },
   userCard: {
@@ -340,11 +341,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  userAvatarText: { fontSize: 20, fontWeight: '700', color: Colors.primary },
+  userAvatarText: { fontSize: 20, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   userInfo: { flex: 1 },
-  userName: { fontSize: 15, fontWeight: '600', color: Colors.text },
+  userName: { fontSize: 15, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   userMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  userMetaText: { fontSize: 12, color: Colors.primary, fontWeight: '500' },
+  userMetaText: { fontSize: 12, color: Colors.primary, fontFamily: Fonts.poppinsMedium },
   tags: { flexDirection: 'row', gap: 4, marginTop: 4, flexWrap: 'wrap' },
   tag: {
     backgroundColor: Colors.primaryLight,
@@ -352,7 +353,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 2,
   },
-  tagText: { fontSize: 10, color: Colors.primary, fontWeight: '600' },
+  tagText: { fontSize: 10, color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
   userActions: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   actionBtn: {
     width: 36,
@@ -365,6 +366,6 @@ const styles = StyleSheet.create({
   addBtn: { backgroundColor: Colors.primary },
   addBtnDone: { backgroundColor: Colors.success },
   emptyState: { alignItems: 'center', gap: 10, paddingTop: 60 },
-  emptyTitle: { fontSize: 16, fontWeight: '600', color: Colors.text },
-  emptySubtitle: { fontSize: 13, color: Colors.textMuted },
+  emptyTitle: { fontSize: 16, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
+  emptySubtitle: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
 });

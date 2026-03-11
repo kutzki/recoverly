@@ -13,6 +13,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { Fonts } from '../../../constants/fonts';
 import { useAuthStore } from '../../../store/auth';
 import { getPublicProfile, SupabaseProfile } from '../../../services/supabase';
 import { getOrCreateDMChannel } from '../../../services/streamChat';
@@ -258,10 +259,10 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  headerTitle: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   scroll: { paddingHorizontal: 20, paddingTop: 20 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  notFoundText: { fontSize: 16, color: Colors.textMuted },
+  notFoundText: { fontSize: 16, fontFamily: Fonts.jost, color: Colors.textMuted },
   profileCard: {
     backgroundColor: Colors.white,
     borderRadius: 20,
@@ -284,11 +285,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
   },
-  avatarText: { fontSize: 34, fontWeight: '700', color: Colors.primary },
-  name: { fontSize: 22, fontWeight: '700', color: Colors.text },
-  username: { fontSize: 15, color: Colors.textMuted },
+  avatarText: { fontSize: 34, fontFamily: Fonts.poppinsBold, color: Colors.primary },
+  name: { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  username: { fontSize: 15, fontFamily: Fonts.jost, color: Colors.textMuted },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  location: { fontSize: 13, color: Colors.textMuted },
+  location: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
   sobrietyBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -299,7 +300,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
   },
-  sobrietyText: { fontSize: 14, fontWeight: '700', color: Colors.primary },
+  sobrietyText: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   actionRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
   messageBtn: {
     flex: 1,
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     height: 50,
   },
-  messageBtnText: { color: Colors.white, fontWeight: '700', fontSize: 15 },
+  messageBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 15 },
   followBtn: {
     flex: 1,
     flexDirection: 'row',
@@ -324,7 +325,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   followBtnDone: { backgroundColor: Colors.primaryLight, borderColor: Colors.primaryLight },
-  followBtnText: { color: Colors.primary, fontWeight: '700', fontSize: 15 },
+  followBtnText: { color: Colors.primary, fontFamily: Fonts.poppinsBold, fontSize: 15 },
   editBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -336,15 +337,15 @@ const styles = StyleSheet.create({
     height: 50,
     marginBottom: 20,
   },
-  editBtnText: { color: Colors.primary, fontWeight: '700', fontSize: 15 },
+  editBtnText: { color: Colors.primary, fontFamily: Fonts.poppinsBold, fontSize: 15 },
   section: { marginBottom: 20 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 10 },
+  sectionTitle: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 10 },
   bioCard: {
     backgroundColor: Colors.white,
     borderRadius: 12,
     padding: 14,
   },
-  bioText: { fontSize: 14, color: Colors.text, lineHeight: 22 },
+  bioText: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.text, lineHeight: 22 },
   pillWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pill: {
     backgroundColor: Colors.primaryLight,
@@ -352,7 +353,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
   },
-  pillText: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
+  pillText: { fontSize: 13, color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
   goalCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -361,7 +362,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  goalText: { flex: 1, fontSize: 14, color: Colors.primary, lineHeight: 22 },
+  goalText: { flex: 1, fontSize: 14, fontFamily: Fonts.jost, color: Colors.primary, lineHeight: 22 },
   badgesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   badgeItem: { alignItems: 'center', gap: 6, width: 72 },
   badgeCircle: {
@@ -371,5 +372,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badgeLabel: { fontSize: 11, color: Colors.textMuted, textAlign: 'center', fontWeight: '600' },
+  badgeLabel: { fontSize: 11, color: Colors.textMuted, textAlign: 'center', fontFamily: Fonts.poppinsSemiBold },
 });

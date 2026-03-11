@@ -274,6 +274,7 @@ const styles = StyleSheet.create({
   },
   heroSub: {
     fontSize: 13,
+    fontFamily: Fonts.jost,
     color: 'rgba(255,255,255,0.75)',
     textAlign: 'center',
   },
@@ -361,12 +362,14 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     color: Colors.textMuted,
+    fontFamily: Fonts.jost,
     fontSize: 14,
     textDecorationLine: 'underline',
   },
   version: {
     textAlign: 'center',
     fontSize: 12,
+    fontFamily: Fonts.jost,
     color: Colors.textLight,
     marginTop: 8,
   },

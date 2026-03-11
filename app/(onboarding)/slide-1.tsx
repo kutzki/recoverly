@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { Button } from '../../components/ui/Button';
 
 const { width } = Dimensions.get('window');
@@ -73,7 +74,7 @@ export default function OnboardingSlide1() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 60 },
   skip: { position: 'absolute', top: 60, right: 24, zIndex: 10 },
-  skipText: { color: Colors.primary, fontSize: 15, fontWeight: '500' },
+  skipText: { color: Colors.primary, fontSize: 15, fontFamily: Fonts.poppinsMedium },
   illustration: {
     height: 260, marginHorizontal: 24, position: 'relative',
     alignItems: 'center', justifyContent: 'center',
@@ -87,10 +88,10 @@ const styles = StyleSheet.create({
     position: 'absolute', alignItems: 'center', justifyContent: 'center',
     borderWidth: 3, borderColor: Colors.white,
   },
-  avatarText: { fontWeight: '700', color: Colors.primary },
+  avatarText: { fontFamily: Fonts.poppinsBold, color: Colors.primary },
   content: { flex: 1, paddingHorizontal: 28, paddingBottom: 50, justifyContent: 'flex-end' },
-  body: { fontSize: 17, color: Colors.text, lineHeight: 26, marginBottom: 32 },
-  accent: { color: Colors.primary, fontWeight: '600' },
+  body: { fontSize: 17, fontFamily: Fonts.jost, color: Colors.text, lineHeight: 26, marginBottom: 32 },
+  accent: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
   dots: { flexDirection: 'row', gap: 8, marginBottom: 30 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primaryLight },
   dotActive: { width: 22, backgroundColor: Colors.primary },

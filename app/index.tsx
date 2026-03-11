@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../store/auth';
 import { Colors } from '../constants/colors';
+import { Fonts } from '../constants/fonts';
 
 export default function SplashScreen() {
   const isLoading = useAuthStore((s) => s.isLoading);
@@ -52,5 +53,5 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,  // logo-vertical is roughly square (icon + wordmark stacked)
   },
-  tagline: { fontSize: 16, color: Colors.textMuted, fontWeight: '400' },
+  tagline: { fontSize: 16, color: Colors.textMuted, fontFamily: Fonts.jost },
 });

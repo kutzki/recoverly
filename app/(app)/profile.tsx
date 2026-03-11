@@ -306,11 +306,11 @@ const styles = StyleSheet.create({
   /* ── Name / Bio ── */
   nameSection: { alignItems: 'center', paddingHorizontal: 24, marginTop: 10, marginBottom: 16 },
   name: { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 2 },
-  username: { fontSize: 14, color: Colors.textMuted, marginBottom: 6 },
-  bio: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20, marginBottom: 6 },
-  bioPlaceholder: { fontSize: 14, color: Colors.textLight, textAlign: 'center', fontStyle: 'italic', marginBottom: 6 },
+  username: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, marginBottom: 6 },
+  bio: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center', lineHeight: 20, marginBottom: 6 },
+  bioPlaceholder: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textLight, textAlign: 'center', fontStyle: 'italic', marginBottom: 6 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  location: { fontSize: 13, color: Colors.textMuted },
+  location: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
 
   /* ── Stats ── */
   statsCard: {
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   statCol: { alignItems: 'center', flex: 1 },
   statDivider: { width: 1, backgroundColor: Colors.border },
   statValue: { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.text },
-  statLabel: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
+  statLabel: { fontSize: 11, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
 
   /* ── Connect / Following row ── */
   connectRow: {
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.text },
-  sectionMeta: { fontSize: 13, color: Colors.textMuted },
+  sectionMeta: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
   sectionAction: { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.primary },
 
   /* ── Badge grid ── */
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
   },
   sponsorInitial: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   sponsorName: { fontSize: 15, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
-  sponsorPhone: { fontSize: 13, color: Colors.textMuted, marginTop: 2 },
+  sponsorPhone: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
   addSponsorBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   infoContent: { flex: 1 },
-  infoLabel: { fontSize: 11, color: Colors.textMuted },
+  infoLabel: { fontSize: 11, fontFamily: Fonts.jost, color: Colors.textMuted },
   infoValue: { fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   infoDivider: {
     height: StyleSheet.hairlineWidth,
@@ -502,5 +502,5 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  goalText: { flex: 1, fontSize: 14, color: Colors.primary, lineHeight: 22 },
+  goalText: { flex: 1, fontSize: 14, fontFamily: Fonts.jost, color: Colors.primary, lineHeight: 22 },
 });

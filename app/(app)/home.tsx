@@ -330,9 +330,10 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   reminderSectionLabel: {
-    fontSize: 13,
+    fontSize: 15,
     color: Colors.cardCyanText,
     fontFamily: Fonts.jostMedium,
+    letterSpacing: 0.5,
   },
   reminderArrowBtn: {
     width: 30,
@@ -350,16 +351,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   reminderTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: Fonts.poppinsBold,
     color: Colors.text,
-    lineHeight: 30,
+    lineHeight: 28,
+    letterSpacing: 0.5,
     marginBottom: 12,
   },
   reminderWeekLabel: {
-    fontSize: 12,
+    fontSize: 10,
     color: Colors.textMuted,
     fontFamily: Fonts.jost,
+    letterSpacing: 0.5,
     marginBottom: 6,
   },
   thumbTap: {
@@ -373,9 +376,9 @@ const styles = StyleSheet.create({
 
   /* ─── Upcoming Events ─── */
   sectionLabel: {
-    fontSize: 17,
+    fontSize: 14,
     fontFamily: Fonts.poppinsSemiBold,
-    color: Colors.text,
+    color: Colors.textMuted,
     marginBottom: 12,
   },
   eventsRow: {
@@ -437,15 +440,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   eventTitle: {
-    fontSize: 15,
-    fontFamily: Fonts.poppinsSemiBold,
+    fontSize: 13,
+    fontFamily: Fonts.poppinsMedium,
     color: Colors.text,
+    letterSpacing: 0.5,
     marginBottom: 4,
   },
   eventLocation: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: Fonts.jost,
-    color: Colors.textMuted,
+    color: Colors.text,
     lineHeight: 16,
   },
 });

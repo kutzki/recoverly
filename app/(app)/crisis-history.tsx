@@ -12,6 +12,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { getCrisisHistory, CrisisIncident } from '../../services/supabase';
 import { useAuthStore } from '../../store/auth';
 
@@ -153,12 +154,12 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  title: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   scroll: { paddingHorizontal: 20, paddingTop: 20 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, padding: 32 },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: Colors.text, textAlign: 'center' },
-  emptySub: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 21 },
+  emptyTitle: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text, textAlign: 'center' },
+  emptySub: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center', lineHeight: 21 },
   summaryCard: {
     backgroundColor: Colors.white,
     borderRadius: 16,
@@ -170,14 +171,14 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  summaryTitle: { fontSize: 15, fontWeight: '700', color: Colors.text, marginBottom: 14 },
+  summaryTitle: { fontSize: 15, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 14 },
   summaryRows: { gap: 10 },
   summaryRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   summaryIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  summaryLabel: { flex: 1, fontSize: 14, color: Colors.text },
+  summaryLabel: { flex: 1, fontSize: 14, fontFamily: Fonts.jost, color: Colors.text },
   countBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
-  countText: { fontSize: 13, fontWeight: '700' },
-  historyTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 12 },
+  countText: { fontSize: 13, fontFamily: Fonts.poppinsBold },
+  historyTitle: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 12 },
   incidentCard: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
@@ -193,8 +194,8 @@ const styles = StyleSheet.create({
   },
   incidentIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   incidentBody: { flex: 1 },
-  incidentType: { fontSize: 14, fontWeight: '700', color: Colors.text },
-  incidentDate: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  incidentType: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  incidentDate: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
   actionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
   actionPill: {
     flexDirection: 'row',
@@ -205,6 +206,6 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
   },
-  actionText: { fontSize: 11, color: Colors.primary, fontWeight: '600' },
-  notes: { fontSize: 12, color: Colors.textMuted, marginTop: 6, fontStyle: 'italic' },
+  actionText: { fontSize: 11, color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
+  notes: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 6, fontStyle: 'italic' },
 });

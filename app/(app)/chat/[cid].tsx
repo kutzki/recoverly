@@ -18,6 +18,7 @@ import {
 } from 'stream-chat-react-native';
 import { Channel as ChannelType } from 'stream-chat';
 import { Colors } from '../../../constants/colors';
+import { Fonts } from '../../../constants/fonts';
 import { getStreamChatClient } from '../../../services/streamChat';
 import { useAuthStore } from '../../../store/auth';
 
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
   channelName: {
     flex: 1,
     fontSize: 17,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
     textAlign: 'center',
   },

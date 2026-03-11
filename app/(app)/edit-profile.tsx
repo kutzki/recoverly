@@ -15,6 +15,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuthStore } from '../../store/auth';
 
 export default function EditProfile() {
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  headerTitle: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   saveBtn: {
     backgroundColor: Colors.primary,
     borderRadius: 8,
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveBtnDisabled: { opacity: 0.4 },
-  saveBtnText: { color: Colors.white, fontWeight: '700', fontSize: 14 },
+  saveBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 14 },
   scroll: { paddingHorizontal: 20, paddingTop: 24 },
   avatarRow: { alignItems: 'center', marginBottom: 28 },
   avatar: {
@@ -228,9 +229,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: 32, fontWeight: '700', color: Colors.primary },
+  avatarText: { fontSize: 32, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   fieldWrap: { marginBottom: 18 },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 },
+  fieldLabel: { fontSize: 13, fontFamily: Fonts.poppinsBold, color: Colors.textMuted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -243,9 +244,9 @@ const styles = StyleSheet.create({
   },
   inputFocused: { borderColor: Colors.primary },
   inputMulti: { alignItems: 'flex-start', paddingVertical: 12, minHeight: 90 },
-  input: { flex: 1, fontSize: 15, color: Colors.text, paddingVertical: 0 },
+  input: { flex: 1, fontSize: 15, fontFamily: Fonts.jost, color: Colors.text, paddingVertical: 0 },
   inputTextMulti: { textAlignVertical: 'top', minHeight: 70 },
-  atPrefix: { fontSize: 16, color: Colors.textMuted, marginRight: 4, fontWeight: '600' },
-  charCount: { fontSize: 11, color: Colors.textMuted, alignSelf: 'flex-end', paddingBottom: 4 },
-  hint: { fontSize: 12, color: Colors.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 18 },
+  atPrefix: { fontSize: 16, fontFamily: Fonts.poppinsSemiBold, color: Colors.textMuted, marginRight: 4 },
+  charCount: { fontSize: 11, fontFamily: Fonts.jost, color: Colors.textMuted, alignSelf: 'flex-end', paddingBottom: 4 },
+  hint: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 18 },
 });

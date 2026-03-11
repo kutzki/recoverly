@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuthStore } from '../../store/auth';
 import { getFavorites, removeFavorite, UserFavorite } from '../../services/supabase';
 
@@ -166,8 +167,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   scroll: { paddingHorizontal: 20, paddingTop: 16 },
   header: { marginBottom: 20 },
-  title: { fontSize: 26, fontWeight: '800', color: Colors.text },
-  subtitle: { fontSize: 14, color: Colors.textMuted, marginTop: 4 },
+  title: { fontSize: 26, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  subtitle: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 4 },
   emptyCard: {
     backgroundColor: Colors.white,
     borderRadius: 20,
@@ -189,16 +190,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
   },
-  emptyTitle: { fontSize: 17, fontWeight: '700', color: Colors.text, marginBottom: 8 },
+  emptyTitle: { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 8 },
   emptyDesc: {
     fontSize: 13,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 19,
   },
   sectionTitle: {
     fontSize: 17,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
     marginBottom: 12,
   },
@@ -225,14 +227,14 @@ const styles = StyleSheet.create({
   },
   favInfo: { flex: 1 },
   favTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 3 },
-  favTitle: { flex: 1, fontSize: 14, fontWeight: '600', color: Colors.text },
+  favTitle: { flex: 1, fontSize: 14, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
   favTypePill: {
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
-  favTypeText: { fontSize: 10, fontWeight: '700' },
-  favDesc: { fontSize: 12, color: Colors.textMuted, lineHeight: 17 },
+  favTypeText: { fontSize: 10, fontFamily: Fonts.poppinsBold },
+  favDesc: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, lineHeight: 17 },
   favRemoveBtn: {
     width: 32,
     height: 32,
@@ -261,5 +263,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  linkLabel: { flex: 1, fontSize: 15, fontWeight: '600', color: Colors.text },
+  linkLabel: { flex: 1, fontSize: 15, fontFamily: Fonts.poppinsSemiBold, color: Colors.text },
 });

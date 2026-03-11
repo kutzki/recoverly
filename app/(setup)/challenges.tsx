@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { useAuthStore } from '../../store/auth';
 
 const CHALLENGES = [
@@ -183,16 +184,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: 2,
   },
-  progressLabel: { color: Colors.textMuted, fontSize: 12 },
+  progressLabel: { color: Colors.textMuted, fontSize: 12, fontFamily: Fonts.jost },
   heading: {
     fontSize: 26,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
     marginBottom: 8,
     lineHeight: 32,
   },
   sub: {
     fontSize: 15,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     lineHeight: 22,
     marginBottom: 28,
@@ -226,12 +228,13 @@ const styles = StyleSheet.create({
   optionText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: Fonts.jost,
     color: Colors.text,
     lineHeight: 20,
   },
   optionTextSelected: {
     color: Colors.primary,
-    fontWeight: '500',
+    fontFamily: Fonts.poppinsMedium,
   },
   checkbox: {
     width: 22,
@@ -248,6 +251,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     fontSize: 13,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     lineHeight: 20,
     marginBottom: 32,

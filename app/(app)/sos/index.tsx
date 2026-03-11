@@ -172,6 +172,7 @@ const styles = StyleSheet.create({
   },
   heroSub: {
     fontSize: 14,
+    fontFamily: Fonts.jost,
     color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
     marginBottom: 28,
@@ -274,7 +275,7 @@ const styles = StyleSheet.create({
   },
   talkTextWrap: { flex: 1 },
   talkTitle: { fontSize: 15, fontFamily: Fonts.poppinsBold, color: Colors.text },
-  talkSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  talkSub: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 2 },
 
   /* ── Emergency box ── */
   emergencyBox: {
@@ -289,6 +290,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.sosBorderRed,
   },
-  emergencyText: { flex: 1, fontSize: 13, color: Colors.text, lineHeight: 20 },
+  emergencyText: { flex: 1, fontSize: 13, fontFamily: Fonts.jost, color: Colors.text, lineHeight: 20 },
   emergencyLink: { color: Colors.sosRedBright, fontFamily: Fonts.poppinsBold },
 });

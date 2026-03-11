@@ -636,6 +636,7 @@ const styles = StyleSheet.create({
   },
   communityMembers: {
     fontSize: 10,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     textAlign: 'center',
   },
@@ -664,7 +665,7 @@ const styles = StyleSheet.create({
   /* ── Empty / error states ── */
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32 },
   emptyTitle: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text, textAlign: 'center' },
-  emptySubtitle: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  emptySubtitle: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
   postFirstBtn: { marginTop: 8, backgroundColor: Colors.primary, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
   postFirstBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 14 },
   retryBtn: { marginTop: 8, borderWidth: 1.5, borderColor: Colors.primary, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
@@ -696,7 +697,7 @@ const card = StyleSheet.create({
   avatarText: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   meta: { flex: 1 },
   actorName: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.text },
-  time: { fontSize: 11, color: Colors.textMuted, marginTop: 1 },
+  time: { fontSize: 11, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 1 },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -706,7 +707,7 @@ const card = StyleSheet.create({
     borderRadius: 20,
   },
   badgeText: { fontSize: 11, fontFamily: Fonts.poppinsBold },
-  body: { fontSize: 14, color: Colors.text, lineHeight: 22, marginBottom: 12 },
+  body: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.text, lineHeight: 22, marginBottom: 12 },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -716,8 +717,8 @@ const card = StyleSheet.create({
     gap: 18,
   },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  actionCount: { fontSize: 13, color: Colors.textMuted },
-  actionLabel: { fontSize: 13, color: Colors.textMuted },
+  actionCount: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
+  actionLabel: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted },
 });
 
 const compose = StyleSheet.create({
@@ -731,7 +732,7 @@ const compose = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  cancel: { fontSize: 16, color: Colors.textMuted },
+  cancel: { fontSize: 16, fontFamily: Fonts.jost, color: Colors.textMuted },
   title: { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text },
   postBtn: { backgroundColor: Colors.primary, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 7 },
   postBtnDisabled: { opacity: 0.5 },
@@ -741,8 +742,8 @@ const compose = StyleSheet.create({
   typeBtnActive: { backgroundColor: Colors.primaryLight, borderColor: Colors.primary },
   typeBtnLabel: { fontSize: 13, color: Colors.textMuted, fontFamily: Fonts.poppinsMedium },
   typeBtnLabelActive: { color: Colors.primary, fontFamily: Fonts.poppinsBold },
-  input: { flex: 1, padding: 16, fontSize: 16, color: Colors.text, textAlignVertical: 'top', lineHeight: 24 },
-  charCount: { textAlign: 'right', paddingHorizontal: 16, paddingBottom: 8, fontSize: 12, color: Colors.textMuted },
+  input: { flex: 1, padding: 16, fontSize: 16, fontFamily: Fonts.jost, color: Colors.text, textAlignVertical: 'top', lineHeight: 24 },
+  charCount: { textAlign: 'right', paddingHorizontal: 16, paddingBottom: 8, fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted },
 });
 
 const cm = StyleSheet.create({
@@ -758,21 +759,21 @@ const cm = StyleSheet.create({
   },
   title: { fontSize: 17, fontFamily: Fonts.poppinsBold, color: Colors.text },
   postPreview: { backgroundColor: Colors.background, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  postPreviewText: { fontSize: 13, color: Colors.textMuted, lineHeight: 18 },
+  postPreviewText: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted, lineHeight: 18 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   list: { flex: 1 },
   listContent: { padding: 16, gap: 14 },
   empty: { paddingVertical: 40, alignItems: 'center' },
-  emptyText: { fontSize: 14, color: Colors.textMuted },
+  emptyText: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted },
   commentRow: { flexDirection: 'row', gap: 10 },
   commentAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
   commentInitial: { fontSize: 15, fontFamily: Fonts.poppinsBold, color: Colors.primary },
   commentBody: { flex: 1 },
   commentAuthor: { fontSize: 13, fontFamily: Fonts.poppinsBold, color: Colors.text },
-  commentText: { fontSize: 14, color: Colors.text, marginTop: 2, lineHeight: 20 },
-  commentTime: { fontSize: 11, color: Colors.textMuted, marginTop: 4 },
+  commentText: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.text, marginTop: 2, lineHeight: 20 },
+  commentTime: { fontSize: 11, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 4 },
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: Colors.border, gap: 8 },
-  input: { flex: 1, backgroundColor: Colors.background, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: Colors.text, maxHeight: 100 },
+  input: { flex: 1, backgroundColor: Colors.background, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, fontFamily: Fonts.jost, color: Colors.text, maxHeight: 100 },
   sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
   sendBtnDisabled: { opacity: 0.4 },
 });

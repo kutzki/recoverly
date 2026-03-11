@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: Fonts.poppins,
     color: '#000',
     letterSpacing: 0.5,
     padding: 0,  // remove default iOS/Android TextInput padding
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
   },
   pickerSectionLabel: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: 'rgba(0,0,0,0.4)',
     letterSpacing: 0.8,
     textTransform: 'uppercase',
@@ -492,8 +492,8 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   chipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  chipText: { fontSize: 13, color: '#000' },
-  chipActiveText: { color: '#fff', fontWeight: '600' },
+  chipText: { fontSize: 13, fontFamily: Fonts.jost, color: '#000' },
+  chipActiveText: { color: '#fff', fontFamily: Fonts.poppinsSemiBold },
   monthRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -504,8 +504,8 @@ const styles = StyleSheet.create({
     borderTopColor: '#f0f0f0',
   },
   monthActive: { backgroundColor: Colors.primaryLight },
-  monthText: { fontSize: 15, color: '#000' },
-  monthActiveText: { color: Colors.primary, fontWeight: '600' },
+  monthText: { fontSize: 15, fontFamily: Fonts.jost, color: '#000' },
+  monthActiveText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
 
   // ── Black circle next button ─────────────────────────────
   nextBtn: {

@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 interface ButtonProps {
   title: string;
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
   size_lg: { paddingVertical: 17, paddingHorizontal: 32 },
 
   // Text
-  text: { fontWeight: '600' },
+  text: { fontFamily: Fonts.poppinsSemiBold },
   text_primary: { color: Colors.white },
   text_outline: { color: Colors.primary },
   text_ghost: { color: Colors.primary },

@@ -12,6 +12,7 @@ import {
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { journalService } from '../../services/journal';
 
 const MOODS = [
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     paddingBottom: Platform.OS === 'ios' ? 40 : 24,
   },
-  title: { fontSize: 20, fontWeight: '700', color: Colors.text, marginBottom: 16 },
+  title: { fontSize: 20, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 16 },
   moodRow: {
     flexDirection: 'row',
     gap: 10,
@@ -222,12 +223,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toolActive: { backgroundColor: Colors.primaryLight },
-  toolBold: { fontSize: 15, fontWeight: '900', color: Colors.textMuted },
-  toolUnderline: { fontSize: 15, textDecorationLine: 'underline', fontWeight: '700', color: Colors.textMuted },
+  toolBold: { fontSize: 15, fontFamily: Fonts.poppinsBold, color: Colors.textMuted },
+  toolUnderline: { fontSize: 15, fontFamily: Fonts.poppinsBold, textDecorationLine: 'underline', color: Colors.textMuted },
   toolDivider: { width: 1, height: 20, backgroundColor: Colors.border, marginHorizontal: 4 },
   titleInput: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: Fonts.poppinsSemiBold,
     color: Colors.text,
     marginBottom: 12,
     borderBottomWidth: 1,
@@ -236,6 +237,7 @@ const styles = StyleSheet.create({
   },
   bodyInput: {
     fontSize: 15,
+    fontFamily: Fonts.jost,
     color: Colors.text,
     lineHeight: 24,
     minHeight: 160,
@@ -249,5 +251,5 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   submitDisabled: { opacity: 0.4 },
-  submitText: { color: Colors.white, fontWeight: '700', fontSize: 15 },
+  submitText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 15 },
 });

@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 // ─── Affirmations ─────────────────────────────────────────────────────────────
 
@@ -543,8 +544,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   scroll: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 },
   header: { marginBottom: 20 },
-  title: { fontSize: 26, fontWeight: '800', color: Colors.text },
-  subtitle: { fontSize: 14, color: Colors.textMuted, marginTop: 4 },
+  title: { fontSize: 26, fontFamily: Fonts.poppinsBold, color: Colors.text },
+  subtitle: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, marginTop: 4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   card: {
     width: '47%',
@@ -565,8 +566,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
-  cardTitle: { fontSize: 14, fontWeight: '700', color: Colors.text, marginBottom: 4 },
-  cardDesc: { fontSize: 12, color: Colors.textMuted, lineHeight: 17, marginBottom: 10 },
+  cardTitle: { fontSize: 14, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 4 },
+  cardDesc: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, lineHeight: 17, marginBottom: 10 },
   badge: {
     alignSelf: 'flex-start',
     backgroundColor: Colors.primaryLight,
@@ -574,7 +575,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  badgeText: { fontSize: 10, color: Colors.primary, fontWeight: '600' },
+  badgeText: { fontSize: 10, color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
   badgeActive: { backgroundColor: Colors.success + '22' },
   badgeActiveText: { color: Colors.success },
 });
@@ -591,7 +592,7 @@ const modal = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.text },
+  headerTitle: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text },
   body: {
     flex: 1,
     alignItems: 'center',
@@ -612,13 +613,13 @@ const modal = StyleSheet.create({
   },
   affirmText: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
     color: Colors.text,
     textAlign: 'center',
     lineHeight: 32,
     fontStyle: 'italic',
   },
-  affirmSub: { fontSize: 13, color: Colors.textMuted, textAlign: 'center' },
+  affirmSub: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center' },
   shuffleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -629,7 +630,7 @@ const modal = StyleSheet.create({
     borderRadius: 12,
     height: 48,
   },
-  shuffleBtnText: { color: Colors.primary, fontWeight: '600', fontSize: 15 },
+  shuffleBtnText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold, fontSize: 15 },
   doneBtn: {
     backgroundColor: Colors.primary,
     borderRadius: 12,
@@ -637,7 +638,7 @@ const modal = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  doneBtnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
+  doneBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 16 },
 
   // Breathing
   breathBody: {
@@ -649,6 +650,7 @@ const modal = StyleSheet.create({
   },
   breathSubtitle: {
     fontSize: 13,
+    fontFamily: Fonts.jost,
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 20,
@@ -675,8 +677,8 @@ const modal = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
   },
-  phaseLabel: { fontSize: 16, fontWeight: '700', textAlign: 'center' },
-  countdown: { fontSize: 36, fontWeight: '800', textAlign: 'center' },
+  phaseLabel: { fontSize: 16, fontFamily: Fonts.poppinsBold, textAlign: 'center' },
+  countdown: { fontSize: 36, fontFamily: Fonts.poppinsBold, textAlign: 'center' },
   cycleRow: { flexDirection: 'row', gap: 8 },
   cycleDot: {
     width: 10,
@@ -694,7 +696,7 @@ const modal = StyleSheet.create({
     borderRadius: 12,
     height: 52,
   },
-  startBtnText: { color: Colors.white, fontWeight: '700', fontSize: 15 },
+  startBtnText: { color: Colors.white, fontFamily: Fonts.poppinsBold, fontSize: 15 },
   stopBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -705,7 +707,7 @@ const modal = StyleSheet.create({
     borderRadius: 12,
     height: 52,
   },
-  stopBtnText: { color: Colors.error, fontWeight: '600', fontSize: 15 },
+  stopBtnText: { color: Colors.error, fontFamily: Fonts.poppinsSemiBold, fontSize: 15 },
   tipBox: {
     flexDirection: 'row',
     gap: 10,
@@ -715,7 +717,7 @@ const modal = StyleSheet.create({
     padding: 14,
     width: '100%',
   },
-  tipText: { flex: 1, fontSize: 13, color: Colors.primaryDark, lineHeight: 20 },
+  tipText: { flex: 1, fontSize: 13, fontFamily: Fonts.jost, color: Colors.primaryDark, lineHeight: 20 },
 
   // CBT
   cbtBody: {
@@ -729,7 +731,7 @@ const modal = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: Colors.border,
   },
-  cbtStep: { fontSize: 12, color: Colors.textMuted, textAlign: 'center' },
+  cbtStep: { fontSize: 12, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center' },
   cbtPromptIcon: {
     width: 52,
     height: 52,
@@ -739,7 +741,7 @@ const modal = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
   },
-  cbtLabel: { fontSize: 18, fontWeight: '700', color: Colors.text, textAlign: 'center' },
+  cbtLabel: { fontSize: 18, fontFamily: Fonts.poppinsBold, color: Colors.text, textAlign: 'center' },
   cbtInput: {
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -747,6 +749,7 @@ const modal = StyleSheet.create({
     borderColor: Colors.border,
     padding: 14,
     fontSize: 15,
+    fontFamily: Fonts.jost,
     color: Colors.text,
     minHeight: 120,
     lineHeight: 22,
@@ -762,7 +765,7 @@ const modal = StyleSheet.create({
     height: 52,
     paddingHorizontal: 16,
   },
-  backBtnText: { color: Colors.primary, fontWeight: '600', fontSize: 15 },
+  backBtnText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold, fontSize: 15 },
 
   // CBT done
   cbtDoneBody: { padding: 24, gap: 16, alignItems: 'center' },
@@ -774,8 +777,8 @@ const modal = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cbtDoneTitle: { fontSize: 22, fontWeight: '700', color: Colors.text, textAlign: 'center' },
-  cbtDoneSub: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 21 },
+  cbtDoneTitle: { fontSize: 22, fontFamily: Fonts.poppinsBold, color: Colors.text, textAlign: 'center' },
+  cbtDoneSub: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted, textAlign: 'center', lineHeight: 21 },
   cbtSummaryRow: {
     alignSelf: 'stretch',
     backgroundColor: Colors.white,
@@ -783,6 +786,6 @@ const modal = StyleSheet.create({
     padding: 14,
     gap: 4,
   },
-  cbtSummaryLabel: { fontSize: 11, fontWeight: '700', color: Colors.primary, textTransform: 'uppercase' },
-  cbtSummaryValue: { fontSize: 14, color: Colors.text, lineHeight: 20 },
+  cbtSummaryLabel: { fontSize: 11, fontFamily: Fonts.poppinsBold, color: Colors.primary, textTransform: 'uppercase' },
+  cbtSummaryValue: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.text, lineHeight: 20 },
 });

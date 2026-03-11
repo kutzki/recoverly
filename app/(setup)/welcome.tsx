@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
   },
   welcomeLabel: {
     fontSize: 50,
-    fontWeight: '700',
     color: Colors.text,
     letterSpacing: -1.5,
     fontFamily: Fonts.poppinsSemiBold,
