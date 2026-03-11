@@ -152,14 +152,14 @@ export default function BasicInfo() {
   };
 
   const usernameBorderColor =
-    usernameStatus === 'available' ? '#40c64e' :
-    usernameStatus === 'taken'    ? '#EF4444' :
+    usernameStatus === 'available' ? Colors.successGreen :
+    usernameStatus === 'taken'    ? Colors.error :
     focusedField === 'username'   ? Colors.primary :
-    '#dddddd';
+    Colors.border;
 
   return (
     <LinearGradient
-      colors={['#D6EEFF', '#EDE6FF', '#FFFFFF']}
+      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
       start={{ x: 0.1, y: 0 }}
       end={{ x: 0.9, y: 1 }}
       style={styles.container}
@@ -197,7 +197,7 @@ export default function BasicInfo() {
               <TextInput
                 style={styles.input}
                 placeholder="John Smith"
-                placeholderTextColor="rgba(0,0,0,0.35)"
+                placeholderTextColor={Colors.placeholderText}
                 value={name}
                 onChangeText={setName}
                 autoCapitalize="words"
@@ -215,7 +215,7 @@ export default function BasicInfo() {
               <TextInput
                 style={styles.input}
                 placeholder="@johnsmith"
-                placeholderTextColor="rgba(0,0,0,0.35)"
+                placeholderTextColor={Colors.placeholderText}
                 value={username ? `@${username}` : ''}
                 onChangeText={handleUsernameChange}
                 autoCapitalize="none"
@@ -228,15 +228,15 @@ export default function BasicInfo() {
               )}
               {usernameStatus === 'available' && (
                 <View style={styles.checkCircle}>
-                  <Ionicons name="checkmark" size={14} color="#fff" />
+                  <Ionicons name="checkmark" size={14} color={Colors.white} />
                 </View>
               )}
               {usernameStatus === 'taken' && (
-                <Ionicons name="close-circle" size={22} color="#EF4444" />
+                <Ionicons name="close-circle" size={22} color={Colors.error} />
               )}
             </View>
             {usernameStatus === 'taken' && (
-              <Text style={[styles.hint, { color: '#EF4444' }]}>That username is already taken</Text>
+              <Text style={[styles.hint, { color: Colors.error }]}>That username is already taken</Text>
             )}
           </View>
 
@@ -257,7 +257,7 @@ export default function BasicInfo() {
               <Ionicons
                 name={showDobPicker ? 'chevron-up' : 'chevron-down'}
                 size={16}
-                color="rgba(0,0,0,0.4)"
+                color={Colors.mutedOverlay}
               />
             </TouchableOpacity>
 
@@ -313,7 +313,7 @@ export default function BasicInfo() {
               <Ionicons
                 name={showLocationPicker ? 'chevron-up' : 'chevron-down'}
                 size={16}
-                color="rgba(0,0,0,0.4)"
+                color={Colors.mutedOverlay}
               />
             </TouchableOpacity>
 
@@ -342,7 +342,7 @@ export default function BasicInfo() {
                 <TextInput
                   style={styles.input}
                   placeholder="Enter your city or region…"
-                  placeholderTextColor="rgba(0,0,0,0.35)"
+                  placeholderTextColor={Colors.placeholderText}
                   value={otherLocation}
                   onChangeText={setOtherLocation}
                   autoCapitalize="words"
@@ -367,8 +367,8 @@ export default function BasicInfo() {
         activeOpacity={0.85}
       >
         {loading
-          ? <ActivityIndicator color="#fff" />
-          : <Ionicons name="arrow-forward" size={22} color="#fff" />
+          ? <ActivityIndicator color={Colors.white} />
+          : <Ionicons name="arrow-forward" size={22} color={Colors.white} />
         }
       </TouchableOpacity>
     </LinearGradient>
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   sub: {
     fontSize: 16,
     fontFamily: Fonts.poppins,
-    color: 'rgba(0,0,0,0.5)',
+    color: Colors.textMuted,
     lineHeight: 24,
   },
 
@@ -417,16 +417,16 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     fontFamily: Fonts.poppinsMedium,
-    color: '#121212',
+    color: Colors.text,
     letterSpacing: 0.375,
   },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#dddddd',
+    borderColor: Colors.border,
     paddingHorizontal: 24,
     paddingVertical: 16,
     minHeight: 55,
@@ -436,15 +436,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: Fonts.poppins,
-    color: '#000',
+    color: Colors.text,
     letterSpacing: 0.5,
     padding: 0,  // remove default iOS/Android TextInput padding
   },
-  placeholder: { color: 'rgba(0,0,0,0.35)' },
+  placeholder: { color: Colors.placeholderText },
   hint: {
     fontSize: 12,
     fontFamily: Fonts.poppinsMedium,
-    color: 'rgba(0,0,0,0.5)',
+    color: Colors.textMuted,
     lineHeight: 20,
   },
 
@@ -460,16 +460,16 @@ const styles = StyleSheet.create({
 
   // ── Dropdowns ───────────────────────────────────────────
   pickerDropdown: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#dddddd',
+    borderColor: Colors.border,
     overflow: 'hidden',
   },
   pickerSectionLabel: {
     fontSize: 11,
     fontFamily: Fonts.poppinsBold,
-    color: 'rgba(0,0,0,0.4)',
+    color: Colors.mutedOverlay,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
     paddingHorizontal: 16,
@@ -487,13 +487,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: Colors.border,
   },
   chipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  chipText: { fontSize: 13, fontFamily: Fonts.jost, color: '#000' },
-  chipActiveText: { color: '#fff', fontFamily: Fonts.poppinsSemiBold },
+  chipText: { fontSize: 13, fontFamily: Fonts.jost, color: Colors.text },
+  chipActiveText: { color: Colors.white, fontFamily: Fonts.poppinsSemiBold },
   monthRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -501,10 +501,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 13,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: Colors.border,
   },
   monthActive: { backgroundColor: Colors.primaryLight },
-  monthText: { fontSize: 15, fontFamily: Fonts.jost, color: '#000' },
+  monthText: { fontSize: 15, fontFamily: Fonts.jost, color: Colors.text },
   monthActiveText: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
 
   // ── Black circle next button ─────────────────────────────
@@ -515,10 +515,10 @@ const styles = StyleSheet.create({
     width: 62,
     height: 62,
     borderRadius: 31,
-    backgroundColor: '#000',
+    backgroundColor: Colors.text,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: Colors.text,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,

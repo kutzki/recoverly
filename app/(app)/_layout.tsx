@@ -18,8 +18,8 @@ function SOSTabIcon() {
     <View style={sosStyles.container}>
       <LinearGradient
         colors={[Colors.primaryDark, Colors.primaryMid]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
         style={sosStyles.pill}
       >
         <Ionicons name="alert" size={18} color={Colors.white} />
@@ -37,7 +37,7 @@ const sosStyles = StyleSheet.create({
   pill: {
     width: 116,
     height: 34,
-    borderRadius: 8,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Colors.primaryDark,
@@ -171,7 +171,7 @@ const drawerStyles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: Colors.overlayDark,
   },
   drawer: {
     width: 300,

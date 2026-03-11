@@ -118,7 +118,7 @@ export const SobrietyCounter = React.memo(function SobrietyCounter({ days, goal 
           fontFamily={Fonts.jost}
           fill={Colors.textMuted}
         >
-          Days
+          Days Sober
         </SvgText>
       </Svg>
     </View>

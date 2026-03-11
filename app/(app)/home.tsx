@@ -117,7 +117,7 @@ export default function Home() {
           {/* ── Header ── */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.greeting}>Welcome Back,</Text>
+              <Text style={styles.greeting}>Welcome Back</Text>
               <Text style={styles.name}>{displayName}</Text>
             </View>
             <TouchableOpacity style={styles.menuBtn} onPress={openDrawer} accessibilityLabel="Open menu">
@@ -194,7 +194,7 @@ export default function Home() {
                   activeOpacity={0.82}
                 >
                   <LinearGradient
-                    colors={['rgba(171,49,240,0.18)', 'rgba(204,115,254,0.18)']}
+                    colors={[Colors.eventGradientStart, Colors.eventGradientEnd]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0, y: 1 }}
                     style={styles.eventCard}
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.white,
     borderRadius: 22,
-    shadowColor: '#000',
+    shadowColor: Colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
     shadowRadius: 6,

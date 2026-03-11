@@ -32,6 +32,8 @@ export const Colors = {
 
   // ─── Overlays ─────────────────────────────────────────────────────────────
   overlayDark:   'rgba(0,0,0,0.5)',
+  placeholderText: 'rgba(0,0,0,0.35)', // TextInput placeholder color
+  mutedOverlay:    'rgba(0,0,0,0.4)',  // icon / chevron muted color
 
   // ─── Milestone ────────────────────────────────────────────────────────────
   milestoneGrey:   '#E8E0F0',
@@ -57,6 +59,10 @@ export const Colors = {
   goalGreen:     '#10B981',
   goalAmber:     '#F59E0B',
   goalBlue:      '#3B82F6',
+
+  // ─── Home event card gradient (18% opacity brand colors) ─────────────────
+  eventGradientStart: 'rgba(171,49,240,0.18)',   // 18% primaryDark
+  eventGradientEnd:   'rgba(204,115,254,0.18)',  // 18% primaryMid
 
   // ─── Home card tints ──────────────────────────────────────────────────────
   cardTintBlue:        '#C0EEFF',
