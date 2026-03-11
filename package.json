@@ -75,7 +75,7 @@
         "react-native-reanimated",
         "react-native-webview",
         "react-native-worklets",
-        "@react-navigation/drawer",
+        "@react-navigation/drawer"
       ]
     }
   }
