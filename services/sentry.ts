@@ -21,8 +21,8 @@ export { Sentry };
 export function initSentry(): void {
   const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
 
-  if (!dsn) {
-    // DSN not configured — Sentry disabled in this build.
+  if (!dsn || !dsn.startsWith('https://')) {
+    // DSN not configured or still a placeholder — Sentry disabled in this build.
     if (__DEV__) {
       console.info('[Sentry] DSN not set — disabled. Set EXPO_PUBLIC_SENTRY_DSN to enable.');
     }
