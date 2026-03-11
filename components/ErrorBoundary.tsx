@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
 import { Fonts } from '../constants/fonts';
+import { Sentry } from '../services/sentry';
 
 interface Props {
   children: React.ReactNode;
@@ -26,6 +27,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('[ErrorBoundary] Caught error:', error.message, info.componentStack);
+    Sentry.captureException(error, {
+      extra: { componentStack: info.componentStack },
+    });
   }
 
   reset = () => this.setState({ hasError: false, error: null });

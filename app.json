@@ -3,7 +3,7 @@
     "buildCacheProvider": "eas",
     "name": "recoverly",
     "slug": "recoverly",
-    "version": "1.0.40",
+    "version": "1.0.41",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,7 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.recoverly.app",
-      "versionCode": 10040,
+      "versionCode": 10041,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",
@@ -51,7 +51,14 @@
       "expo-router",
       "expo-font",
       "expo-secure-store",
-      "expo-image-picker"
+      "expo-image-picker",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "SENTRY_ORG",
+          "project": "SENTRY_PROJECT"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

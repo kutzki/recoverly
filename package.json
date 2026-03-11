@@ -1,6 +1,6 @@
 {
   "name": "recoverly",
-  "version": "1.0.40",
+  "version": "1.0.41",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -19,6 +19,7 @@
     "@gorhom/bottom-sheet": "^5.2.8",
     "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/drawer": "^7.8.1",
+    "@sentry/react-native": "~6.14.0",
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.90.21",
     "axios": "^1.13.5",
