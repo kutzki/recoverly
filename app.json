@@ -1,9 +1,8 @@
 {
   "expo": {
-    "buildCacheProvider": "eas",
     "name": "recoverly",
     "slug": "recoverly",
-    "version": "1.0.45",
+    "version": "1.0.46",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,17 +23,11 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.recoverly.app",
-      "versionCode": 10045,
+      "versionCode": 10046,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.BLUETOOTH_CONNECT",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MICROPHONE",
-        "android.permission.FOREGROUND_SERVICE_CAMERA"
+        "android.permission.CAMERA"
       ]
     },
     "web": {
