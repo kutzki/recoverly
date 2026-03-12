@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -22,10 +23,31 @@ import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
 export default function SignIn() {
   const { signIn, isLoading } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail]           = useState('');
+  const [password, setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  /* ── Entrance animations ── */
+  const logoAnim   = useRef(new Animated.Value(0)).current;
+  const titleAnim  = useRef(new Animated.Value(0)).current;
+  const formAnim   = useRef(new Animated.Value(0)).current;
+  const btnAnim    = useRef(new Animated.Value(0)).current;
+  const btnScale   = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.stagger(100, [
+      Animated.timing(logoAnim,  { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(titleAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(formAnim,  { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(btnAnim,   { toValue: 1, duration: 500, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  const fadeUp = (anim: Animated.Value, offsetY = 20) => ({
+    opacity: anim,
+    transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [offsetY, 0] }) }],
+  });
 
   const handleSignIn = async () => {
     const trimmedEmail = email.trim();
@@ -63,16 +85,14 @@ export default function SignIn() {
     }
     try {
       await supabase.auth.resetPasswordForEmail(trimmedEmail);
-      Alert.alert('Email Sent', `If an account exists for ${trimmedEmail}, you'll receive a password reset link shortly.`);
+      Alert.alert('Email Sent', `If an account exists for ${trimmedEmail}, you'll receive a reset link shortly.`);
     } catch (err: any) {
-      console.error('[SignIn] resetPasswordForEmail error:', err);
       Alert.alert('Error', 'Could not send reset email. Please try again later.');
     }
   };
 
-  const handleGoogle = () => {
-    Alert.alert('Coming soon', 'Google sign-in will be available in the next update.');
-  };
+  const handleBtnPressIn  = () => Animated.spring(btnScale, { toValue: 0.96, useNativeDriver: true, speed: 30 }).start();
+  const handleBtnPressOut = () => Animated.spring(btnScale, { toValue: 1,    useNativeDriver: true, speed: 20 }).start();
 
   return (
     <LinearGradient
@@ -90,98 +110,111 @@ export default function SignIn() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Back — filled purple circle */}
+          {/* Back button */}
           <TouchableOpacity style={styles.back} onPress={() => router.back()} accessibilityLabel="Go back">
             <View style={styles.backCircle}>
               <Ionicons name="chevron-back" size={20} color={Colors.white} />
             </View>
           </TouchableOpacity>
 
+          {/* Logo */}
+          <Animated.View style={[styles.logoWrapTop, fadeUp(logoAnim, -10)]}>
+            <RecoverlyLogo size={48} showWordmark />
+          </Animated.View>
+
           {/* Title */}
-          <Text style={styles.title}>Sign in</Text>
-          <Text style={styles.subtitle}>Welcome back to your recovery journey</Text>
+          <Animated.View style={fadeUp(titleAnim)}>
+            <Text style={styles.title}>Sign in</Text>
+            <Text style={styles.subtitle}>Welcome back to your recovery journey</Text>
+          </Animated.View>
 
-          {/* Email */}
-          <Text style={styles.fieldLabel}>Email</Text>
-          <View style={[styles.inputWrap, focusedField === 'email' && styles.inputFocused]}>
-            <Ionicons name="mail-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="your@email.com"
-              placeholderTextColor={Colors.textLight}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-              returnKeyType="next"
-              onFocus={() => setFocusedField('email')}
-              onBlur={() => setFocusedField(null)}
-            />
-          </View>
-
-          {/* Password */}
-          <Text style={styles.fieldLabel}>Password</Text>
-          <View style={[styles.inputWrap, focusedField === 'password' && styles.inputFocused]}>
-            <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, styles.passwordInput]}
-              placeholder="••••••••"
-              placeholderTextColor={Colors.textLight}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoComplete="current-password"
-              returnKeyType="done"
-              onSubmitEditing={handleSignIn}
-              onFocus={() => setFocusedField('password')}
-              onBlur={() => setFocusedField(null)}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.eyeBtn}>
-              <Ionicons
-                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                size={18}
-                color={Colors.textMuted}
+          {/* Form */}
+          <Animated.View style={fadeUp(formAnim)}>
+            <Text style={styles.fieldLabel}>Email</Text>
+            <View style={[styles.inputWrap, focusedField === 'email' && styles.inputFocused]}>
+              <Ionicons name="mail-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="your@email.com"
+                placeholderTextColor={Colors.textLight}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+                returnKeyType="next"
+                onFocus={() => setFocusedField('email')}
+                onBlur={() => setFocusedField(null)}
               />
+            </View>
+
+            <Text style={styles.fieldLabel}>Password</Text>
+            <View style={[styles.inputWrap, focusedField === 'password' && styles.inputFocused]}>
+              <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                placeholder="••••••••"
+                placeholderTextColor={Colors.textLight}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoComplete="current-password"
+                returnKeyType="done"
+                onSubmitEditing={handleSignIn}
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.eyeBtn}>
+                <Ionicons
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={18}
+                  color={Colors.textMuted}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.forgotWrap} onPress={handleForgotPassword}>
+              <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
-          </View>
 
-          {/* Forgot password */}
-          <TouchableOpacity style={styles.forgotWrap} onPress={handleForgotPassword}>
-            <Text style={styles.forgotText}>Forgot password?</Text>
-          </TouchableOpacity>
+            {/* Divider */}
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
 
-          {/* Or divider */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
+            {/* Google (soon) */}
+            <TouchableOpacity
+              style={styles.googleBtn}
+              onPress={() => Alert.alert('Coming soon', 'Google sign-in will be available in the next update.')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="logo-google" size={18} color="#4285F4" />
+              <Text style={styles.googleText}>Continue with Google</Text>
+              <View style={styles.soonChip}>
+                <Text style={styles.soonChipText}>SOON</Text>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
 
-          {/* Continue with Google */}
-          <TouchableOpacity
-            style={styles.googleBtn}
-            onPress={handleGoogle}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="logo-google" size={18} color="#4285F4" />
-            <Text style={styles.googleText}>Continue with Google</Text>
-            <View style={styles.soonChip}><Text style={styles.soonChipText}>SOON</Text></View>
-          </TouchableOpacity>
-
-          {/* Sign In */}
-          <TouchableOpacity
-            style={[styles.signInBtn, isLoading && styles.btnDisabled]}
-            onPress={handleSignIn}
-            activeOpacity={0.85}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={Colors.white} />
-            ) : (
-              <Text style={styles.signInText}>Sign In</Text>
-            )}
-          </TouchableOpacity>
+          {/* CTA */}
+          <Animated.View style={[fadeUp(btnAnim), { transform: [...(fadeUp(btnAnim).transform || []), { scale: btnScale }] }]}>
+            <TouchableOpacity
+              style={[styles.signInBtn, isLoading && styles.btnDisabled]}
+              onPress={handleSignIn}
+              onPressIn={handleBtnPressIn}
+              onPressOut={handleBtnPressOut}
+              activeOpacity={1}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={Colors.white} />
+              ) : (
+                <Text style={styles.signInText}>Sign In</Text>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
 
           {/* Sign up link */}
           <View style={styles.signupRow}>
@@ -189,11 +222,6 @@ export default function SignIn() {
             <TouchableOpacity onPress={() => router.replace('/(auth)/sign-up')}>
               <Text style={styles.signupLink}>Sign up</Text>
             </TouchableOpacity>
-          </View>
-
-          {/* Logo at bottom */}
-          <View style={styles.logoWrap}>
-            <RecoverlyLogo size={36} showWordmark />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -211,7 +239,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
 
-  /* Back button — filled purple circle */
   back: {
     position: 'absolute',
     top: 12,
@@ -227,13 +254,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  /* Title */
+  logoWrapTop: {
+    alignItems: 'center',
+    marginTop: 32,
+    marginBottom: 24,
+  },
+
   title: {
     fontSize: 26,
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.primary,
     textAlign: 'center',
-    marginTop: 44,
     marginBottom: 6,
   },
   subtitle: {
@@ -244,15 +275,12 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
 
-  /* Field label */
   fieldLabel: {
     fontSize: 13,
     fontFamily: Fonts.poppinsMedium,
     color: Colors.text,
     marginBottom: 6,
   },
-
-  /* Input */
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -267,23 +295,16 @@ const styles = StyleSheet.create({
   inputFocused: {
     borderColor: Colors.primary,
   },
-  inputIcon: {
-    marginRight: 10,
-  },
+  inputIcon: { marginRight: 10 },
   input: {
     flex: 1,
     fontSize: 15,
     fontFamily: Fonts.jost,
     color: Colors.text,
   },
-  passwordInput: {
-    paddingRight: 8,
-  },
-  eyeBtn: {
-    padding: 4,
-  },
+  passwordInput: { paddingRight: 8 },
+  eyeBtn: { padding: 4 },
 
-  /* Forgot password */
   forgotWrap: {
     alignSelf: 'flex-end',
     marginTop: -8,
@@ -295,25 +316,15 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.poppinsMedium,
   },
 
-  /* Or divider */
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
     gap: 12,
   },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  dividerText: {
-    color: Colors.textMuted,
-    fontSize: 13,
-    fontFamily: Fonts.jost,
-  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
+  dividerText: { color: Colors.textMuted, fontSize: 13, fontFamily: Fonts.jost },
 
-  /* Google button */
   googleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -343,7 +354,6 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
 
-  /* Sign in button — full pill */
   signInBtn: {
     backgroundColor: Colors.primary,
     borderRadius: 999,
@@ -353,40 +363,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 5,
   },
-  btnDisabled: {
-    opacity: 0.7,
-  },
+  btnDisabled: { opacity: 0.7 },
   signInText: {
     color: Colors.white,
     fontSize: 16,
     fontFamily: Fonts.poppinsBold,
   },
 
-  /* Sign up link */
   signupRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 40,
   },
-  signupLabel: {
-    color: Colors.textMuted,
-    fontSize: 14,
-    fontFamily: Fonts.jost,
-  },
-  signupLink: {
-    color: Colors.primary,
-    fontSize: 14,
-    fontFamily: Fonts.poppinsSemiBold,
-  },
-
-  /* Logo at bottom */
-  logoWrap: {
-    alignItems: 'center',
-    paddingBottom: 8,
-  },
+  signupLabel: { color: Colors.textMuted, fontSize: 14, fontFamily: Fonts.jost },
+  signupLink: { color: Colors.primary, fontSize: 14, fontFamily: Fonts.poppinsSemiBold },
 });

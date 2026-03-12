@@ -32,13 +32,11 @@ function RootLayout() {
   });
 
   const loadStoredAuth = useAuthStore((s) => s.loadStoredAuth);
-  const loadChecklist = useChecklistStore((s) => s.loadChecklist);
-  const appState = useRef<AppStateStatus>(AppState.currentState);
+  const loadChecklist  = useChecklistStore((s) => s.loadChecklist);
+  const appState       = useRef<AppStateStatus>(AppState.currentState);
 
   useEffect(() => {
     loadStoredAuth();
-    // Reload checklist on every foreground transition so it resets correctly
-    // if midnight has passed while the app was backgrounded or left open.
     const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
       if (appState.current.match(/inactive|background/) && next === 'active') {
         loadChecklist();
@@ -48,9 +46,8 @@ function RootLayout() {
     return () => sub.remove();
   }, []);
 
-  // Keep the native splash screen visible while fonts load.
-  // Return null (not a View) so expo-router knows to hold the splash.
-  // If font loading errors, proceed anyway with system font fallback.
+  // Hold splash until fonts ready.
+  // If font error, proceed with system font fallback.
   if (!fontsLoaded && !fontError) return null;
 
   return (

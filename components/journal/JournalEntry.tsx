@@ -1,4 +1,4 @@
-import React, { forwardRef, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,33 +8,75 @@ import {
   ScrollView,
   Alert,
   Platform,
+  Modal,
+  Animated,
+  Dimensions,
+  KeyboardAvoidingView,
 } from 'react-native';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 import { journalService } from '../../services/journal';
+import type { SheetRef } from '../checklists/DailyChecklist';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const MOODS = [
-  { id: 'happy', emoji: '😊', label: 'Happy' },
-  { id: 'angry', emoji: '😠', label: 'Angry' },
-  { id: 'cool', emoji: '😎', label: 'Cool' },
+  { id: 'happy',    emoji: '😊', label: 'Happy' },
+  { id: 'angry',    emoji: '😠', label: 'Angry' },
+  { id: 'cool',     emoji: '😎', label: 'Cool' },
   { id: 'confused', emoji: '😕', label: 'Confused' },
-  { id: 'sad', emoji: '😢', label: 'Sad' },
-  { id: 'blank', emoji: '😐', label: 'Blank' },
+  { id: 'sad',      emoji: '😢', label: 'Sad' },
+  { id: 'blank',    emoji: '😐', label: 'Blank' },
 ] as const;
 
-const JournalSheet = forwardRef<BottomSheet>((_, ref) => {
-  const snapPoints = useMemo(() => ['75%', '95%'], []);
-
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
+const JournalSheet = forwardRef<SheetRef>((_, ref) => {
+  const [visible, setVisible]           = useState(false);
+  const [title, setTitle]               = useState('');
+  const [body, setBody]                 = useState('');
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
-  const [bold, setBold] = useState(false);
-  const [underline, setUnderline] = useState(false);
-  const [align, setAlign] = useState<'left' | 'center' | 'right'>('left');
+  const [bold, setBold]                 = useState(false);
+  const [underline, setUnderline]       = useState(false);
+  const [align, setAlign]               = useState<'left' | 'center' | 'right'>('left');
+  const [saving, setSaving]             = useState(false);
 
-  const [saving, setSaving] = useState(false);
+  const translateY      = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  const openSheet = useCallback(() => {
+    setVisible(true);
+    Animated.parallel([
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 22,
+        mass: 0.9,
+        stiffness: 180,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [translateY, backdropOpacity]);
+
+  const closeSheet = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: SCREEN_HEIGHT,
+        duration: 260,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setVisible(false));
+  }, [translateY, backdropOpacity]);
+
+  useImperativeHandle(ref, () => ({ expand: openSheet, close: closeSheet }));
 
   const handleSubmit = async () => {
     if (!body.trim()) {
@@ -49,13 +91,16 @@ const JournalSheet = forwardRef<BottomSheet>((_, ref) => {
         title: title.trim() || 'Journal Entry',
         body: body.trim(),
       });
-      Alert.alert('Entry saved', 'Your journal entry has been saved.', [
-        { text: 'OK', onPress: () => {
-          setTitle('');
-          setBody('');
-          setSelectedMood(null);
-          (ref as any)?.current?.close();
-        }},
+      Alert.alert('Entry saved ✨', 'Your journal entry has been saved.', [
+        {
+          text: 'OK',
+          onPress: () => {
+            setTitle('');
+            setBody('');
+            setSelectedMood(null);
+            closeSheet();
+          },
+        },
       ]);
     } catch {
       Alert.alert('Error', 'Could not save your entry. Please try again.');
@@ -65,124 +110,150 @@ const JournalSheet = forwardRef<BottomSheet>((_, ref) => {
   };
 
   return (
-    <BottomSheet
-      ref={ref}
-      index={-1}
-      snapPoints={snapPoints}
-      enablePanDownToClose
-      backgroundStyle={styles.bg}
-      handleIndicatorStyle={styles.handle}
-      keyboardBehavior="interactive"
-      keyboardBlurBehavior="restore"
-    >
-      <BottomSheetView style={styles.container}>
-        <Text style={styles.title}>Journal Entry</Text>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={closeSheet}>
+      <KeyboardAvoidingView
+        style={styles.modalWrap}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
+          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={closeSheet} activeOpacity={1} />
+        </Animated.View>
 
-        {/* Mood picker */}
-        <View style={styles.moodRow}>
-          {MOODS.map(mood => (
+        <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
+          {/* Handle */}
+          <View style={styles.handleWrap}>
+            <View style={styles.handle} />
+          </View>
+
+          <Text style={styles.title}>Journal Entry</Text>
+
+          {/* Mood picker */}
+          <View style={styles.moodRow}>
+            {MOODS.map(mood => (
+              <TouchableOpacity
+                key={mood.id}
+                style={[styles.moodBtn, selectedMood === mood.id && styles.moodSelected]}
+                onPress={() => setSelectedMood(mood.id === selectedMood ? null : mood.id)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.moodEmoji}>{mood.emoji}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Toolbar */}
+          <View style={styles.toolbar}>
+            {(['left', 'center', 'right'] as const).map(a => (
+              <TouchableOpacity
+                key={a}
+                style={[styles.toolBtn, align === a && styles.toolActive]}
+                onPress={() => setAlign(a)}
+              >
+                <Ionicons
+                  name={
+                    a === 'left'
+                      ? 'reorder-three-outline'
+                      : a === 'center'
+                      ? 'menu-outline'
+                      : 'reorder-two-outline'
+                  }
+                  size={18}
+                  color={align === a ? Colors.primary : Colors.textMuted}
+                />
+              </TouchableOpacity>
+            ))}
+            <View style={styles.toolDivider} />
             <TouchableOpacity
-              key={mood.id}
-              style={[styles.moodBtn, selectedMood === mood.id && styles.moodSelected]}
-              onPress={() => setSelectedMood(mood.id === selectedMood ? null : mood.id)}
+              style={[styles.toolBtn, bold && styles.toolActive]}
+              onPress={() => setBold(v => !v)}
             >
-              <Text style={styles.moodEmoji}>{mood.emoji}</Text>
+              <Text style={[styles.toolBold, bold && { color: Colors.primary }]}>B</Text>
             </TouchableOpacity>
-          ))}
-        </View>
+            <TouchableOpacity
+              style={[styles.toolBtn, underline && styles.toolActive]}
+              onPress={() => setUnderline(v => !v)}
+            >
+              <Text style={[styles.toolUnderline, underline && { color: Colors.primary }]}>U</Text>
+            </TouchableOpacity>
+            <View style={styles.toolDivider} />
+            <TouchableOpacity style={styles.toolBtn}>
+              <Ionicons name="attach-outline" size={18} color={Colors.textMuted} />
+            </TouchableOpacity>
+          </View>
 
-        {/* Toolbar */}
-        <View style={styles.toolbar}>
-          <TouchableOpacity
-            style={[styles.toolBtn, align === 'left' && styles.toolActive]}
-            onPress={() => setAlign('left')}
-          >
-            <Ionicons name="reorder-three-outline" size={18} color={align === 'left' ? Colors.primary : Colors.textMuted} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toolBtn, align === 'center' && styles.toolActive]}
-            onPress={() => setAlign('center')}
-          >
-            <Ionicons name="menu-outline" size={18} color={align === 'center' ? Colors.primary : Colors.textMuted} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toolBtn, align === 'right' && styles.toolActive]}
-            onPress={() => setAlign('right')}
-          >
-            <Ionicons name="reorder-two-outline" size={18} color={align === 'right' ? Colors.primary : Colors.textMuted} />
-          </TouchableOpacity>
-          <View style={styles.toolDivider} />
-          <TouchableOpacity
-            style={[styles.toolBtn, bold && styles.toolActive]}
-            onPress={() => setBold(v => !v)}
-          >
-            <Text style={[styles.toolBold, bold && { color: Colors.primary }]}>B</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toolBtn, underline && styles.toolActive]}
-            onPress={() => setUnderline(v => !v)}
-          >
-            <Text style={[styles.toolUnderline, underline && { color: Colors.primary }]}>U</Text>
-          </TouchableOpacity>
-          <View style={styles.toolDivider} />
-          <TouchableOpacity style={styles.toolBtn}>
-            <Ionicons name="attach-outline" size={18} color={Colors.textMuted} />
-          </TouchableOpacity>
-        </View>
+          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+            <TextInput
+              style={styles.titleInput}
+              placeholder="Write a title here"
+              placeholderTextColor={Colors.textMuted}
+              value={title}
+              onChangeText={setTitle}
+            />
+            <TextInput
+              style={[
+                styles.bodyInput,
+                bold && { fontWeight: '700' },
+                underline && { textDecorationLine: 'underline' },
+                { textAlign: align },
+              ]}
+              placeholder="Write about how you're feeling today…"
+              placeholderTextColor={Colors.textMuted}
+              value={body}
+              onChangeText={setBody}
+              multiline
+              numberOfLines={10}
+              textAlignVertical="top"
+            />
+          </ScrollView>
 
-        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-          {/* Title */}
-          <TextInput
-            style={styles.titleInput}
-            placeholder="Write a title here"
-            placeholderTextColor={Colors.textMuted}
-            value={title}
-            onChangeText={setTitle}
-          />
-
-          {/* Body */}
-          <TextInput
-            style={[
-              styles.bodyInput,
-              bold && { fontWeight: '700' },
-              underline && { textDecorationLine: 'underline' },
-              { textAlign: align },
-            ]}
-            placeholder="Write about how you're feeling today and what you did…"
-            placeholderTextColor={Colors.textMuted}
-            value={body}
-            onChangeText={setBody}
-            multiline
-            numberOfLines={10}
-            textAlignVertical="top"
-          />
-        </ScrollView>
-
-        {/* Submit */}
-        <TouchableOpacity
-          style={[styles.submitBtn, (!body.trim() || saving) && styles.submitDisabled]}
-          onPress={handleSubmit}
-          disabled={!body.trim() || saving}
-        >
-          <Text style={styles.submitText}>{saving ? 'Saving…' : 'Submit Entry'}</Text>
-        </TouchableOpacity>
-      </BottomSheetView>
-    </BottomSheet>
+          <TouchableOpacity
+            style={[styles.submitBtn, (!body.trim() || saving) && styles.submitDisabled]}
+            onPress={handleSubmit}
+            disabled={!body.trim() || saving}
+          >
+            <Text style={styles.submitText}>{saving ? 'Saving…' : 'Submit Entry'}</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </KeyboardAvoidingView>
+    </Modal>
   );
 });
 
 JournalSheet.displayName = 'JournalSheet';
-
 export default JournalSheet;
 
 const styles = StyleSheet.create({
-  bg: { backgroundColor: Colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
-  handle: { backgroundColor: Colors.border, width: 36, height: 4 },
-  container: {
+  modalWrap: {
     flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  sheet: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: SCREEN_HEIGHT * 0.9,
     paddingHorizontal: 24,
-    paddingTop: 4,
     paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  handleWrap: {
+    alignItems: 'center',
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
   },
   title: { fontSize: 20, fontFamily: Fonts.poppinsBold, color: Colors.text, marginBottom: 16 },
   moodRow: {
@@ -223,9 +294,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toolActive: { backgroundColor: Colors.primaryLight },
-  toolBold: { fontSize: 15, fontFamily: Fonts.poppinsBold, color: Colors.textMuted },
-  toolUnderline: { fontSize: 15, fontFamily: Fonts.poppinsBold, textDecorationLine: 'underline', color: Colors.textMuted },
-  toolDivider: { width: 1, height: 20, backgroundColor: Colors.border, marginHorizontal: 4 },
+  toolBold: {
+    fontSize: 15,
+    fontFamily: Fonts.poppinsBold,
+    color: Colors.textMuted,
+  },
+  toolUnderline: {
+    fontSize: 15,
+    fontFamily: Fonts.poppinsBold,
+    textDecorationLine: 'underline',
+    color: Colors.textMuted,
+  },
+  toolDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: Colors.border,
+    marginHorizontal: 4,
+  },
   titleInput: {
     fontSize: 18,
     fontFamily: Fonts.poppinsSemiBold,

@@ -1,100 +1,203 @@
-import React, { forwardRef, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Animated,
+  Dimensions,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 import { useChecklistStore } from '../../store/checklist';
 
-const ChecklistSheet = forwardRef<BottomSheet>((_, ref) => {
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+
+export interface SheetRef {
+  expand: () => void;
+  close: () => void;
+}
+
+const ChecklistSheet = forwardRef<SheetRef>((_, ref) => {
   const { items, toggleItem } = useChecklistStore();
-  const snapPoints = useMemo(() => ['60%', '85%'], []);
+  const [visible, setVisible] = useState(false);
+  const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  const openSheet = useCallback(() => {
+    setVisible(true);
+    Animated.parallel([
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 22,
+        mass: 0.9,
+        stiffness: 180,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [translateY, backdropOpacity]);
+
+  const closeSheet = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: SCREEN_HEIGHT,
+        duration: 260,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setVisible(false));
+  }, [translateY, backdropOpacity]);
+
+  useImperativeHandle(ref, () => ({ expand: openSheet, close: closeSheet }));
 
   const completed = items.filter(i => i.completed).length;
-
-  const handleToggle = useCallback((id: string) => {
-    toggleItem(id);
-  }, [toggleItem]);
+  const progress = items.length > 0 ? (completed / items.length) * 100 : 0;
 
   return (
-    <BottomSheet
-      ref={ref}
-      index={-1}
-      snapPoints={snapPoints}
-      enablePanDownToClose
-      backgroundStyle={styles.bg}
-      handleIndicatorStyle={styles.handle}
-    >
-      <BottomSheetView style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Daily Checklist</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{completed}/{items.length}</Text>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={closeSheet}>
+      <View style={styles.modalWrap}>
+        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
+          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={closeSheet} activeOpacity={1} />
+        </Animated.View>
+
+        <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
+          {/* Handle */}
+          <View style={styles.handleWrap}>
+            <View style={styles.handle} />
           </View>
-        </View>
-        <Text style={styles.subtitle}>Remember to always celebrate your small achievements.</Text>
 
-        {/* Progress */}
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${items.length > 0 ? (completed / items.length) * 100 : 0}%` },
-            ]}
-          />
-        </View>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Daily Checklist</Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{completed}/{items.length}</Text>
+            </View>
+          </View>
+          <Text style={styles.subtitle}>Celebrate every small achievement. 🎉</Text>
 
-        {/* Items */}
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {items.map(item => (
-            <TouchableOpacity
-              key={item.id}
-              style={[styles.item, item.completed && styles.itemDone]}
-              onPress={() => handleToggle(item.id)}
-              activeOpacity={0.85}
-            >
-              <View style={[styles.check, item.completed && styles.checkDone]}>
-                {item.completed && <Ionicons name="checkmark" size={14} color={Colors.white} />}
-              </View>
-              <View style={styles.itemInfo}>
-                <Text style={[styles.itemLabel, item.completed && styles.itemLabelDone]}>
-                  {item.label}
-                </Text>
-                <Text style={styles.itemProgress}>
-                  Today: {item.current}/{item.target}
-                </Text>
-              </View>
-              <View style={[
-                styles.toggle,
-                item.completed && styles.toggleOn,
-              ]}>
-                <View style={[
-                  styles.toggleThumb,
-                  item.completed && styles.toggleThumbOn,
-                ]} />
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </BottomSheetView>
-    </BottomSheet>
+          {/* Progress bar */}
+          <View style={styles.progressTrack}>
+            <Animated.View style={[styles.progressFill, { width: `${progress}%` as any }]} />
+          </View>
+
+          {/* Items */}
+          <ScrollView showsVerticalScrollIndicator={false} style={styles.list}>
+            {items.map((item, idx) => (
+              <ChecklistItem
+                key={item.id}
+                item={item}
+                index={idx}
+                onToggle={toggleItem}
+              />
+            ))}
+            <View style={{ height: 32 }} />
+          </ScrollView>
+        </Animated.View>
+      </View>
+    </Modal>
   );
 });
 
-ChecklistSheet.displayName = 'ChecklistSheet';
+function ChecklistItem({
+  item,
+  index,
+  onToggle,
+}: {
+  item: { id: string; label: string; completed: boolean; current: number; target: number };
+  index: number;
+  onToggle: (id: string) => void;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
 
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.spring(scale, { toValue: 0.93, useNativeDriver: true, speed: 40 }),
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 20 }),
+    ]).start();
+    onToggle(item.id);
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <TouchableOpacity
+        style={[styles.item, item.completed && styles.itemDone]}
+        onPress={handlePress}
+        activeOpacity={0.9}
+      >
+        <View style={[styles.check, item.completed && styles.checkDone]}>
+          {item.completed && <Ionicons name="checkmark" size={14} color={Colors.white} />}
+        </View>
+        <View style={styles.itemInfo}>
+          <Text style={[styles.itemLabel, item.completed && styles.itemLabelDone]}>
+            {item.label}
+          </Text>
+          <Text style={styles.itemProgress}>
+            Today: {item.current}/{item.target}
+          </Text>
+        </View>
+        <View style={[styles.toggle, item.completed && styles.toggleOn]}>
+          <View style={[styles.toggleThumb, item.completed && styles.toggleThumbOn]} />
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
+ChecklistSheet.displayName = 'ChecklistSheet';
 export default ChecklistSheet;
 
 const styles = StyleSheet.create({
-  bg: { backgroundColor: Colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
-  handle: { backgroundColor: Colors.border, width: 36, height: 4 },
-  container: { flex: 1, paddingHorizontal: 24, paddingTop: 4, paddingBottom: 32 },
+  modalWrap: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  sheet: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: SCREEN_HEIGHT * 0.85,
+    paddingHorizontal: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  handleWrap: {
+    alignItems: 'center',
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 6,
+    marginTop: 4,
   },
   title: { fontSize: 20, fontFamily: Fonts.poppinsBold, color: Colors.text },
   badge: {
@@ -104,19 +207,26 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeText: { color: Colors.primary, fontFamily: Fonts.poppinsBold, fontSize: 13 },
-  subtitle: { fontSize: 14, color: Colors.textMuted, marginBottom: 16, lineHeight: 20, fontFamily: Fonts.jost },
+  subtitle: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    marginBottom: 16,
+    lineHeight: 20,
+    fontFamily: Fonts.jost,
+  },
   progressTrack: {
-    height: 4,
+    height: 6,
     backgroundColor: Colors.primaryLight,
-    borderRadius: 2,
+    borderRadius: 3,
     overflow: 'hidden',
     marginBottom: 20,
   },
   progressFill: {
-    height: 4,
+    height: 6,
     backgroundColor: Colors.primary,
-    borderRadius: 2,
+    borderRadius: 3,
   },
+  list: { flex: 1 },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
