@@ -1,6 +1,6 @@
 {
   "name": "recoverly",
-  "version": "1.0.46",
+  "version": "1.0.47",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -13,8 +13,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json}\""
   },
   "dependencies": {
-    "@expo-google-fonts/jost": "^0.4.2",
-    "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/drawer": "^7.8.1",
