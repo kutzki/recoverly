@@ -2,7 +2,7 @@
   "expo": {
     "name": "recoverly",
     "slug": "recoverly",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -23,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.recoverly.app",
-      "versionCode": 20001,
+      "versionCode": 20002,
+      "softwareKeyboardLayoutMode": "pan",
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",

@@ -1,24 +1,26 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ScrollView, Alert, Dimensions,
+  KeyboardAvoidingView, Platform, ScrollView, Alert, Image, TextInput as RNTextInput,
 } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { authService } from '../../services/auth';
 import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
-const { width } = Dimensions.get('window');
-
 export default function SignIn() {
-  const insets  = useSafeAreaInsets();
-  const setAuth = useAuthStore((s) => s.setAuth);
-  const [email,    setEmail]    = useState('');
-  const [password, setPassword] = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const insets       = useSafeAreaInsets();
+  const setAuth      = useAuthStore((s) => s.setAuth);
+  const [email,      setEmail]      = useState('');
+  const [password,   setPassword]   = useState('');
+  const [showPass,   setShowPass]   = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const passwordRef  = useRef<RNTextInput>(null);
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) return;
@@ -42,7 +44,8 @@ export default function SignIn() {
       style={styles.gradient}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'android' ? 0 : 0}
         style={styles.kav}
       >
         <ScrollView
@@ -50,20 +53,23 @@ export default function SignIn() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Logo area */}
-          <View style={styles.logoArea}>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoEmoji}>🟣</Text>
-            </View>
-            <Text style={styles.appName}>recoverly</Text>
-          </View>
+          {/* Logo */}
+          <Animated.View entering={FadeInDown.duration(400).delay(0)} style={styles.logoArea}>
+            <Image
+              source={require('../../assets/Logo Icon.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </Animated.View>
 
           {/* Heading */}
-          <Text style={styles.heading}>Welcome Back</Text>
-          <Text style={styles.subheading}>Sign in to continue your journey</Text>
+          <Animated.View entering={FadeInDown.duration(400).delay(80)}>
+            <Text style={styles.heading}>Welcome Back</Text>
+            <Text style={styles.subheading}>Sign in to continue your journey</Text>
+          </Animated.View>
 
           {/* Form */}
-          <View style={styles.form}>
+          <Animated.View entering={FadeInDown.duration(400).delay(160)} style={styles.form}>
             <View style={styles.field}>
               <Text style={styles.label}>Email</Text>
               <TextInput
@@ -75,21 +81,37 @@ export default function SignIn() {
                 autoCapitalize="none"
                 keyboardType="email-address"
                 returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                blurOnSubmit={false}
               />
             </View>
 
             <View style={styles.field}>
               <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="••••••••"
-                placeholderTextColor={Colors.placeholderText}
-                secureTextEntry
-                returnKeyType="done"
-                onSubmitEditing={handleSignIn}
-              />
+              <View style={styles.inputRow}>
+                <TextInput
+                  ref={passwordRef}
+                  style={styles.inputFlex}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="••••••••"
+                  placeholderTextColor={Colors.placeholderText}
+                  secureTextEntry={!showPass}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSignIn}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPass((v) => !v)}
+                  style={styles.eyeBtn}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={showPass ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={Colors.textMuted}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -100,15 +122,15 @@ export default function SignIn() {
             >
               <Text style={styles.buttonText}>{loading ? 'Signing in…' : 'Sign In'}</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
 
           {/* Footer */}
-          <View style={styles.footer}>
+          <Animated.View entering={FadeInDown.duration(400).delay(240)} style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => router.replace('/(auth)/sign-up')}>
               <Text style={styles.footerLink}>Sign Up</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -121,25 +143,16 @@ const styles = StyleSheet.create({
   scroll:   { flexGrow: 1, paddingHorizontal: 30, alignItems: 'center' },
 
   logoArea:  { alignItems: 'center', marginBottom: 40 },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  logoEmoji: { fontSize: 40 },
-  appName:   { fontFamily: Fonts.poppinsBold, fontSize: 24, color: Colors.primary },
+  logoImage: { width: 120, height: 120 },
 
-  heading:    { fontFamily: Fonts.poppinsBold,     fontSize: 26, color: Colors.text,      marginBottom: 8,  textAlign: 'center' },
-  subheading: { fontFamily: Fonts.jost,            fontSize: 15, color: Colors.textMuted, marginBottom: 36, textAlign: 'center' },
+  heading:    { fontFamily: Fonts.poppinsBold, fontSize: 26, color: Colors.text, marginBottom: 8, textAlign: 'center' },
+  subheading: { fontFamily: Fonts.jost, fontSize: 15, color: Colors.textMuted, marginBottom: 36, textAlign: 'center' },
 
   form: { width: '100%', gap: 16, marginBottom: 32 },
 
   field: { gap: 6 },
   label: { fontFamily: Fonts.poppinsMedium, fontSize: 13, color: Colors.text },
+
   input: {
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -150,6 +163,27 @@ const styles = StyleSheet.create({
     color: Colors.text,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  inputFlex: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontFamily: Fonts.jost,
+    fontSize: 15,
+    color: Colors.text,
+  },
+  eyeBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
   },
 
   button: {

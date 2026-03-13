@@ -41,7 +41,7 @@ export default function BasicInfo() {
       colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
       style={styles.gradient}
     >
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.kav}>
+      <KeyboardAvoidingView behavior="padding" style={styles.kav}>
         <ScrollView
           contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 30, paddingBottom: insets.bottom + 40 }]}
           keyboardShouldPersistTaps="handled"
