@@ -1,55 +1,49 @@
-import { supabase, getJournalEntries, insertJournalEntry, updateJournalEntry, deleteJournalEntry } from './supabase';
+import { supabase } from './supabase';
 
-export interface JournalEntry {
+export type JournalEntry = {
   id: string;
+  user_id: string;
   date: string;
-  mood: string;
-  title: string;
-  body: string;
-  createdAt: string;
-}
-
-async function getCurrentUserId(): Promise<string | null> {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user?.id ?? null;
-}
+  mood: number | null;
+  title: string | null;
+  body: string | null;
+  created_at: string;
+};
 
 export const journalService = {
-  async getEntries(): Promise<JournalEntry[]> {
-    try {
-      const userId = await getCurrentUserId();
-      if (!userId) return [];
-      const rows = await getJournalEntries(userId);
-      return rows.map(r => ({
-        id: r.id,
-        date: r.date,
-        mood: r.mood,
-        title: r.title,
-        body: r.body,
-        createdAt: r.created_at,
-      }));
-    } catch {
-      return [];
-    }
+  async getEntries(userId: string): Promise<JournalEntry[]> {
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data ?? [];
   },
 
-  async createEntry(entry: Omit<JournalEntry, 'id' | 'createdAt'>): Promise<JournalEntry> {
-    const userId = await getCurrentUserId();
-    if (!userId) throw new Error('You must be signed in to save a journal entry.');
-    const row = await insertJournalEntry(userId, entry);
-    if (!row) throw new Error('Could not save your entry. Please try again.');
-    return { id: row.id, date: row.date, mood: row.mood, title: row.title, body: row.body, createdAt: row.created_at };
+  async createEntry(entry: Omit<JournalEntry, 'id' | 'created_at'>): Promise<JournalEntry> {
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .insert(entry)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as JournalEntry;
   },
 
-  async updateEntry(id: string, updates: Partial<JournalEntry>): Promise<void> {
-    await updateJournalEntry(id, {
-      mood: updates.mood,
-      title: updates.title,
-      body: updates.body,
-    });
+  async updateEntry(id: string, updates: Partial<JournalEntry>): Promise<JournalEntry> {
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as JournalEntry;
   },
 
   async deleteEntry(id: string): Promise<void> {
-    await deleteJournalEntry(id);
+    const { error } = await supabase.from('journal_entries').delete().eq('id', id);
+    if (error) throw error;
   },
 };

@@ -1,34 +1,19 @@
-import { useEffect, useRef } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppState, AppStateStatus, StyleSheet } from 'react-native';
-import { useAuthStore } from '../store/auth';
-import { useChecklistStore } from '../store/checklist';
+import { StyleSheet } from 'react-native';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+
+// NOTE: Fonts are loaded natively by the expo-font plugin in app.json.
+// DO NOT add useFonts() here. DO NOT add a null-return guard. Either will crash the app.
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 2, staleTime: 1000 * 60 * 5 } },
 });
 
-function RootLayout() {
-  const loadStoredAuth = useAuthStore((s) => s.loadStoredAuth);
-  const loadChecklist  = useChecklistStore((s) => s.loadChecklist);
-  const appState       = useRef<AppStateStatus>(AppState.currentState);
-
-  useEffect(() => {
-    loadStoredAuth();
-    const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
-      if (appState.current.match(/inactive|background/) && next === 'active') {
-        loadChecklist();
-      }
-      appState.current = next;
-    });
-    return () => sub.remove();
-  }, []);
-
+export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
@@ -50,5 +35,3 @@ function RootLayout() {
 }
 
 const styles = StyleSheet.create({ root: { flex: 1 } });
-
-export default RootLayout;

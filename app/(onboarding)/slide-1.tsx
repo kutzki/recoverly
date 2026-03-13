@@ -1,59 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
-import { Button } from '../../components/ui/Button';
 
 const { width } = Dimensions.get('window');
 
-export default function OnboardingSlide1() {
+export default function Slide1() {
+  const insets = useSafeAreaInsets();
+
   return (
     <LinearGradient
       colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
-      style={styles.container}
+      style={styles.gradient}
     >
-      {/* Skip */}
-      <TouchableOpacity style={styles.skip} onPress={() => router.replace('/(auth)/sign-up')}>
-        <Text style={styles.skipText}>Skip</Text>
-      </TouchableOpacity>
-
-      {/* Illustration — diverse community on a map */}
-      <View style={styles.illustration}>
-        {/* Map placeholder */}
-        <View style={styles.mapBg}>
-          <Ionicons name="map-outline" size={80} color={Colors.primaryLight} />
-        </View>
-        {/* Avatar bubbles */}
-        {[
-          { top: 10, left: 30, size: 52, initial: 'A' },
-          { top: -10, right: 20, size: 60, initial: 'J' },
-          { top: 60, left: 90, size: 56, initial: 'M' },
-          { bottom: 10, left: 10, size: 48, initial: 'S' },
-          { bottom: 0, right: 10, size: 64, initial: 'R' },
-        ].map((av, i) => (
-          <View
-            key={i}
-            style={[styles.avatar, {
-              width: av.size, height: av.size, borderRadius: av.size / 2,
-              top: av.top, left: (av as any).left, right: (av as any).right,
-              bottom: (av as any).bottom,
-              backgroundColor: i % 2 === 0 ? Colors.primaryLight : Colors.accentLight,
-            }]}
-          >
-            <Text style={[styles.avatarText, { fontSize: av.size * 0.35 }]}>{av.initial}</Text>
+      <View style={[styles.container, { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 }]}>
+        {/* Illustration placeholder area */}
+        <View style={styles.illustration}>
+          <View style={styles.illustrationInner}>
+            <Text style={styles.illustrationIcon}>🗺️</Text>
           </View>
-        ))}
-      </View>
+        </View>
 
-      {/* Text */}
-      <View style={styles.content}>
-        <Text style={styles.body}>
-          We're here to support you on your{'\n'}recovery journey. Let's get started by{'\n'}
-          setting up your <Text style={styles.accent}>personalized experience.</Text>
-        </Text>
+        {/* Copy */}
+        <View style={styles.copy}>
+          <Text style={styles.heading}>You're Not Alone</Text>
+          <Text style={styles.body}>
+            Connect with a community of people on the same journey. Find meetings, mentors, and
+            support near you.
+          </Text>
+        </View>
 
         {/* Dots */}
         <View style={styles.dots}>
@@ -62,9 +39,17 @@ export default function OnboardingSlide1() {
           <View style={styles.dot} />
         </View>
 
-        {/* Next */}
-        <TouchableOpacity style={styles.nextBtn} onPress={() => router.push('/(onboarding)/slide-2')}>
-          <Ionicons name="arrow-forward" size={22} color={Colors.white} />
+        {/* CTA */}
+        <TouchableOpacity
+          style={styles.button}
+          activeOpacity={0.85}
+          onPress={() => router.push('/(onboarding)/slide-2')}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.replace('/(auth)/sign-in')}>
+          <Text style={styles.skip}>Skip</Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>
@@ -72,33 +57,62 @@ export default function OnboardingSlide1() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 60 },
-  skip: { position: 'absolute', top: 60, right: 24, zIndex: 10 },
-  skipText: { color: Colors.primary, fontSize: 15, fontFamily: Fonts.poppinsMedium },
+  gradient:  { flex: 1 },
+  container: { flex: 1, alignItems: 'center', paddingHorizontal: 30 },
+
   illustration: {
-    height: 260, marginHorizontal: 24, position: 'relative',
-    alignItems: 'center', justifyContent: 'center',
+    width: width * 0.7,
+    height: width * 0.7,
+    borderRadius: width * 0.35,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 48,
   },
-  mapBg: {
-    width: 200, height: 200, borderRadius: 100,
-    backgroundColor: Colors.gradientStart,
-    alignItems: 'center', justifyContent: 'center',
+  illustrationInner: {
+    width: width * 0.5,
+    height: width * 0.5,
+    borderRadius: width * 0.25,
+    backgroundColor: 'rgba(183,64,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  avatar: {
-    position: 'absolute', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 3, borderColor: Colors.white,
+  illustrationIcon: { fontSize: 80 },
+
+  copy: { alignItems: 'center', marginBottom: 40 },
+  heading: {
+    fontFamily: Fonts.poppinsBold,
+    fontSize: 28,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  avatarText: { fontFamily: Fonts.poppinsBold, color: Colors.primary },
-  content: { flex: 1, paddingHorizontal: 28, paddingBottom: 50, justifyContent: 'flex-end' },
-  body: { fontSize: 17, fontFamily: Fonts.jost, color: Colors.text, lineHeight: 26, marginBottom: 32 },
-  accent: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
-  dots: { flexDirection: 'row', gap: 8, marginBottom: 30 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primaryLight },
-  dotActive: { width: 22, backgroundColor: Colors.primary },
-  nextBtn: {
-    width: 54, height: 54, borderRadius: 27,
+  body: {
+    fontFamily: Fonts.jost,
+    fontSize: 15,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+
+  dots: { flexDirection: 'row', gap: 8, marginBottom: 40 },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primaryLight,
+  },
+  dotActive: { backgroundColor: Colors.primary, width: 24 },
+
+  button: {
     backgroundColor: Colors.primary,
-    alignItems: 'center', justifyContent: 'center',
-    alignSelf: 'flex-end',
+    width: width - 60,
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginBottom: 16,
   },
+  buttonText: { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.white },
+
+  skip: { fontFamily: Fonts.jost, fontSize: 14, color: Colors.textMuted },
 });

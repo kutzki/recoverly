@@ -1,99 +1,51 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
 const { width } = Dimensions.get('window');
 
-const FEATURES = [
-  { icon: 'timer-outline' as const, label: 'Track your sobriety' },
-  { icon: 'people-outline' as const, label: 'Connect with a community' },
-  { icon: 'shield-checkmark-outline' as const, label: 'SOS crisis support' },
-  { icon: 'journal-outline' as const, label: 'Daily check-ins & journal' },
-];
+export default function Slide3() {
+  const insets = useSafeAreaInsets();
 
-export default function OnboardingSlide3() {
   return (
     <LinearGradient
       colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
-      style={styles.container}
+      style={styles.gradient}
     >
-      <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={24} color={Colors.primary} />
-      </TouchableOpacity>
-
-      {/* Illustration — glowing ring with icon */}
-      <View style={styles.illustration}>
-        <View style={styles.outerRing} />
-        <View style={styles.midRing} />
-        <View style={styles.innerCircle}>
-          <Ionicons name="heart" size={44} color={Colors.white} />
-        </View>
-        {/* Floating feature bubbles */}
-        <View style={[styles.bubble, styles.bubble1]}>
-          <Ionicons name="checkmark-circle" size={18} color={Colors.primary} />
-        </View>
-        <View style={[styles.bubble, styles.bubble2]}>
-          <Ionicons name="star" size={18} color={Colors.accent} />
-        </View>
-        <View style={[styles.bubble, styles.bubble3]}>
-          <Ionicons name="flash" size={18} color={Colors.success} />
-        </View>
-      </View>
-
-      <View style={styles.content}>
-        <Text style={styles.headline}>
-          Start your{' '}
-          <Text style={styles.accent}>recovery</Text>
-          {'\n'}journey today.
-        </Text>
-
-        <View style={styles.features}>
-          {FEATURES.map((f, i) => (
-            <View key={i} style={styles.featureRow}>
-              <View style={styles.featureIconWrap}>
-                <Ionicons name={f.icon} size={18} color={Colors.primary} />
-              </View>
-              <Text style={styles.featureLabel}>{f.label}</Text>
-            </View>
-          ))}
+      <View style={[styles.container, { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 }]}>
+        <View style={styles.illustration}>
+          <View style={styles.illustrationInner}>
+            <Text style={styles.illustrationIcon}>🆘</Text>
+          </View>
         </View>
 
-        {/* Pagination dots */}
+        <View style={styles.copy}>
+          <Text style={styles.heading}>Help When You Need It</Text>
+          <Text style={styles.body}>
+            One tap connects you to crisis lines, coping tools, and your support network — 24
+            hours a day, 7 days a week.
+          </Text>
+        </View>
+
         <View style={styles.dots}>
           <View style={styles.dot} />
           <View style={styles.dot} />
           <View style={[styles.dot, styles.dotActive]} />
         </View>
 
-        {/* CTAs */}
         <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={() => router.push('/(auth)/sign-up')}
+          style={styles.button}
           activeOpacity={0.85}
+          onPress={() => router.replace('/(auth)/sign-up')}
         >
-          <Text style={styles.primaryBtnText}>Get Started</Text>
-          <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+          <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.secondaryBtn}
-          onPress={() => router.push('/(auth)/sign-in')}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.secondaryBtnText}>
-            Already have an account?{' '}
-            <Text style={styles.signInLink}>Sign in</Text>
-          </Text>
+        <TouchableOpacity onPress={() => router.replace('/(auth)/sign-in')}>
+          <Text style={styles.skip}>Already have an account? Sign in</Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>
@@ -101,111 +53,62 @@ export default function OnboardingSlide3() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 60 },
-  back: { position: 'absolute', top: 60, left: 20, zIndex: 10, padding: 4 },
+  gradient:  { flex: 1 },
+  container: { flex: 1, alignItems: 'center', paddingHorizontal: 30 },
 
   illustration: {
-    height: 260,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  outerRing: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    width: width * 0.7,
+    height: width * 0.7,
+    borderRadius: width * 0.35,
     backgroundColor: Colors.primaryLight,
-    opacity: 0.4,
-  },
-  midRing: {
-    position: 'absolute',
-    width: 148,
-    height: 148,
-    borderRadius: 74,
-    backgroundColor: Colors.primaryLight,
-    opacity: 0.7,
-  },
-  innerCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 8,
+    marginBottom: 48,
   },
-  bubble: {
-    position: 'absolute',
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: Colors.white,
+  illustrationInner: {
+    width: width * 0.5,
+    height: width * 0.5,
+    borderRadius: width * 0.25,
+    backgroundColor: 'rgba(183,64,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
   },
-  bubble1: { top: 30, left: width * 0.15 },
-  bubble2: { top: 30, right: width * 0.15 },
-  bubble3: { bottom: 20, right: width * 0.22 },
+  illustrationIcon: { fontSize: 80 },
 
-  content: {
-    flex: 1,
-    paddingHorizontal: 28,
-    paddingBottom: 48,
-    justifyContent: 'flex-end',
-  },
-  headline: {
-    fontSize: 28,
+  copy: { alignItems: 'center', marginBottom: 40 },
+  heading: {
     fontFamily: Fonts.poppinsBold,
+    fontSize: 28,
     color: Colors.text,
-    lineHeight: 36,
-    marginBottom: 24,
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  accent: { color: Colors.primary },
+  body: {
+    fontFamily: Fonts.jost,
+    fontSize: 15,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
 
-  features: { gap: 10, marginBottom: 28 },
-  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  featureIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+  dots: { flexDirection: 'row', gap: 8, marginBottom: 40 },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  featureLabel: { fontSize: 14, fontFamily: Fonts.poppinsMedium, color: Colors.text },
+  dotActive: { backgroundColor: Colors.primary, width: 24 },
 
-  dots: { flexDirection: 'row', gap: 8, marginBottom: 28 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primaryLight },
-  dotActive: { width: 22, backgroundColor: Colors.primary },
-
-  primaryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+  button: {
     backgroundColor: Colors.primary,
-    borderRadius: 999,
+    width: width - 60,
     paddingVertical: 16,
-    marginBottom: 14,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 5,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  primaryBtnText: { fontSize: 16, fontFamily: Fonts.poppinsBold, color: Colors.white },
+  buttonText: { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.white },
 
-  secondaryBtn: { alignItems: 'center', paddingVertical: 4 },
-  secondaryBtnText: { fontSize: 14, fontFamily: Fonts.jost, color: Colors.textMuted },
-  signInLink: { color: Colors.primary, fontFamily: Fonts.poppinsSemiBold },
+  skip: { fontFamily: Fonts.jost, fontSize: 14, color: Colors.textMuted },
 });

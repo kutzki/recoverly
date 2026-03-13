@@ -1,277 +1,156 @@
-import React, { ComponentProps, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated } from 'react-native';
-import { OverlayProvider } from 'stream-chat-react-native';
+import { Tabs, router } from 'expo-router';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
-import { DrawerProvider, useDrawer } from '../../components/DrawerContext';
-import DrawerContent from '../../components/DrawerContent';
 
-/* ─── Animated tab icon — bounces when focused ─── */
-function AnimatedTabIcon({
-  name,
-  color,
-  size,
-  focused,
-}: {
-  name: ComponentProps<typeof Ionicons>['name'];
-  color: string;
-  size: number;
-  focused: boolean;
-}) {
-  const scale = useRef(new Animated.Value(1)).current;
+// ── Tab definitions (4 real tabs + panic button in center) ───────────────────
 
-  useEffect(() => {
-    if (focused) {
-      Animated.sequence([
-        Animated.spring(scale, { toValue: 1.25, useNativeDriver: true, speed: 28, bounciness: 10 }),
-        Animated.spring(scale, { toValue: 1.0,  useNativeDriver: true, speed: 18 }),
-      ]).start();
-    }
-  }, [focused]);
+const LEFT_TABS  = [
+  { name: 'home',      icon: 'home-outline',   activeIcon: 'home'    as const },
+  { name: 'apps',      icon: 'grid-outline',   activeIcon: 'grid'    as const },
+];
+const RIGHT_TABS = [
+  { name: 'favorites', icon: 'heart-outline',  activeIcon: 'heart'   as const },
+  { name: 'profile',   icon: 'person-outline', activeIcon: 'person'  as const },
+];
 
-  return (
-    <Animated.View style={{ transform: [{ scale }] }}>
-      <Ionicons name={name} size={size} color={color} />
-    </Animated.View>
-  );
-}
+// ── Custom bottom tab bar ────────────────────────────────────────────────────
 
-/* ─── SOS panic button — gentle glowing pulse ─── */
-function SOSTabIcon({ focused }: { focused: boolean }) {
-  const glow = useRef(new Animated.Value(0)).current;
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glow, { toValue: 1, duration: 1200, useNativeDriver: true }),
-        Animated.timing(glow, { toValue: 0, duration: 1200, useNativeDriver: true }),
-      ])
+  const renderTab = (
+    item: { name: string; icon: string; activeIcon: string },
+    i: number,
+  ) => {
+    const routeIndex = state.routes.findIndex((r) => r.name === item.name);
+    const isActive   = state.index === routeIndex;
+    return (
+      <TouchableOpacity
+        key={item.name}
+        style={styles.tabItem}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate(item.name)}
+      >
+        <Ionicons
+          name={(isActive ? item.activeIcon : item.icon) as any}
+          size={24}
+          color={isActive ? Colors.navIconActive : Colors.navIcon}
+        />
+      </TouchableOpacity>
     );
-    pulse.start();
-    return () => pulse.stop();
-  }, []);
-
-  const glowScale = glow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] });
+  };
 
   return (
-    <View style={sosStyles.container}>
-      <Animated.View style={{ transform: [{ scale: glowScale }] }}>
+    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+      {LEFT_TABS.map(renderTab)}
+
+      {/* Panic Button — center, raised */}
+      <TouchableOpacity
+        style={styles.panicWrapper}
+        activeOpacity={0.85}
+        onPress={() => router.push('/(app)/sos')}
+      >
         <LinearGradient
           colors={[Colors.primaryDark, Colors.primaryMid]}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={sosStyles.pill}
+          style={styles.panicGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
         >
-          <Ionicons name="alert" size={18} color={Colors.white} />
+          <Text style={styles.panicBang}>!</Text>
         </LinearGradient>
-      </Animated.View>
-      <Text style={sosStyles.label}>Panic{'\n'}Button</Text>
+        <Text style={styles.panicLabel}>{'Panic\nButton'}</Text>
+      </TouchableOpacity>
+
+      {RIGHT_TABS.map(renderTab)}
     </View>
   );
 }
 
-const sosStyles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    marginBottom: Platform.OS === 'ios' ? 10 : 14,
+// ── Layout ───────────────────────────────────────────────────────────────────
+
+export default function AppLayout() {
+  return (
+    <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
+      {/* Visible tabs */}
+      <Tabs.Screen name="home"      />
+      <Tabs.Screen name="apps"      />
+      <Tabs.Screen name="favorites" />
+      <Tabs.Screen name="profile"   />
+
+      {/* Hidden screens — accessible by push, not shown in tab bar */}
+      <Tabs.Screen name="tracker"        options={{ href: null }} />
+      <Tabs.Screen name="goals"          options={{ href: null }} />
+      <Tabs.Screen name="edit-profile"   options={{ href: null }} />
+      <Tabs.Screen name="messages"       options={{ href: null }} />
+      <Tabs.Screen name="find-users"     options={{ href: null }} />
+      <Tabs.Screen name="sober-pal"      options={{ href: null }} />
+      <Tabs.Screen name="sponsor"        options={{ href: null }} />
+      <Tabs.Screen name="inner-circle"   options={{ href: null }} />
+      <Tabs.Screen name="meetings"       options={{ href: null }} />
+      <Tabs.Screen name="resource-hub"   options={{ href: null }} />
+      <Tabs.Screen name="crisis-history" options={{ href: null }} />
+      <Tabs.Screen name="settings"       options={{ href: null }} />
+      <Tabs.Screen name="sos"            options={{ href: null }} />
+      <Tabs.Screen name="chat"           options={{ href: null }} />
+      <Tabs.Screen name="user"           options={{ href: null }} />
+      <Tabs.Screen name="call"           options={{ href: null }} />
+    </Tabs>
+  );
+}
+
+// ── Styles ───────────────────────────────────────────────────────────────────
+
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection:    'row',
+    backgroundColor:  Colors.navBackground,
+    borderTopWidth:   1,
+    borderTopColor:   Colors.navBorder,
+    alignItems:       'center',
+    paddingTop:       8,
+    // Figma: DROP_SHADOW #00000019, offset(10,-10), radius 54
+    shadowColor:      '#000000',
+    shadowOffset:     { width: 10, height: -10 },
+    shadowOpacity:    0.098,
+    shadowRadius:     54,
+    elevation:        20,
   },
-  pill: {
-    width: 116,
-    height: 34,
-    borderRadius: 999,
+  tabItem: {
+    flex:         1,
+    alignItems:   'center',
+    paddingBottom: 4,
+  },
+  panicWrapper: {
+    flex:       1,
     alignItems: 'center',
+    marginTop:  -22,
+  },
+  panicGradient: {
+    width:          125,
+    height:         34,
+    borderRadius:   4,
+    alignItems:     'center',
     justifyContent: 'center',
-    shadowColor: Colors.primaryDark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 12,
-    elevation: 10,
   },
-  label: {
-    fontSize: 10,
-    fontFamily: Fonts.poppinsMedium,
-    color: Colors.textMuted,
-    textAlign: 'center',
+  panicBang: {
+    color:      Colors.white,
+    fontSize:   16,
+    fontFamily: Fonts.poppinsBold,
+  },
+  panicLabel: {
+    fontFamily: Fonts.poppins,
+    fontSize:   10,
+    color:      '#9d9d9d',
+    textAlign:  'center',
+    marginTop:  4,
     lineHeight: 13,
-    marginTop: 3,
   },
 });
-
-function AppLayout() {
-  const { isOpen, closeDrawer } = useDrawer();
-  const drawerAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(drawerAnim, {
-      toValue: isOpen ? 1 : 0,
-      duration: 260,
-      useNativeDriver: true,
-    }).start();
-  }, [isOpen]);
-
-  const drawerTranslate = drawerAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [320, 0],
-  });
-
-  return (
-    <View style={{ flex: 1 }}>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: Colors.primary,
-          tabBarInactiveTintColor: Colors.textMuted,
-          tabBarStyle: {
-            backgroundColor: Colors.white,
-            borderTopWidth: 1,
-            borderTopColor: Colors.border,
-            height: Platform.OS === 'ios' ? 84 : 64,
-            paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-            paddingTop: 8,
-          },
-          tabBarLabelStyle: {
-            fontSize: 11,
-            fontFamily: Fonts.poppinsMedium,
-          },
-        }}
-      >
-        <Tabs.Screen
-          name="home"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size, focused }) => (
-              <AnimatedTabIcon
-                name={focused ? 'home' : 'home-outline'}
-                color={color}
-                size={size}
-                focused={focused}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen name="feed" options={{ href: null }} />
-        <Tabs.Screen
-          name="apps"
-          options={{
-            title: 'Apps',
-            tabBarIcon: ({ color, size, focused }) => (
-              <AnimatedTabIcon
-                name={focused ? 'grid' : 'grid-outline'}
-                color={color}
-                size={size}
-                focused={focused}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="sos"
-          options={{
-            title: 'SOS',
-            tabBarIcon: ({ focused }) => <SOSTabIcon focused={focused} />,
-            tabBarLabel: () => null,
-          }}
-        />
-        <Tabs.Screen
-          name="favorites"
-          options={{
-            title: 'Favorites',
-            tabBarIcon: ({ color, size, focused }) => (
-              <AnimatedTabIcon
-                name={focused ? 'star' : 'star-outline'}
-                color={color}
-                size={size}
-                focused={focused}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Profile',
-            tabBarIcon: ({ color, size, focused }) => (
-              <AnimatedTabIcon
-                name={focused ? 'person' : 'person-outline'}
-                color={color}
-                size={size}
-                focused={focused}
-              />
-            ),
-          }}
-        />
-        {/* Hidden screens — navigable via router.push */}
-        <Tabs.Screen name="tracker"        options={{ href: null }} />
-        <Tabs.Screen name="messages"       options={{ href: null }} />
-        <Tabs.Screen name="sober-pal"      options={{ href: null }} />
-        <Tabs.Screen name="meetings"       options={{ href: null }} />
-        <Tabs.Screen name="resource-hub"   options={{ href: null }} />
-        <Tabs.Screen name="settings"       options={{ href: null }} />
-        <Tabs.Screen name="find-users"     options={{ href: null }} />
-        <Tabs.Screen name="chat"           options={{ href: null }} />
-        <Tabs.Screen name="edit-profile"   options={{ href: null }} />
-        <Tabs.Screen name="sponsor"        options={{ href: null }} />
-        <Tabs.Screen name="inner-circle"   options={{ href: null }} />
-        <Tabs.Screen name="goals"          options={{ href: null }} />
-        <Tabs.Screen name="crisis-history" options={{ href: null }} />
-        <Tabs.Screen name="user"           options={{ href: null }} />
-        <Tabs.Screen name="call"           options={{ href: null }} />
-      </Tabs>
-
-      {/* Animated slide-in drawer */}
-      {isOpen && (
-        <View style={drawerStyles.overlay}>
-          <Animated.View style={[drawerStyles.backdrop, { opacity: drawerAnim }]}>
-            <TouchableOpacity
-              style={StyleSheet.absoluteFill}
-              onPress={closeDrawer}
-              activeOpacity={1}
-            />
-          </Animated.View>
-          <Animated.View
-            style={[
-              drawerStyles.drawer,
-              { transform: [{ translateX: drawerTranslate }] },
-            ]}
-          >
-            <DrawerContent onClose={closeDrawer} />
-          </Animated.View>
-        </View>
-      )}
-    </View>
-  );
-}
-
-const drawerStyles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'row',
-    zIndex: 999,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: Colors.overlayDark,
-  },
-  drawer: {
-    width: 300,
-    backgroundColor: Colors.white,
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 12,
-  },
-});
-
-export default function AppLayoutWrapper() {
-  return (
-    <OverlayProvider>
-      <DrawerProvider>
-        <AppLayout />
-      </DrawerProvider>
-    </OverlayProvider>
-  );
-}

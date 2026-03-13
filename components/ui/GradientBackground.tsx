@@ -1,29 +1,23 @@
-import React from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../constants/colors';
 
-interface Props {
+type Props = {
   children: React.ReactNode;
   style?: ViewStyle;
-  variant?: 'default' | 'splash' | 'card';
-}
+};
 
-export function GradientBackground({ children, style, variant = 'default' }: Props) {
-  const gradients = {
-    default: [Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd] as const,
-    splash: [Colors.gradientStart, '#FFE6F8', Colors.gradientEnd] as const,
-    card: [Colors.primaryLight, Colors.white] as const,
-  };
-
+export function GradientBackground({ children, style }: Props) {
   return (
     <LinearGradient
-      colors={gradients[variant]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[StyleSheet.absoluteFill, style]}
+      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
+      style={[styles.gradient, style]}
     >
       {children}
     </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  gradient: { flex: 1 },
+});

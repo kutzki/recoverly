@@ -1,66 +1,34 @@
-/**
- * Call screen — temporarily disabled.
- *
- * @stream-io/video-react-native-sdk depends on @stream-io/react-native-webrtc,
- * which is a legacy ReactPackage (no TurboModule / codegenConfig). Its
- * createNativeModules() eagerly loads libwebrtc.so at Android startup, blocking
- * the main thread for ~5 s and causing an ANR. The SDK has been removed from the
- * build until a lazy-loadable alternative is available.
- */
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
 import { Fonts } from '../../../constants/fonts';
 
 export default function CallScreen() {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.screen}>
-      <Ionicons name="videocam-off-outline" size={56} color={Colors.primaryLight} />
-      <Text style={styles.title}>Video Calling Coming Soon</Text>
-      <Text style={styles.subtitle}>
-        This feature is temporarily unavailable while we improve performance.
-      </Text>
-      <TouchableOpacity style={styles.btn} onPress={() => router.back()}>
-        <Text style={styles.btnText}>Go Back</Text>
+    <LinearGradient
+      colors={[Colors.primaryDark, Colors.primaryMid]}
+      style={[styles.root, { paddingTop: insets.top }]}
+    >
+      <TouchableOpacity style={styles.back} onPress={() => router.back()} hitSlop={12}>
+        <Ionicons name="arrow-back" size={24} color={Colors.white} />
       </TouchableOpacity>
-    </View>
+      <View style={styles.center}>
+        <Ionicons name="videocam-off-outline" size={64} color="rgba(255,255,255,0.6)" />
+        <Text style={styles.title}>Video Calling</Text>
+        <Text style={styles.body}>Coming soon. Video calling will let you connect face-to-face with your support network.</Text>
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-    padding: 32,
-  },
-  title: {
-    fontSize: 20,
-    fontFamily: Fonts.poppinsBold,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: Fonts.jost,
-    color: Colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  btn: {
-    marginTop: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    paddingHorizontal: 28,
-    paddingVertical: 12,
-  },
-  btnText: {
-    color: '#fff',
-    fontFamily: Fonts.poppinsSemiBold,
-    fontSize: 15,
-  },
+  root:   { flex: 1 },
+  back:   { margin: 24 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, gap: 16, marginTop: -60 },
+  title:  { fontFamily: Fonts.poppinsBold, fontSize: 24, color: Colors.white },
+  body:   { fontFamily: Fonts.jost, fontSize: 15, color: 'rgba(255,255,255,0.8)', textAlign: 'center', lineHeight: 24 },
 });

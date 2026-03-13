@@ -1,126 +1,93 @@
-import React, { useMemo } from 'react';
-import { View, useWindowDimensions } from 'react-native';
-import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 'react-native-svg';
+import { View, Text, StyleSheet } from 'react-native';
+import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
-interface Props {
-  days: number;
-  /** Sobriety goal in days (default 90). Progress arc fills to this target. */
-  goal?: number;
+type Props = {
+  daysSober: number;
+  size?: number;
+};
+
+// Draws a semicircular arc (top half of a circle)
+function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
+  const rad = ((angleDeg - 90) * Math.PI) / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
 }
 
-/**
- * Semicircular ∩ progress arc.
- *
- * The purple arc fills from the left endpoint clockwise based on days/goal.
- * At goal completion (p=1) the arc is fully purple.
- *
- * Progress endpoint maths (circle centre cx,cy, radius r):
- *   progressX = cx - r · cos(p · π)
- *   progressY = cy - r · sin(p · π)
- */
-const STROKE = 13; // arc stroke width — constant, not per-render
+function arcPath(cx: number, cy: number, r: number, startDeg: number, endDeg: number) {
+  const s = polarToCartesian(cx, cy, r, startDeg);
+  const e = polarToCartesian(cx, cy, r, endDeg);
+  const large = endDeg - startDeg > 180 ? 1 : 0;
+  return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
+}
 
-export const SobrietyCounter = React.memo(function SobrietyCounter({ days, goal = 90 }: Props) {
-  const { width: screenWidth } = useWindowDimensions();
+export function SobrietyCounter({ daysSober, size = 230 }: Props) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const r  = size * 0.38;
+  const strokeWidth = size * 0.055;
 
-  const { W, H, cx, trackPath, purplePath, bluePath, numFontSize, lblFontSize, numBaseY, lblBaseY } =
-    useMemo(() => {
-      const p      = Math.min(days / goal, 1);
-      const _W     = screenWidth - 40;
-      const PAD    = STROKE / 2 + 8;
-      const r      = _W / 2 - PAD;
-      const _cx    = _W / 2;
-      const _cy    = r + STROKE / 2 + 8;
-      const _H     = _cy + STROKE / 2 + 8;
-
-      const progX = _cx - r * Math.cos(p * Math.PI);
-      const progY = _cy - r * Math.sin(p * Math.PI);
-
-      const _trackPath  = `M ${PAD} ${_cy} A ${r} ${r} 0 0 1 ${_W - PAD} ${_cy}`;
-      const _purplePath = p > 0.001 ? `M ${PAD} ${_cy} A ${r} ${r} 0 0 1 ${progX} ${progY}` : null;
-      const _bluePath   = p < 0.999 ? `M ${progX} ${progY} A ${r} ${r} 0 0 1 ${_W - PAD} ${_cy}` : null;
-
-      const _numFontSize = Math.round(r * 0.42);
-      const _lblFontSize = Math.round(r * 0.18);
-      const midY         = (_cy - r + _cy) / 2;
-      const _numBaseY    = midY + _numFontSize * 0.36;
-      const _lblBaseY    = _numBaseY + _numFontSize * 0.65 + 4;
-
-      return {
-        W: _W, H: _H, cx: _cx,
-        trackPath: _trackPath, purplePath: _purplePath, bluePath: _bluePath,
-        numFontSize: _numFontSize, lblFontSize: _lblFontSize,
-        numBaseY: _numBaseY, lblBaseY: _lblBaseY,
-      };
-    }, [days, goal, screenWidth]);
+  // Arc spans 210° (from -105° to +105° — slightly more than a semicircle)
+  const startAngle = -210;
+  const endAngle   = 30;
+  const progress   = Math.min(daysSober / 365, 1);
+  const fillAngle  = startAngle + (endAngle - startAngle) * progress;
 
   return (
-    <View>
-      <Svg width={W} height={H}>
+    <View style={{ width: size, height: size * 0.65, alignItems: 'center' }}>
+      <Svg width={size} height={size} style={{ position: 'absolute', top: 0 }}>
         <Defs>
-          <SvgGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0"   stopColor={Colors.arcGradStart} />
-            <Stop offset="1"   stopColor={Colors.arcGradEnd} />
+          <SvgGradient id="arcGrad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0" stopColor={Colors.arcGradStart} />
+            <Stop offset="1" stopColor={Colors.arcGradEnd} />
           </SvgGradient>
         </Defs>
 
-        {/* faint background track */}
+        {/* Track */}
         <Path
-          d={trackPath}
+          d={arcPath(cx, cy, r, startAngle, endAngle)}
           stroke={Colors.arcTrack}
-          strokeWidth={STROKE}
-          fill="none"
+          strokeWidth={strokeWidth}
           strokeLinecap="round"
+          fill="none"
         />
 
-        {/* remaining (blue) arc */}
-        {bluePath && (
+        {/* Fill */}
+        {daysSober > 0 && (
           <Path
-            d={bluePath}
-            stroke={Colors.arcBlue}
-            strokeWidth={STROKE}
-            fill="none"
+            d={arcPath(cx, cy, r, startAngle, fillAngle)}
+            stroke="url(#arcGrad)"
+            strokeWidth={strokeWidth}
             strokeLinecap="round"
+            fill="none"
           />
         )}
-
-        {/* progress (purple) arc */}
-        {purplePath && (
-          <Path
-            d={purplePath}
-            stroke="url(#purpleGrad)"
-            strokeWidth={STROKE}
-            fill="none"
-            strokeLinecap="round"
-          />
-        )}
-
-        {/* day count */}
-        <SvgText
-          x={cx}
-          y={numBaseY}
-          textAnchor="middle"
-          fontSize={numFontSize}
-          fontFamily={Fonts.poppinsBold}
-          fill={Colors.text}
-        >
-          {days}
-        </SvgText>
-
-        {/* "Days" label */}
-        <SvgText
-          x={cx}
-          y={lblBaseY}
-          textAnchor="middle"
-          fontSize={lblFontSize}
-          fontFamily={Fonts.jost}
-          fill={Colors.textMuted}
-        >
-          Days Sober
-        </SvgText>
       </Svg>
+
+      {/* Centre text */}
+      <View style={[styles.center, { top: size * 0.24 }]}>
+        <Text style={styles.days}>{daysSober}</Text>
+        <Text style={styles.label}>Days Sober</Text>
+      </View>
     </View>
   );
+}
+
+const styles = StyleSheet.create({
+  center: {
+    position: 'absolute',
+    alignItems: 'center',
+  },
+  days: {
+    fontFamily: Fonts.poppinsBold,
+    fontSize: 35,
+    color: Colors.text,
+    lineHeight: 40,
+  },
+  label: {
+    fontFamily: Fonts.poppins,
+    fontSize: 20,
+    color: Colors.text,
+    textTransform: 'capitalize',
+  },
 });
