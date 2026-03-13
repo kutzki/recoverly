@@ -1,92 +1,61 @@
-import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
-interface Props {
-  label: string;
-  subtitle: string;
-  date: string;
-  icon?: keyof typeof Ionicons.glyphMap;
-  // Support both old prop name (achieved) and new (unlocked)
-  achieved?: boolean;
-  unlocked?: boolean;
-  color?: 'grey' | 'purple' | 'cyan';
-  variant?: 'grey' | 'purple' | 'cyan';
-  isHighlighted?: boolean;
-}
+const MILESTONES = [
+  { days: 7,   label: '7 Days',    emoji: '⭐', color: Colors.milestonePurple },
+  { days: 30,  label: '30 Days',   emoji: '🔥', color: Colors.milestoneCyan  },
+  { days: 60,  label: '60 Days',   emoji: '💪', color: Colors.milestonePurple },
+  { days: 90,  label: '90 Days',   emoji: '🏅', color: Colors.milestoneCyan  },
+  { days: 180, label: '6 Months',  emoji: '🌟', color: Colors.milestonePurple },
+  { days: 365, label: '1 Year',    emoji: '🏆', color: Colors.milestoneCyan  },
+];
 
-const BG_MAP = {
-  grey: Colors.milestoneGrey,
-  purple: Colors.primary,
-  cyan: Colors.success,
-};
-const TEXT_MAP = {
-  grey: Colors.textMuted,
-  purple: Colors.white,
-  cyan: Colors.text,
+type Props = {
+  daysSober: number;
 };
 
-export function MilestoneCard({
-  label,
-  subtitle,
-  date,
-  icon = 'medal',
-  achieved,
-  unlocked,
-  color,
-  variant,
-  isHighlighted,
-}: Props) {
-  const resolvedVariant = variant || color || 'grey';
-  const isUnlocked = unlocked ?? achieved ?? false;
-  const bg = isUnlocked ? BG_MAP[resolvedVariant] : Colors.milestoneGrey;
-  const textColor = isUnlocked ? TEXT_MAP[resolvedVariant] : Colors.textLight;
-
+export function MilestoneCard({ daysSober }: Props) {
   return (
-    <View style={[styles.card, { backgroundColor: bg }, isHighlighted && styles.highlighted]}>
-      <View style={styles.row}>
-        <View style={styles.iconWrap}>
-          <Ionicons name={icon} size={20} color={textColor} />
-        </View>
-        <View style={styles.textCol}>
-          <Text style={[styles.subtitle, { color: textColor }]} numberOfLines={2}>{subtitle}</Text>
-          <Text style={[styles.label, { color: textColor }]} numberOfLines={1}>{label}</Text>
-        </View>
-        <Text style={[styles.date, { color: textColor }]}>{date}</Text>
-      </View>
+    <View style={styles.row}>
+      {MILESTONES.map((m) => {
+        const achieved = daysSober >= m.days;
+        return (
+          <View key={m.days} style={[styles.badge, achieved ? { backgroundColor: m.color } : styles.badgeEmpty]}>
+            <Text style={styles.emoji}>{m.emoji}</Text>
+            <Text style={[styles.label, achieved ? styles.labelAchieved : styles.labelEmpty]}>
+              {m.label}
+            </Text>
+          </View>
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-  },
-  highlighted: {
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    flexWrap: 'wrap',
+    gap: 8,
   },
-  iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+  badge: {
+    width: 70,
+    height: 70,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 4,
   },
-  textCol: { flex: 1 },
-  subtitle: { fontSize: 13, fontWeight: '700', marginBottom: 1 },
-  label: { fontSize: 12, opacity: 0.8 },
-  date: { fontSize: 12, fontWeight: '600', opacity: 0.8 },
+  badgeEmpty: {
+    backgroundColor: Colors.milestoneGrey,
+  },
+  emoji: { fontSize: 22 },
+  label: {
+    fontFamily: Fonts.poppinsMedium,
+    fontSize: 9,
+    textAlign: 'center',
+  },
+  labelAchieved: { color: Colors.white },
+  labelEmpty:    { color: Colors.textMuted },
 });

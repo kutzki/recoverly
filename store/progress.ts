@@ -1,143 +1,121 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
-import { upsertProfile, insertCheckin } from '../services/supabase';
+import { supabase } from '../services/supabase';
 
-// Lazy getter to avoid a circular import with store/auth (auth imports progress)
-function getAuthUserId(): string | null {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return require('../store/auth').useAuthStore.getState().user?.id ?? null;
-}
+const STORAGE_KEY = 'recoverly_progress_v2';
 
-const PROGRESS_KEY = 'user_progress';
-
-interface ProgressState {
+type ProgressState = {
   sobrietyStartDate: string | null;
-  weeklyStreak: boolean[];
-  tasksCompleted: number;
-  tasksTarget: number;
+  weeklyStreak:      boolean[];   // [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+  tasksCompleted:    number;
+  tasksTarget:       number;
   checkInsCompleted: number;
-  checkInsTarget: number;
-  meetingsAttended: number;
-  meetingsTarget: number;
-  setSobrietyStart: (date: string) => void;
-  markTodayCheckedIn: () => void;
-  incrementTasks: () => void;
-  incrementMeetings: () => void;
-  loadProgress: () => Promise<void>;
-}
+  checkInsTarget:    number;
+  meetingsAttended:  number;
+  meetingsTarget:    number;
+  lastWeekReset:     string | null;
 
-function todayKey() {
-  return new Date().toISOString().split('T')[0]; // "2026-02-23"
-}
+  setSobrietyStart:    (date: string, userId?: string) => Promise<void>;
+  markTodayCheckedIn:  (userId?: string) => Promise<void>;
+  incrementTasks:      () => void;
+  incrementMeetings:   () => void;
+  loadProgress:        (userId?: string) => Promise<void>;
+};
 
-// Monday-based index: Mon=0, Tue=1, ..., Sun=6
-function weekDayIndex() {
-  return (new Date().getDay() + 6) % 7;
-}
-
-function currentMondayKey() {
+const weekStartISO = () => {
   const d = new Date();
-  const diff = (d.getDay() + 6) % 7;
-  d.setDate(d.getDate() - diff);
-  return d.toISOString().split('T')[0];
-}
+  const day = d.getDay(); // 0=Sun
+  d.setDate(d.getDate() - ((day + 6) % 7)); // Monday
+  return d.toISOString().slice(0, 10);
+};
 
-function persist(partial: Partial<ProgressState>) {
-  SecureStore.getItemAsync(PROGRESS_KEY).then(raw => {
-    const current = raw ? JSON.parse(raw) : {};
-    SecureStore.setItemAsync(PROGRESS_KEY, JSON.stringify({ ...current, ...partial })).catch((err) => { console.warn('[Progress] persist write error:', err); });
-  }).catch((err) => { console.warn('[Progress] persist read error:', err); });
-}
+const todayDayIndex = () => (new Date().getDay() + 6) % 7; // 0=Mon
 
 export const useProgressStore = create<ProgressState>((set, get) => ({
   sobrietyStartDate: null,
-  weeklyStreak: [false, false, false, false, false, false, false],
-  tasksCompleted: 0,
-  tasksTarget: 7,
+  weeklyStreak:      Array(7).fill(false),
+  tasksCompleted:    0,
+  tasksTarget:       7,
   checkInsCompleted: 0,
-  checkInsTarget: 7,
-  meetingsAttended: 0,
-  meetingsTarget: 7,
+  checkInsTarget:    7,
+  meetingsAttended:  0,
+  meetingsTarget:    7,
+  lastWeekReset:     null,
 
-  setSobrietyStart: (date) => {
+  setSobrietyStart: async (date, userId) => {
     set({ sobrietyStartDate: date });
-    persist({ sobrietyStartDate: date });
-    // Sync to Supabase profiles table in background (synchronous userId lookup)
-    const userId = getAuthUserId();
     if (userId) {
-      upsertProfile(userId, { sobriety_start_date: date }).catch(() => {});
+      await supabase.from('profiles').update({ sobriety_start_date: date }).eq('id', userId);
     }
+    await _persist(get());
   },
 
-  markTodayCheckedIn: () => {
-    const { weeklyStreak, checkInsCompleted, checkInsTarget } = get();
-    const newStreak = [...weeklyStreak];
-    newStreak[weekDayIndex()] = true;
-    const next = {
-      weeklyStreak: newStreak,
-      checkInsCompleted: Math.min(checkInsCompleted + 1, checkInsTarget),
-    };
-    set(next);
-    // Include weekStart so that loadProgress never incorrectly resets the streak
-    // on the next launch (if weekStart is missing it looks like a new week)
-    persist({ ...next, lastCheckInDate: todayKey(), weekStart: currentMondayKey() } as any);
-    // Sync check-in to Supabase in background (synchronous userId lookup)
-    const userId = getAuthUserId();
+  markTodayCheckedIn: async (userId) => {
+    const streak = [...get().weeklyStreak];
+    streak[todayDayIndex()] = true;
+    set({ weeklyStreak: streak, checkInsCompleted: get().checkInsCompleted + 1 });
+
     if (userId) {
-      insertCheckin(userId, todayKey()).catch(() => {});
+      const today = new Date().toISOString().slice(0, 10);
+      await supabase.from('daily_checkins').upsert({ user_id: userId, checked_in_date: today });
     }
+    await _persist(get());
   },
 
   incrementTasks: () => {
-    set((s) => {
-      const next = { tasksCompleted: Math.min(s.tasksCompleted + 1, s.tasksTarget) };
-      persist(next);
-      return next;
-    });
+    set({ tasksCompleted: get().tasksCompleted + 1 });
+    _persist(get());
   },
 
   incrementMeetings: () => {
-    set((s) => {
-      const next = { meetingsAttended: Math.min(s.meetingsAttended + 1, s.meetingsTarget) };
-      persist(next);
-      return next;
-    });
+    set({ meetingsAttended: get().meetingsAttended + 1 });
+    _persist(get());
   },
 
-  loadProgress: async () => {
-    try {
-      const raw = await SecureStore.getItemAsync(PROGRESS_KEY);
-      const saved = raw ? JSON.parse(raw) : {};
+  loadProgress: async (userId) => {
+    const raw = await SecureStore.getItemAsync(STORAGE_KEY);
+    const thisWeek = weekStartISO();
 
-      // Reset weekly streak if stored weekStart doesn't match the current Monday.
-      // This handles both a new week AND the first-ever launch (saved.weekStart is
-      // undefined on first run, which correctly triggers a reset to all-false).
-      const currentMonday = currentMondayKey();
-
-      const weekStreak = saved.weekStart === currentMonday
-        ? (saved.weeklyStreak ?? [false, false, false, false, false, false, false])
-        : [false, false, false, false, false, false, false];
-
-      if (raw) {
+    if (raw) {
+      const saved = JSON.parse(raw) as Partial<ProgressState>;
+      if (saved.lastWeekReset !== thisWeek) {
+        // New week — reset counters but keep sobriety date
         set({
           sobrietyStartDate: saved.sobrietyStartDate ?? null,
-          weeklyStreak: weekStreak,
-          tasksCompleted: saved.tasksCompleted ?? 0,
-          tasksTarget: saved.tasksTarget ?? 7,
-          checkInsCompleted: saved.checkInsCompleted ?? 0,
-          checkInsTarget: saved.checkInsTarget ?? 7,
-          meetingsAttended: saved.meetingsAttended ?? 0,
-          meetingsTarget: saved.meetingsTarget ?? 7,
+          weeklyStreak:      Array(7).fill(false),
+          tasksCompleted:    0,
+          checkInsCompleted: 0,
+          meetingsAttended:  0,
+          lastWeekReset:     thisWeek,
         });
+        await _persist(get());
+        return;
       }
+      set({ ...saved });
+    }
 
-      // Always persist current weekStart so subsequent launches don't
-      // incorrectly see a missing weekStart and reset the streak.
-      if (saved.weekStart !== currentMonday) {
-        persist({ weekStart: currentMonday, weeklyStreak: weekStreak } as any);
+    // Sync sobriety date from DB if we have a user
+    if (userId && !get().sobrietyStartDate) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('sobriety_start_date')
+        .eq('id', userId)
+        .single();
+      if (data?.sobriety_start_date) {
+        set({ sobrietyStartDate: data.sobriety_start_date });
+        await _persist(get());
       }
-    } catch (err) {
-      console.warn('[Progress] loadProgress error:', err);
     }
   },
 }));
+
+async function _persist(state: ProgressState) {
+  await SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify({
+    sobrietyStartDate: state.sobrietyStartDate,
+    weeklyStreak:      state.weeklyStreak,
+    tasksCompleted:    state.tasksCompleted,
+    checkInsCompleted: state.checkInsCompleted,
+    meetingsAttended:  state.meetingsAttended,
+    lastWeekReset:     state.lastWeekReset,
+  }));
+}

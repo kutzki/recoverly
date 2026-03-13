@@ -1,145 +1,93 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { useSharedValue, useAnimatedStyle, withDelay, withSpring, withTiming } from 'react-native-reanimated';
+import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
-import { useAuthStore } from '../../store/auth';
-import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
-export default function ThankYou() {
-  const setProfileComplete = useAuthStore(s => s.updateUser);
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(24)).current;
-  const dotAnim = useRef(new Animated.Value(0)).current;
+export default function ThankYouScreen() {
+  const insets     = useSafeAreaInsets();
+  const updateUser = useAuthStore((s) => s.updateUser);
+
+  const scale   = useSharedValue(0);
+  const opacity = useSharedValue(0);
+  const textOp  = useSharedValue(0);
 
   useEffect(() => {
-    // Entrance animation
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    // Trigger profile completion + navigate
+    updateUser({ is_profile_complete: true }).catch(() => {});
 
-    // Dot loading animation
-    Animated.loop(
-      Animated.timing(dotAnim, {
-        toValue: 1,
-        duration: 1200,
-        useNativeDriver: false,
-      })
-    ).start();
+    scale.value   = withSpring(1, { damping: 12, stiffness: 100 });
+    opacity.value = withTiming(1, { duration: 400 });
+    textOp.value  = withDelay(500, withTiming(1, { duration: 500 }));
 
-    // Navigate to home after delay
-    const timer = setTimeout(() => {
-      setProfileComplete({ isProfileComplete: true });
-      router.replace('/(app)/home');
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => router.replace('/(app)/home'), 2600);
+    return () => clearTimeout(t);
   }, []);
 
+  const circleStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({ opacity: textOp.value }));
+
   return (
-    <LinearGradient
-      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 0.9, y: 1 }}
-      style={styles.container}
-    >
-      {/* ── Centered text block ── */}
-      <Animated.View style={[styles.textWrap, { opacity, transform: [{ translateY }] }]}>
-        <Text style={styles.heading}>Thank you.</Text>
+    <LinearGradient colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]} style={styles.gradient}>
+      <View style={[styles.center, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <Animated.View style={[styles.emojiCircle, circleStyle]}>
+          <Text style={styles.emoji}>🎉</Text>
+        </Animated.View>
 
-        {/* Subtitle + animated dots */}
-        <View style={styles.subtitleRow}>
-          <Text style={styles.subtitle}>We are setting up your profile</Text>
-          {[0, 1, 2].map(i => (
-            <Animated.View
-              key={i}
-              style={[
-                styles.loadDot,
-                {
-                  opacity: dotAnim.interpolate({
-                    inputRange: [
-                      Math.max(0, i * 0.3 - 0.1),
-                      i * 0.3,
-                      i * 0.3 + 0.3,
-                      Math.min(1, i * 0.3 + 0.4),
-                    ],
-                    outputRange: [0.3, 1, 1, 0.3],
-                    extrapolate: 'clamp',
-                  }),
-                  transform: [{
-                    translateY: dotAnim.interpolate({
-                      inputRange: [
-                        Math.max(0, i * 0.3),
-                        i * 0.3 + 0.15,
-                        Math.min(1, i * 0.3 + 0.3),
-                      ],
-                      outputRange: [0, -4, 0],
-                      extrapolate: 'clamp',
-                    }),
-                  }],
-                },
-              ]}
-            />
-          ))}
-        </View>
-      </Animated.View>
-
-      {/* ── Logo pinned to the bottom (matches Figma) ── */}
-      <Animated.View style={[styles.logoWrap, { opacity }]}>
-        <RecoverlyLogo size={44} showWordmark />
-      </Animated.View>
+        <Animated.View style={[styles.textBlock, textStyle]}>
+          <Text style={styles.heading}>You're all set!</Text>
+          <Text style={styles.subheading}>
+            Your recovery journey starts now. We're here for you every step of the way.
+          </Text>
+        </Animated.View>
+      </View>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: { flex: 1 },
+  center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 40,
+    gap: 32,
   },
-  textWrap: {
+  emojiCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: Colors.white,
     alignItems: 'center',
-    gap: 16,
+    justifyContent: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 12,
   },
+  emoji: { fontSize: 56 },
+  textBlock: { alignItems: 'center', gap: 12 },
   heading: {
-    fontSize: 50,
-    fontWeight: '700',
+    fontFamily: Fonts.poppinsBold,
+    fontSize: 30,
     color: Colors.text,
-    letterSpacing: -1.5,
-    fontFamily: Fonts.generalSansSemiBold,
+    textAlign: 'center',
   },
-  subtitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  subtitle: {
+  subheading: {
+    fontFamily: Fonts.jost,
     fontSize: 16,
-    color: Colors.primary,
-    fontFamily: Fonts.generalSans,
-    letterSpacing: 0.1,
-  },
-  loadDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: Colors.primary,
-    marginTop: 2,
-  },
-  logoWrap: {
-    position: 'absolute',
-    bottom: 52,
-    alignItems: 'center',
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });

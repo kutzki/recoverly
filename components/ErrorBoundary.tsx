@@ -1,50 +1,29 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../constants/colors';
-
-interface Props {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error; reset: () => void }>;
-}
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface State {
   hasError: boolean;
   error: Error | null;
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+export class ErrorBoundary extends React.Component<React.PropsWithChildren, State> {
+  state: State = { hasError: false, error: null };
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[ErrorBoundary] Caught error:', error.message, info.componentStack);
-  }
-
-  reset = () => this.setState({ hasError: false, error: null });
-
   render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        const Fallback = this.props.fallback;
-        return <Fallback error={this.state.error!} reset={this.reset} />;
-      }
       return (
         <View style={styles.container}>
-          <Ionicons name="alert-circle-outline" size={56} color={Colors.error} />
           <Text style={styles.title}>Something went wrong</Text>
-          <Text style={styles.message}>
-            {this.state.error?.message || 'An unexpected error occurred.'}
-          </Text>
-          <TouchableOpacity style={styles.btn} onPress={this.reset}>
-            <Ionicons name="refresh-outline" size={16} color={Colors.white} />
-            <Text style={styles.btnText}>Try Again</Text>
+          <Text style={styles.message}>{this.state.error?.message ?? 'Unknown error'}</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => this.setState({ hasError: false, error: null })}
+          >
+            <Text style={styles.buttonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
       );
@@ -58,36 +37,29 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 28,
-    backgroundColor: Colors.background,
-    gap: 12,
+    padding: 24,
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.text,
-    textAlign: 'center',
-    marginTop: 4,
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#1A1A1A',
   },
   message: {
     fontSize: 14,
-    color: Colors.textMuted,
+    color: '#888',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 8,
+    marginBottom: 24,
   },
-  btn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
+  button: {
+    backgroundColor: '#b740ff',
     paddingHorizontal: 24,
     paddingVertical: 12,
+    borderRadius: 10,
   },
-  btnText: {
-    color: Colors.white,
-    fontWeight: '700',
-    fontSize: 14,
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
   },
 });

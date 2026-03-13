@@ -1,273 +1,170 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/auth';
+import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 const CHALLENGES = [
-  {
-    id: 'alcohol',
-    label: "I'm focusing on alcohol-related challenges",
-    icon: 'wine-outline' as const,
-  },
-  {
-    id: 'substance',
-    label: "I'm addressing substance-related challenges",
-    icon: 'medical-outline' as const,
-  },
-  {
-    id: 'gambling',
-    label: "I'm working on overcoming gambling-related challenges",
-    icon: 'card-outline' as const,
-  },
-  {
-    id: 'combination',
-    label: "I'm dealing with a combination of challenges",
-    icon: 'layers-outline' as const,
-  },
-  {
-    id: 'prefer_not',
-    label: "I'd rather not say at this time",
-    icon: 'lock-closed-outline' as const,
-  },
+  { id: 'cravings',        label: 'Managing Cravings',       emoji: '🔥' },
+  { id: 'triggers',        label: 'Avoiding Triggers',        emoji: '⚠️' },
+  { id: 'relationships',   label: 'Rebuilding Relationships', emoji: '🤝' },
+  { id: 'mental_health',   label: 'Mental Health',           emoji: '🧠' },
+  { id: 'finances',        label: 'Financial Stability',     emoji: '💰' },
+  { id: 'employment',      label: 'Finding Employment',      emoji: '💼' },
+  { id: 'housing',         label: 'Stable Housing',          emoji: '🏠' },
+  { id: 'loneliness',      label: 'Loneliness',              emoji: '😔' },
+  { id: 'physical_health', label: 'Physical Health',         emoji: '🏃' },
+  { id: 'self_worth',      label: 'Building Self-Worth',     emoji: '💎' },
 ];
 
-export default function Challenges() {
-  const updateUser = useAuthStore(s => s.updateUser);
+export default function ChallengesScreen() {
+  const insets     = useSafeAreaInsets();
+  const updateUser = useAuthStore((s) => s.updateUser);
   const [selected, setSelected] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false);
+  const [loading,  setLoading]  = useState(false);
 
   const toggle = (id: string) => {
-    if (id === 'prefer_not') {
-      // Second tap on prefer_not deselects it
-      setSelected(prev => prev.includes('prefer_not') ? [] : ['prefer_not']);
-      return;
-    }
-    setSelected(prev => {
-      const without = prev.filter(x => x !== 'prefer_not');
-      return without.includes(id)
-        ? without.filter(x => x !== id)
-        : [...without, id];
-    });
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   };
 
   const handleNext = async () => {
-    setSaving(true);
+    if (selected.length === 0) {
+      Alert.alert('Select at least one', 'Choose the challenges you want support with.');
+      return;
+    }
+    setLoading(true);
     try {
       await updateUser({ challenges: selected });
-      router.push('/(setup)/goal');
-    } catch {
-      Alert.alert('Error', 'Could not save your selection. Please try again.');
+      router.push('/(setup)/thank-you');
+    } catch (e: any) {
+      Alert.alert('Error', e.message ?? 'Failed to save.');
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
   return (
-    <LinearGradient
-      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
-      style={styles.container}
-    >
+    <LinearGradient colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]} style={styles.gradient}>
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 30, paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Back */}
-        <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={Colors.primary} />
-        </TouchableOpacity>
-
-        {/* Progress */}
         <View style={styles.progressRow}>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: '50%' }]} />
-          </View>
-          <Text style={styles.progressLabel}>2 of 4</Text>
+          {[1, 2, 3].map((s) => (
+            <View key={s} style={[styles.progressDot, s <= 3 && styles.progressActive]} />
+          ))}
         </View>
 
-        <Text style={styles.heading}>What are you trying to overcome?</Text>
-        <Text style={styles.sub}>Could you share what you're trying to overcome? Select all that apply.</Text>
+        <Text style={styles.stepLabel}>Step 3 of 3</Text>
+        <Text style={styles.heading}>What challenges do{'\n'}you face?</Text>
+        <Text style={styles.subheading}>Select all that apply — we'll help you tackle them</Text>
 
-        {/* Options */}
-        <View style={styles.options}>
-          {CHALLENGES.map(c => {
+        <View style={styles.grid}>
+          {CHALLENGES.map((c) => {
             const isSelected = selected.includes(c.id);
             return (
               <TouchableOpacity
                 key={c.id}
-                style={[styles.option, isSelected && styles.optionSelected]}
-                onPress={() => toggle(c.id)}
+                style={[styles.card, isSelected && styles.cardSelected]}
                 activeOpacity={0.8}
+                onPress={() => toggle(c.id)}
               >
-                <View style={[styles.optionIcon, isSelected && styles.optionIconSelected]}>
-                  <Ionicons
-                    name={c.icon}
-                    size={20}
-                    color={isSelected ? Colors.white : Colors.primary}
-                  />
-                </View>
-                <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+                <Text style={styles.emoji}>{c.emoji}</Text>
+                <Text style={[styles.cardLabel, isSelected && styles.cardLabelSelected]}>
                   {c.label}
                 </Text>
-                <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-                  {isSelected && <Ionicons name="checkmark" size={14} color={Colors.white} />}
-                </View>
+                {isSelected && (
+                  <View style={styles.checkBadge}>
+                    <Text style={styles.checkMark}>✓</Text>
+                  </View>
+                )}
               </TouchableOpacity>
             );
           })}
         </View>
 
-        <Text style={styles.footer}>
-          These questions will help us tailor your experience and provide the most relevant resources.
-        </Text>
+        {selected.length > 0 && (
+          <Text style={styles.selectedCount}>{selected.length} selected</Text>
+        )}
 
-        {/* Spacer so content clears the absolute button */}
-        <View style={{ height: 100 }} />
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          activeOpacity={0.85}
+          onPress={handleNext}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>{loading ? 'Saving…' : 'Finish Setup'}</Text>
+        </TouchableOpacity>
       </ScrollView>
-
-      {/* Next — black circle, absolute at bottom (matches Figma) */}
-      <TouchableOpacity
-        style={[styles.nextBtn, (selected.length === 0 || saving) && styles.nextDisabled]}
-        onPress={handleNext}
-        disabled={selected.length === 0 || saving}
-        activeOpacity={0.85}
-      >
-        {saving
-          ? <ActivityIndicator color="#fff" />
-          : <Ionicons name="arrow-forward" size={22} color="#fff" />
-        }
-      </TouchableOpacity>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scroll: {
-    flexGrow: 1,
-    paddingTop: 60,
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-  },
-  back: {
-    position: 'absolute',
-    top: 60,
-    left: 20,
-    zIndex: 10,
-    padding: 4,
-  },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 32,
-  },
-  progressTrack: {
-    flex: 1,
-    height: 4,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 2,
-  },
-  progressFill: {
-    height: 4,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-  },
-  progressLabel: { color: Colors.textMuted, fontSize: 12 },
-  heading: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 8,
-    lineHeight: 32,
-  },
-  sub: {
-    fontSize: 15,
-    color: Colors.textMuted,
-    lineHeight: 22,
-    marginBottom: 28,
-  },
-  options: { gap: 12, marginBottom: 24 },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  gradient: { flex: 1 },
+  scroll:   { flexGrow: 1, paddingHorizontal: 30 },
+
+  progressRow:    { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  progressDot:    { flex: 1, height: 4, borderRadius: 2, backgroundColor: Colors.primaryLight },
+  progressActive: { backgroundColor: Colors.primary },
+
+  stepLabel:  { fontFamily: Fonts.jostMedium, fontSize: 12, color: Colors.textMuted, marginBottom: 8  },
+  heading:    { fontFamily: Fonts.poppinsBold, fontSize: 26, color: Colors.text,     marginBottom: 8  },
+  subheading: { fontFamily: Fonts.jost,        fontSize: 15, color: Colors.textMuted,marginBottom: 28 },
+
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 16 },
+
+  card: {
+    width: '47%',
     backgroundColor: Colors.white,
     borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
     padding: 16,
-    gap: 12,
-  },
-  optionSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight,
-  },
-  optionIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  optionIconSelected: {
-    backgroundColor: Colors.primary,
-  },
-  optionText: {
-    flex: 1,
-    fontSize: 14,
-    color: Colors.text,
-    lineHeight: 20,
-  },
-  optionTextSelected: {
-    color: Colors.primary,
-    fontWeight: '500',
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    gap: 6,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: 'relative',
   },
-  checkboxSelected: {
-    backgroundColor: Colors.primary,
+  cardSelected: {
     borderColor: Colors.primary,
+    backgroundColor: Colors.cardTintPurpleFaint,
   },
-  footer: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    lineHeight: 20,
-    marginBottom: 32,
-    fontStyle: 'italic',
+  emoji: { fontSize: 28 },
+  cardLabel: {
+    fontFamily: Fonts.poppinsMedium,
+    fontSize: 12,
+    color: Colors.text,
+    textAlign: 'center',
   },
-  nextBtn: {
+  cardLabelSelected: { color: Colors.primary },
+
+  checkBadge: {
     position: 'absolute',
-    bottom: 30,
-    alignSelf: 'center',
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: '#000',
+    top: 8,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
   },
-  nextDisabled: { opacity: 0.35 },
+  checkMark: { color: Colors.white, fontSize: 11, fontFamily: Fonts.poppinsBold },
+
+  selectedCount: {
+    fontFamily: Fonts.jostMedium,
+    fontSize: 13,
+    color: Colors.primary,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  button:         { backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
+  buttonDisabled: { opacity: 0.6 },
+  buttonText:     { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.white },
 });

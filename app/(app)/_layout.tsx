@@ -1,175 +1,156 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
-import { DrawerProvider, useDrawer } from '../../components/DrawerContext';
-import DrawerContent from '../../components/DrawerContent';
 
-function TabBarIcon({ name, color, size }: { name: any; color: string; size: number }) {
-  return <Ionicons name={name} size={size} color={color} />;
-}
+// ── Tab definitions (4 real tabs + panic button in center) ───────────────────
 
-function SOSTabIcon() {
-  return (
-    <View style={sosStyles.wrap}>
-      <Ionicons name="alert" size={20} color={Colors.white} />
-    </View>
-  );
-}
+const LEFT_TABS  = [
+  { name: 'home',      icon: 'home-outline',   activeIcon: 'home'    as const },
+  { name: 'apps',      icon: 'grid-outline',   activeIcon: 'grid'    as const },
+];
+const RIGHT_TABS = [
+  { name: 'favorites', icon: 'heart-outline',  activeIcon: 'heart'   as const },
+  { name: 'profile',   icon: 'person-outline', activeIcon: 'person'  as const },
+];
 
-const sosStyles = StyleSheet.create({
-  wrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Platform.OS === 'ios' ? 14 : 18,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-});
+// ── Custom bottom tab bar ────────────────────────────────────────────────────
 
-function AppLayout() {
-  const { isOpen, closeDrawer } = useDrawer();
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
 
-  return (
-    <View style={{ flex: 1 }}>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: Colors.primary,
-          tabBarInactiveTintColor: Colors.textMuted,
-          tabBarStyle: {
-            backgroundColor: Colors.white,
-            borderTopWidth: 1,
-            borderTopColor: Colors.border,
-            height: Platform.OS === 'ios' ? 84 : 64,
-            paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-            paddingTop: 8,
-          },
-          tabBarLabelStyle: {
-            fontSize: 11,
-            fontFamily: Fonts.generalSansMedium,
-          },
-        }}
+  const renderTab = (
+    item: { name: string; icon: string; activeIcon: string },
+    i: number,
+  ) => {
+    const routeIndex = state.routes.findIndex((r) => r.name === item.name);
+    const isActive   = state.index === routeIndex;
+    return (
+      <TouchableOpacity
+        key={item.name}
+        style={styles.tabItem}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate(item.name)}
       >
-        <Tabs.Screen
-          name="home"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size }) => (
-              <TabBarIcon name="home-outline" color={color} size={size} />
-            ),
-          }}
+        <Ionicons
+          name={(isActive ? item.activeIcon : item.icon) as any}
+          size={24}
+          color={isActive ? Colors.navIconActive : Colors.navIcon}
         />
-        {/* Feed — hidden from tab bar, still accessible via router.push */}
-        <Tabs.Screen name="feed" options={{ href: null }} />
-        <Tabs.Screen
-          name="apps"
-          options={{
-            title: 'Apps',
-            tabBarIcon: ({ color, size }) => (
-              <TabBarIcon name="grid-outline" color={color} size={size} />
-            ),
-          }}
-        />
-        {/* SOS tab — points to sos/index.tsx via the sos folder */}
-        <Tabs.Screen
-          name="sos"
-          options={{
-            title: 'SOS',
-            tabBarIcon: () => <SOSTabIcon />,
-            tabBarLabel: () => (
-              <Text style={{ fontSize: 10, fontFamily: Fonts.generalSansBold, color: Colors.primary }}>Sober SOS</Text>
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="favorites"
-          options={{
-            title: 'Favorites',
-            tabBarIcon: ({ color, size }) => (
-              <TabBarIcon name="star-outline" color={color} size={size} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Profile',
-            tabBarIcon: ({ color, size }) => (
-              <TabBarIcon name="person-outline" color={color} size={size} />
-            ),
-          }}
-        />
-        {/* Hidden screens — navigable via router.push but no tab button */}
-        <Tabs.Screen name="tracker" options={{ href: null }} />
-        <Tabs.Screen name="messages" options={{ href: null }} />
-        <Tabs.Screen name="sober-pal" options={{ href: null }} />
-        <Tabs.Screen name="meetings" options={{ href: null }} />
-        <Tabs.Screen name="resource-hub" options={{ href: null }} />
-        <Tabs.Screen name="settings" options={{ href: null }} />
-        <Tabs.Screen name="find-users" options={{ href: null }} />
-        <Tabs.Screen name="chat" options={{ href: null }} />
-        {/* New screens */}
-        <Tabs.Screen name="edit-profile" options={{ href: null }} />
-        <Tabs.Screen name="sponsor" options={{ href: null }} />
-        <Tabs.Screen name="inner-circle" options={{ href: null }} />
-        <Tabs.Screen name="goals" options={{ href: null }} />
-        <Tabs.Screen name="crisis-history" options={{ href: null }} />
-        <Tabs.Screen name="user" options={{ href: null }} />
-        <Tabs.Screen name="call" options={{ href: null }} />
-      </Tabs>
+      </TouchableOpacity>
+    );
+  };
 
-      {/* Custom side drawer overlay */}
-      {isOpen && (
-        <View style={drawerStyles.overlay}>
-          <TouchableOpacity
-            style={drawerStyles.backdrop}
-            onPress={closeDrawer}
-            activeOpacity={1}
-          />
-          <View style={drawerStyles.drawer}>
-            <DrawerContent onClose={closeDrawer} />
-          </View>
-        </View>
-      )}
+  return (
+    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+      {LEFT_TABS.map(renderTab)}
+
+      {/* Panic Button — center, raised */}
+      <TouchableOpacity
+        style={styles.panicWrapper}
+        activeOpacity={0.85}
+        onPress={() => router.push('/(app)/sos')}
+      >
+        <LinearGradient
+          colors={[Colors.primaryDark, Colors.primaryMid]}
+          style={styles.panicGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+        >
+          <Text style={styles.panicBang}>!</Text>
+        </LinearGradient>
+        <Text style={styles.panicLabel}>{'Panic\nButton'}</Text>
+      </TouchableOpacity>
+
+      {RIGHT_TABS.map(renderTab)}
     </View>
   );
 }
 
-const drawerStyles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'row',
-    zIndex: 999,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  drawer: {
-    width: 300,
-    backgroundColor: Colors.white,
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 10,
-  },
-});
+// ── Layout ───────────────────────────────────────────────────────────────────
 
-export default function AppLayoutWrapper() {
+export default function AppLayout() {
   return (
-    <DrawerProvider>
-      <AppLayout />
-    </DrawerProvider>
+    <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
+      {/* Visible tabs */}
+      <Tabs.Screen name="home"      />
+      <Tabs.Screen name="apps"      />
+      <Tabs.Screen name="favorites" />
+      <Tabs.Screen name="profile"   />
+
+      {/* Hidden screens — accessible by push, not shown in tab bar */}
+      <Tabs.Screen name="tracker"        options={{ href: null }} />
+      <Tabs.Screen name="goals"          options={{ href: null }} />
+      <Tabs.Screen name="edit-profile"   options={{ href: null }} />
+      <Tabs.Screen name="messages"       options={{ href: null }} />
+      <Tabs.Screen name="find-users"     options={{ href: null }} />
+      <Tabs.Screen name="sober-pal"      options={{ href: null }} />
+      <Tabs.Screen name="sponsor"        options={{ href: null }} />
+      <Tabs.Screen name="inner-circle"   options={{ href: null }} />
+      <Tabs.Screen name="meetings"       options={{ href: null }} />
+      <Tabs.Screen name="resource-hub"   options={{ href: null }} />
+      <Tabs.Screen name="crisis-history" options={{ href: null }} />
+      <Tabs.Screen name="settings"       options={{ href: null }} />
+      <Tabs.Screen name="sos"            options={{ href: null }} />
+      <Tabs.Screen name="chat"           options={{ href: null }} />
+      <Tabs.Screen name="user"           options={{ href: null }} />
+      <Tabs.Screen name="call"           options={{ href: null }} />
+    </Tabs>
   );
 }
+
+// ── Styles ───────────────────────────────────────────────────────────────────
+
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection:    'row',
+    backgroundColor:  Colors.navBackground,
+    borderTopWidth:   1,
+    borderTopColor:   Colors.navBorder,
+    alignItems:       'center',
+    paddingTop:       8,
+    // Figma: DROP_SHADOW #00000019, offset(10,-10), radius 54
+    shadowColor:      '#000000',
+    shadowOffset:     { width: 10, height: -10 },
+    shadowOpacity:    0.098,
+    shadowRadius:     54,
+    elevation:        20,
+  },
+  tabItem: {
+    flex:         1,
+    alignItems:   'center',
+    paddingBottom: 4,
+  },
+  panicWrapper: {
+    flex:       1,
+    alignItems: 'center',
+    marginTop:  -22,
+  },
+  panicGradient: {
+    width:          125,
+    height:         34,
+    borderRadius:   4,
+    alignItems:     'center',
+    justifyContent: 'center',
+  },
+  panicBang: {
+    color:      Colors.white,
+    fontSize:   16,
+    fontFamily: Fonts.poppinsBold,
+  },
+  panicLabel: {
+    fontFamily: Fonts.poppins,
+    fontSize:   10,
+    color:      '#9d9d9d',
+    textAlign:  'center',
+    marginTop:  4,
+    lineHeight: 13,
+  },
+});

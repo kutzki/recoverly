@@ -1,22 +1,26 @@
+// Font family names must match the TTF filenames in assets/fonts/
+// (without the .ttf extension). The expo-font plugin embeds these natively.
+// NEVER use fontWeight — always use the appropriate named fontFamily.
+
 export const Fonts = {
-  // GeneralSans — primary display font
-  generalSans:         'GeneralSans-Regular',
-  generalSansMedium:   'GeneralSans-Medium',
-  generalSansSemiBold: 'GeneralSans-Semibold',
-  generalSansBold:     'GeneralSans-Bold',
-  // Poppins — body text
-  poppins: 'Poppins-Regular',
-  // Jost — secondary
-  jost: 'Jost-Regular',
+  // Poppins — headings, buttons, numbers, card titles
+  poppins:         'Poppins_400Regular',
+  poppinsMedium:   'Poppins_500Medium',
+  poppinsSemiBold: 'Poppins_600SemiBold',
+  poppinsBold:     'Poppins_700Bold',
+
+  // Jost — body text, captions, sublabels, inputs
+  jost:       'Jost_400Regular',
+  jostMedium: 'Jost_500Medium',
 };
 
 export const FontSizes = {
-  xs:   11,
-  sm:   13,
-  base: 15,
-  md:   17,
+  xs:   10,
+  sm:   12,
+  base: 14,
+  md:   16,
   lg:   20,
   xl:   24,
   xxl:  30,
-  xxxl: 42,
+  xxxl: 35,
 };

@@ -1,208 +1,132 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  KeyboardAvoidingView, Platform, ScrollView, Alert,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { authService } from '../../services/auth';
+import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
-import { useAuth } from '../../hooks/useAuth';
-import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
-
-function getPasswordStrength(pw: string): { label: string; color: string; pct: string } | null {
-  if (!pw) return null;
-  const hasUpper = /[A-Z]/.test(pw);
-  const hasNumber = /[0-9]/.test(pw);
-  const hasSpecial = /[^A-Za-z0-9]/.test(pw);
-  const score = (pw.length >= 8 ? 1 : 0) + (hasUpper ? 1 : 0) + (hasNumber ? 1 : 0) + (hasSpecial ? 1 : 0);
-  if (score <= 1) return { label: 'Weak', color: Colors.feedLike, pct: '25%' };
-  if (score === 2) return { label: 'Fair', color: Colors.feedAmber, pct: '50%' };
-  if (score === 3) return { label: 'Good', color: Colors.goalBlue, pct: '75%' };
-  return { label: 'Strong', color: Colors.goalGreen, pct: '100%' };
-}
 
 export default function SignUp() {
-  const { signUp, isLoading } = useAuth();
-  const [email, setEmail] = useState('');
+  const insets  = useSafeAreaInsets();
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  const strength = getPasswordStrength(password);
+  const [confirm,  setConfirm]  = useState('');
+  const [loading,  setLoading]  = useState(false);
 
-  const handleProceed = async () => {
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || !password.trim()) {
-      Alert.alert('Missing fields', 'Please enter your email and password.');
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      Alert.alert('Invalid email', 'Please enter a valid email address.');
+  const handleSignUp = async () => {
+    if (!email.trim() || !password || !confirm) return;
+    if (password !== confirm) {
+      Alert.alert('Passwords don\'t match', 'Please make sure both passwords are the same.');
       return;
     }
     if (password.length < 8) {
-      Alert.alert('Weak password', 'Password must be at least 8 characters.');
+      Alert.alert('Password too short', 'Password must be at least 8 characters.');
       return;
     }
-    if (strength?.label === 'Weak' || strength?.label === 'Fair') {
-      Alert.alert('Password too weak', 'Include uppercase letters, numbers, or special characters to make it stronger.');
-      return;
-    }
+
+    setLoading(true);
     try {
-      const result = await signUp(trimmedEmail, password);
-      if (result.token === 'pending_email_confirmation') {
-        Alert.alert(
-          'Check your email',
-          `We sent a confirmation link to ${trimmedEmail}. Please verify your email then sign in.`,
-          [{ text: 'Go to Sign In', onPress: () => router.replace('/(auth)/sign-in') }]
-        );
-      } else {
+      await authService.signUp(email.trim().toLowerCase(), password);
+      // After sign-up, sign in immediately
+      const { session, profile } = await authService.signIn(email.trim().toLowerCase(), password);
+      if (session && profile) {
+        await setAuth(profile, session.access_token);
         router.replace('/(setup)/welcome');
       }
-    } catch (err: any) {
-      Alert.alert('Sign up failed', err.message || 'Please try again.');
+    } catch (e: any) {
+      Alert.alert('Sign Up Failed', e.message ?? 'Could not create account.');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleGoogle = () => {
-    Alert.alert('Coming soon', 'Google sign-in will be available in the next update.');
   };
 
   return (
     <LinearGradient
       colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 0.9, y: 1 }}
-      style={styles.container}
+      style={styles.gradient}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.kav}
       >
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 40 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Back — filled purple circle */}
-          <TouchableOpacity style={styles.back} onPress={() => router.back()} accessibilityLabel="Go back">
-            <View style={styles.backCircle}>
-              <Ionicons name="chevron-back" size={20} color={Colors.white} />
+          <View style={styles.logoArea}>
+            <View style={styles.logoCircle}>
+              <Text style={styles.logoEmoji}>🟣</Text>
             </View>
-          </TouchableOpacity>
-
-          {/* Title */}
-          <Text style={styles.title}>Sign up</Text>
-          <Text style={styles.subtitle}>Join thousands on their recovery journey</Text>
-
-          {/* Email */}
-          <Text style={styles.fieldLabel}>Email</Text>
-          <View style={[styles.inputWrap, focusedField === 'email' && styles.inputFocused]}>
-            <Ionicons name="mail-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="your@email.com"
-              placeholderTextColor={Colors.textLight}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-              returnKeyType="next"
-              onFocus={() => setFocusedField('email')}
-              onBlur={() => setFocusedField(null)}
-            />
+            <Text style={styles.appName}>recoverly</Text>
           </View>
 
-          {/* Password */}
-          <Text style={styles.fieldLabel}>Password</Text>
-          <View style={[styles.inputWrap, focusedField === 'password' && styles.inputFocused]}>
-            <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, styles.passwordInput]}
-              placeholder="••••••••"
-              placeholderTextColor={Colors.textLight}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoComplete="new-password"
-              returnKeyType="done"
-              onSubmitEditing={handleProceed}
-              onFocus={() => setFocusedField('password')}
-              onBlur={() => setFocusedField(null)}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.eyeBtn}>
-              <Ionicons
-                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                size={18}
-                color={Colors.textMuted}
+          <Text style={styles.heading}>Create Account</Text>
+          <Text style={styles.subheading}>Start your recovery journey today</Text>
+
+          <View style={styles.form}>
+            <View style={styles.field}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="your@email.com"
+                placeholderTextColor={Colors.placeholderText}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                returnKeyType="next"
               />
-            </TouchableOpacity>
-          </View>
-
-          {/* Password strength */}
-          {strength && (
-            <View style={styles.strengthWrap}>
-              <View style={styles.strengthTrack}>
-                <View style={[styles.strengthFill, { width: strength.pct, backgroundColor: strength.color }]} />
-              </View>
-              <Text style={[styles.strengthLabel, { color: strength.color }]}>{strength.label}</Text>
             </View>
-          )}
 
-          {/* Or divider */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Min. 8 characters"
+                placeholderTextColor={Colors.placeholderText}
+                secureTextEntry
+                returnKeyType="next"
+              />
+            </View>
 
-          {/* Continue with Google */}
-          <TouchableOpacity
-            style={styles.googleBtn}
-            onPress={handleGoogle}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="logo-google" size={18} color="#4285F4" />
-            <Text style={styles.googleText}>Continue with Google</Text>
-            <View style={styles.soonChip}><Text style={styles.soonChipText}>SOON</Text></View>
-          </TouchableOpacity>
+            <View style={styles.field}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <TextInput
+                style={styles.input}
+                value={confirm}
+                onChangeText={setConfirm}
+                placeholder="Re-enter password"
+                placeholderTextColor={Colors.placeholderText}
+                secureTextEntry
+                returnKeyType="done"
+                onSubmitEditing={handleSignUp}
+              />
+            </View>
 
-          {/* Proceed */}
-          <TouchableOpacity
-            style={[styles.proceedBtn, isLoading && styles.proceedDisabled]}
-            onPress={handleProceed}
-            activeOpacity={0.85}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={Colors.white} />
-            ) : (
-              <Text style={styles.proceedText}>Proceed</Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Sign in link */}
-          <View style={styles.signinRow}>
-            <Text style={styles.signinLabel}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.replace('/(auth)/sign-in')}>
-              <Text style={styles.signinLink}>Sign in</Text>
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
+              activeOpacity={0.85}
+              onPress={handleSignUp}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>{loading ? 'Creating account…' : 'Create Account'}</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Logo at bottom */}
-          <View style={styles.logoWrap}>
-            <RecoverlyLogo size={36} showWordmark />
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => router.replace('/(auth)/sign-in')}>
+              <Text style={styles.footerLink}>Sign In</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -211,201 +135,53 @@ export default function SignUp() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  kav: { flex: 1 },
-  scroll: {
-    flexGrow: 1,
-    paddingTop: 60,
-    paddingHorizontal: 28,
-    paddingBottom: 40,
-  },
+  gradient: { flex: 1 },
+  kav:      { flex: 1 },
+  scroll:   { flexGrow: 1, paddingHorizontal: 30, alignItems: 'center' },
 
-  /* Back button — filled purple circle */
-  back: {
-    position: 'absolute',
-    top: 12,
-    left: 20,
-    zIndex: 10,
-  },
-  backCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.primary,
+  logoArea:  { alignItems: 'center', marginBottom: 40 },
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 12,
   },
+  logoEmoji: { fontSize: 40 },
+  appName:   { fontFamily: Fonts.poppinsBold, fontSize: 24, color: Colors.primary },
 
-  /* Title */
-  title: {
-    fontSize: 26,
-    fontFamily: Fonts.generalSansSemiBold,
-    color: Colors.primary,
-    textAlign: 'center',
-    marginTop: 44,
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: Colors.textMuted,
-    textAlign: 'center',
-    marginBottom: 32,
-  },
+  heading:    { fontFamily: Fonts.poppinsBold,     fontSize: 26, color: Colors.text,      marginBottom: 8,  textAlign: 'center' },
+  subheading: { fontFamily: Fonts.jost,            fontSize: 15, color: Colors.textMuted, marginBottom: 36, textAlign: 'center' },
 
-  /* Field label */
-  fieldLabel: {
-    fontSize: 13,
-    fontFamily: Fonts.generalSansMedium,
-    color: Colors.text,
-    marginBottom: 6,
-  },
+  form: { width: '100%', gap: 16, marginBottom: 32 },
 
-  /* Input */
-  inputWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  field: { gap: 6 },
+  label: { fontFamily: Fonts.poppinsMedium, fontSize: 13, color: Colors.text },
+  input: {
     backgroundColor: Colors.white,
     borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    paddingHorizontal: 14,
-    marginBottom: 18,
-    height: 52,
-  },
-  inputFocused: {
-    borderColor: Colors.primary,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontFamily: Fonts.jost,
     fontSize: 15,
     color: Colors.text,
-  },
-  passwordInput: {
-    paddingRight: 8,
-  },
-  eyeBtn: {
-    padding: 4,
-  },
-
-  /* Password strength */
-  strengthWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: -12,
-    marginBottom: 16,
-  },
-  strengthTrack: {
-    flex: 1,
-    height: 4,
-    backgroundColor: Colors.border,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  strengthFill: {
-    height: 4,
-    borderRadius: 2,
-  },
-  strengthLabel: {
-    fontSize: 12,
-    fontFamily: Fonts.generalSansMedium,
-    minWidth: 44,
-    textAlign: 'right',
-  },
-
-  /* Or divider */
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 12,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  dividerText: {
-    color: Colors.textMuted,
-    fontSize: 13,
-  },
-
-  /* Google button */
-  googleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: Colors.white,
-    borderRadius: 999,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: Colors.border,
-    height: 52,
-    marginBottom: 20,
-  },
-  googleText: {
-    fontSize: 15,
-    fontFamily: Fonts.generalSansMedium,
-    color: Colors.text,
-  },
-  soonChip: {
-    backgroundColor: Colors.border,
-    borderRadius: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-  },
-  soonChipText: {
-    fontSize: 10,
-    fontFamily: Fonts.generalSansBold,
-    color: Colors.textMuted,
   },
 
-  /* Proceed button — full pill */
-  proceedBtn: {
+  button: {
     backgroundColor: Colors.primary,
-    borderRadius: 999,
-    height: 52,
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
+    marginTop: 8,
   },
-  proceedDisabled: {
-    opacity: 0.7,
-  },
-  proceedText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontFamily: Fonts.generalSansBold,
-  },
+  buttonDisabled: { opacity: 0.6 },
+  buttonText: { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.white },
 
-  /* Sign in link */
-  signinRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  signinLabel: {
-    color: Colors.textMuted,
-    fontSize: 14,
-  },
-  signinLink: {
-    color: Colors.primary,
-    fontSize: 14,
-    fontFamily: Fonts.generalSansSemiBold,
-  },
-
-  /* Logo at bottom */
-  logoWrap: {
-    alignItems: 'center',
-    paddingBottom: 8,
-  },
+  footer:     { flexDirection: 'row', alignItems: 'center' },
+  footerText: { fontFamily: Fonts.jost, fontSize: 14, color: Colors.textMuted },
+  footerLink: { fontFamily: Fonts.poppinsMedium, fontSize: 14, color: Colors.primary },
 });

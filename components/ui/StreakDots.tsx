@@ -1,33 +1,41 @@
-import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 
-interface Props {
-  streak: boolean[];
-}
+type Props = {
+  streak: boolean[]; // length 7, index 0 = Monday
+};
 
 export function StreakDots({ streak }: Props) {
   return (
     <View style={styles.row}>
       {streak.map((done, i) => (
-        <View key={i} style={[styles.dot, done ? styles.done : styles.empty]}>
-          {done && <Ionicons name="checkmark" size={11} color={Colors.white} />}
-        </View>
+        <View
+          key={i}
+          style={[styles.dot, done ? styles.dotFilled : styles.dotEmpty]}
+        />
       ))}
     </View>
   );
 }
 
+const DOT = 15;
+
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 6, marginTop: 6 },
-  dot: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
+  row: {
+    flexDirection: 'row',
+    gap: 5,
   },
-  done: { backgroundColor: Colors.primary },
-  empty: { backgroundColor: Colors.border },
+  dot: {
+    width: DOT,
+    height: DOT,
+    borderRadius: DOT / 2,
+  },
+  dotFilled: {
+    backgroundColor: Colors.primary,
+  },
+  dotEmpty: {
+    backgroundColor: '#E0D0F0',
+    borderWidth: 1,
+    borderColor: '#D0C0E8',
+  },
 });

@@ -1,317 +1,131 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-  Linking,
-  Alert,
-  Platform,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
-import { useProgressStore } from '../../store/progress';
 import { useAuthStore } from '../../store/auth';
+import { supabase } from '../../services/supabase';
+import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
-interface Action {
-  id: string;
+export type SOSStep = {
+  id:    string;
   label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-}
+  body:  string;
+  cta?:  { label: string; action: () => void };
+};
 
-interface Props {
-  title: string;
-  subtitle?: string;
-  accentColor: string;
-  headerIcon: keyof typeof Ionicons.glyphMap;
-  actions: Action[];
-  tip?: string;
-}
+type Props = {
+  incidentType:    string;
+  headerTitle:     string;
+  headerColor:     string;
+  headerEmoji:     string;
+  affirmation:     string;
+  steps:           SOSStep[];
+};
 
-export function SOSResponseScreen({ title, subtitle, accentColor, headerIcon, actions, tip }: Props) {
-  const [completed, setCompleted] = useState<Record<string, boolean>>({});
-  const setSobrietyStart = useProgressStore(s => s.setSobrietyStart);
-  const updateUser = useAuthStore(s => s.updateUser);
+export function SOSResponseScreen({ incidentType, headerTitle, headerColor, headerEmoji, affirmation, steps }: Props) {
+  const insets    = useSafeAreaInsets();
+  const user      = useAuthStore((s) => s.user);
+  const [done, setDone] = useState<Record<string, boolean>>({});
 
-  const confirmResetCounter = () => {
+  const toggleStep = (id: string) => setDone((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const handleFinish = async () => {
+    const actionsCompleted = Object.entries(done).filter(([, v]) => v).map(([k]) => k);
+    if (user?.id) {
+      try {
+        await supabase.from('crisis_incidents').insert({
+          user_id: user.id,
+          incident_type: incidentType,
+          actions_completed: actionsCompleted,
+        });
+      } catch { /* ignore — don't block UX */ }
+    }
     Alert.alert(
-      'Reset Sobriety Counter',
-      "This will reset your sobriety counter to today. It's a fresh start — you're not failing, you're trying again. 💜",
-      [
-        { text: 'Not Yet', style: 'cancel' },
-        {
-          text: 'Reset Counter',
-          style: 'destructive',
-          onPress: () => {
-            const today = new Date().toISOString();
-            setSobrietyStart(today);
-            updateUser({ sobrietyStartDate: today });
-            setCompleted(prev => ({ ...prev, reset: true }));
-            Alert.alert(
-              'Counter Reset 💜',
-              "Your sobriety counter starts fresh today. Every day sober is a victory. You've got this.",
-              [{ text: 'Thank you' }]
-            );
-          },
-        },
-      ]
-    );
-  };
-
-  const toggle = (id: string) => {
-    if (id === 'reset') { confirmResetCounter(); return; }
-    setCompleted(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const callCrisis = () => {
-    Alert.alert(
-      '988 Crisis Lifeline',
-      "Call the Suicide & Crisis Lifeline now? They're available 24/7.",
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Call 988', onPress: () => Linking.openURL('tel:988') },
-      ]
-    );
-  };
-
-  const handleComplete = () => {
-    Alert.alert(
-      'Great job 💜',
-      'You reached out for help — that takes courage.',
-      [{ text: 'Continue', onPress: () => router.back() }]
+      'You did it 💪',
+      "You just survived a tough moment. Every step you took matters. You're stronger than you know.",
+      [{ text: 'Back to Home', onPress: () => router.replace('/(app)/home') }],
     );
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-
-        {/* ── Gradient hero header ── */}
-        <LinearGradient
-          colors={[Colors.primaryDark, Colors.primary, Colors.primaryMid]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.hero}
-        >
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={24} color="rgba(255,255,255,0.9)" />
-          </TouchableOpacity>
-          <View style={styles.headerIconWrap}>
-            <Ionicons name={headerIcon} size={28} color="#fff" />
+    <View style={styles.root}>
+      <LinearGradient colors={[headerColor, Colors.primaryMid]} style={styles.headerGrad}>
+        <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 24, paddingBottom: 24 }}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => router.back()} hitSlop={12}>
+              <Ionicons name="arrow-back" size={24} color={Colors.white} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{headerTitle}</Text>
+            <Text style={{ fontSize: 24 }}>{headerEmoji}</Text>
           </View>
-          <Text style={styles.heroTitle}>{title}</Text>
-          {subtitle && <Text style={styles.heroSub}>{subtitle}</Text>}
-        </LinearGradient>
-
-        {/* ── Recommendations card ── */}
-        <View style={styles.recCard}>
-          <Text style={styles.recLabel}>We recommend you try these {actions.length} things</Text>
-
-          {actions.map((action) => {
-            const done = !!completed[action.id];
-            return (
-              <TouchableOpacity
-                key={action.id}
-                style={[styles.actionRow, done && styles.actionRowDone]}
-                onPress={() => toggle(action.id)}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.actionIconWrap, done && styles.actionIconWrapDone]}>
-                  <Ionicons name={action.icon} size={20} color={done ? Colors.white : Colors.primary} />
-                </View>
-                <Text style={[styles.actionLabel, done && styles.actionLabelDone]}>
-                  {action.label}
-                </Text>
-                {/* Right-side circle checkbox (matches Figma) */}
-                <View style={[styles.checkbox, done && styles.checkboxDone]}>
-                  {done && <Ionicons name="checkmark" size={13} color={Colors.white} />}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+          <Text style={styles.affirmation}>{affirmation}</Text>
         </View>
+      </LinearGradient>
 
-        {/* ── Tip ── */}
-        {tip && (
-          <View style={styles.tipBox}>
-            <Ionicons name="bulb-outline" size={18} color={Colors.primary} />
-            <Text style={styles.tipText}>{tip}</Text>
-          </View>
-        )}
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.stepsLabel}>Steps to get through this</Text>
 
-        {/* ── Self-help / crisis line ── */}
-        <TouchableOpacity style={styles.selfHelpBtn} onPress={callCrisis}>
-          <Ionicons name="call" size={18} color={Colors.sosRedBright} />
-          <Text style={styles.selfHelpBtnText}>View all self help options</Text>
+        {steps.map((step, idx) => (
+          <TouchableOpacity
+            key={step.id}
+            style={[styles.stepCard, done[step.id] && styles.stepCardDone]}
+            activeOpacity={0.8}
+            onPress={() => toggleStep(step.id)}
+          >
+            <View style={styles.stepNumber}>
+              {done[step.id] ? (
+                <Ionicons name="checkmark" size={16} color={Colors.white} />
+              ) : (
+                <Text style={styles.stepNum}>{idx + 1}</Text>
+              )}
+            </View>
+            <View style={styles.stepBody}>
+              <Text style={[styles.stepLabel, done[step.id] && styles.stepLabelDone]}>{step.label}</Text>
+              <Text style={styles.stepText}>{step.body}</Text>
+              {step.cta && !done[step.id] && (
+                <TouchableOpacity style={styles.ctaBtn} onPress={step.cta.action}>
+                  <Text style={styles.ctaText}>{step.cta.label}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </TouchableOpacity>
+        ))}
+
+        <TouchableOpacity style={styles.finishBtn} activeOpacity={0.85} onPress={handleFinish}>
+          <Text style={styles.finishText}>I'm feeling better</Text>
         </TouchableOpacity>
-
-        {/* ── Complete Activity ── */}
-        <TouchableOpacity style={styles.completeBtn} onPress={handleComplete}>
-          <Text style={styles.completeBtnText}>Complete Activity</Text>
-          <Ionicons name="checkmark-circle" size={18} color={Colors.white} />
-        </TouchableOpacity>
-
-        <View style={{ height: 32 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: Colors.background },
-  scroll: { paddingBottom: 20 },
+  root:       { flex: 1, backgroundColor: Colors.white },
+  headerGrad: { width: '100%' },
+  headerRow:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  headerTitle:{ fontFamily: Fonts.poppinsBold, fontSize: 18, color: Colors.white, flex: 1, marginLeft: 8 },
+  affirmation:{ fontFamily: Fonts.jost, fontSize: 15, color: 'rgba(255,255,255,0.9)', lineHeight: 24 },
 
-  /* ── Hero ── */
-  hero: {
-    paddingTop: Platform.OS === 'android' ? 50 : 58,
-    paddingBottom: 36,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-  },
-  backBtn: {
-    position: 'absolute',
-    top: Platform.OS === 'android' ? 12 : 56,
-    left: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerIconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
-  heroTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#fff',
-    textAlign: 'center',
-    marginBottom: 6,
-  },
-  heroSub: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
+  scroll:      { paddingHorizontal: 24, paddingTop: 24 },
+  stepsLabel:  { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.text, marginBottom: 16 },
 
-  /* ── Recommendations card ── */
-  recCard: {
-    backgroundColor: Colors.white,
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 18,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 3,
-    gap: 10,
-  },
-  recLabel: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    marginBottom: 4,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: 12,
-    padding: 14,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  actionRowDone: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  actionIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionIconWrapDone: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-  },
-  actionLabel: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  actionLabelDone: {
-    color: Colors.white,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxDone: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderColor: Colors.white,
-  },
+  stepCard:     { flexDirection: 'row', gap: 14, backgroundColor: Colors.cardTintPurpleFaint, borderRadius: 12, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: Colors.primaryLight },
+  stepCardDone: { opacity: 0.75 },
+  stepNumber:   { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 },
+  stepNum:      { fontFamily: Fonts.poppinsBold, fontSize: 14, color: Colors.white },
+  stepBody:     { flex: 1, gap: 4 },
+  stepLabel:    { fontFamily: Fonts.poppinsSemiBold, fontSize: 14, color: Colors.text },
+  stepLabelDone:{ textDecorationLine: 'line-through', color: Colors.textMuted },
+  stepText:     { fontFamily: Fonts.jost, fontSize: 13, color: Colors.textMuted, lineHeight: 20 },
+  ctaBtn:       { alignSelf: 'flex-start', marginTop: 8, backgroundColor: Colors.primary, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 14 },
+  ctaText:      { fontFamily: Fonts.poppinsMedium, fontSize: 12, color: Colors.white },
 
-  /* ── Tip ── */
-  tipBox: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'flex-start',
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 12,
-    padding: 14,
-    marginHorizontal: 20,
-    marginTop: 12,
-  },
-  tipText: { flex: 1, fontSize: 13, color: Colors.primaryDark, lineHeight: 20 },
-
-  /* ── Buttons ── */
-  selfHelpBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    height: 50,
-    marginHorizontal: 20,
-    marginTop: 12,
-  },
-  selfHelpBtnText: { color: Colors.text, fontWeight: '600', fontSize: 15 },
-  completeBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    height: 50,
-    marginHorizontal: 20,
-    marginTop: 10,
-  },
-  completeBtnText: { color: Colors.white, fontWeight: '700', fontSize: 15 },
+  finishBtn:  { backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
+  finishText: { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.white },
 });

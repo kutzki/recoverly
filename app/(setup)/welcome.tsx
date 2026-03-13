@@ -1,92 +1,66 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuthStore } from '../../store/auth';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
-import { RecoverlyLogo } from '../../components/ui/RecoverlyLogo';
 
-export default function SetupWelcome() {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(24)).current;
+export default function Welcome() {
+  const insets = useSafeAreaInsets();
+  const user   = useAuthStore((s) => s.user);
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 700,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 700,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    const timer = setTimeout(() => {
-      router.replace('/(setup)/basic-info');
-    }, 2400);
-
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => router.replace('/(setup)/basic-info'), 2400);
+    return () => clearTimeout(t);
   }, []);
 
   return (
     <LinearGradient
-      // Blue-tinted gradient matching Figma: light blue → soft purple → white
-      colors={['#D6EEFF', '#EDE6FF', '#FFFFFF']}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 0.9, y: 1 }}
-      style={styles.container}
+      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
+      style={styles.gradient}
     >
-      {/* ── Centered text block ── */}
-      <Animated.View style={[styles.textWrap, { opacity, transform: [{ translateY }] }]}>
-        <Text style={styles.welcomeLabel}>Welcome</Text>
-        <View style={styles.divider} />
-        <Text style={styles.subtitle}>Let's start with some basics</Text>
-      </Animated.View>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.logoCircle}>
+          <Text style={styles.logoEmoji}>🟣</Text>
+        </View>
 
-      {/* ── Logo pinned to the bottom (matches Figma position) ── */}
-      <Animated.View style={[styles.logoWrap, { opacity }]}>
-        <RecoverlyLogo size={44} showWordmark />
-      </Animated.View>
+        <Text style={styles.welcome}>Welcome to</Text>
+        <Text style={styles.appName}>Recoverly</Text>
+        <Text style={styles.tagline}>Let's set up your profile</Text>
+
+        {/* Animated dots */}
+        <View style={styles.dots}>
+          {[0, 1, 2].map((i) => (
+            <View key={i} style={[styles.dot, i === 0 && styles.dotActive]} />
+          ))}
+        </View>
+      </View>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  gradient:   { flex: 1 },
+  container:  { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+
+  logoCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 24,
   },
-  textWrap: {
-    alignItems: 'center',
-    gap: 14,
-  },
-  welcomeLabel: {
-    fontSize: 50,
-    fontWeight: '700',
-    color: Colors.text,
-    letterSpacing: -1.5,
-    fontFamily: Fonts.generalSansSemiBold,
-  },
-  divider: {
-    width: 40,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: Colors.primary,
-    opacity: 0.4,
-  },
-  subtitle: {
-    fontSize: 17,
-    color: Colors.primary,
-    fontFamily: Fonts.generalSans,
-    letterSpacing: 0.2,
-  },
-  logoWrap: {
-    position: 'absolute',
-    bottom: 52,
-    alignItems: 'center',
-  },
+  logoEmoji: { fontSize: 50 },
+
+  welcome: { fontFamily: Fonts.jost,         fontSize: 18, color: Colors.textMuted },
+  appName: { fontFamily: Fonts.poppinsBold,  fontSize: 36, color: Colors.primary   },
+  tagline: { fontFamily: Fonts.jostMedium,   fontSize: 16, color: Colors.textMuted },
+
+  dots: { flexDirection: 'row', gap: 8, marginTop: 48 },
+  dot:  { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primaryLight },
+  dotActive: { backgroundColor: Colors.primary, width: 24 },
 });

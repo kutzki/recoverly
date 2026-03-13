@@ -1,450 +1,335 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
-import React, { useRef, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Platform,
-  Animated,
-  Dimensions,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Image,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
-import { Fonts } from '../../constants/fonts';
-import { SobrietyCounter } from '../../components/ui/SobrietyCounter';
-import { StreakDots } from '../../components/ui/StreakDots';
-import { useAuthStore } from '../../store/auth';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
+import { useAuthStore }     from '../../store/auth';
 import { useProgressStore } from '../../store/progress';
-import { useSobrietyTimer } from '../../hooks/useSobrietyTimer';
-import { useDrawer } from '../../components/DrawerContext';
-import ChecklistSheet from '../../components/checklists/DailyChecklist';
-import JournalSheet from '../../components/journal/JournalEntry';
-import BottomSheet from '@gorhom/bottom-sheet';
+import { SobrietyCounter }  from '../../components/ui/SobrietyCounter';
+import { StreakDots }        from '../../components/ui/StreakDots';
+import { Colors }           from '../../constants/colors';
+import { Fonts }            from '../../constants/fonts';
 
-const thumbsUp = require('../../assets/images/thumbs-up.png');
+// ── Quick-action buttons (row of 5, Figma: 55×60 each) ──────────────────────
 
-const SCREEN_W = Dimensions.get('window').width;
-
-/* ─── Quick-action buttons ─── */
 const QUICK_ACTIONS = [
-  { id: 'meeting',   label: 'Meeting',   icon: 'people-outline' as const,      route: '/(app)/meetings' },
-  { id: 'awards',    label: 'Awards',    icon: 'trophy-outline' as const,       route: '/(app)/profile' },
-  { id: 'tracker',   label: 'Tracker',   icon: 'bar-chart-outline' as const,    route: '/(app)/tracker' },
-  { id: 'checklist', label: 'Checklist', icon: 'checkbox-outline' as const,     action: 'checklist' },
-  { id: 'journal',   label: 'Journal',   icon: 'journal-outline' as const,      action: 'journal' },
+  { id: 'meetings',  label: 'Meeting',   icon: 'people',       route: '/(app)/meetings'  },
+  { id: 'awards',    label: 'Awards',    icon: 'trophy',       route: '/(app)/tracker'   },
+  { id: 'tracker',   label: 'Tracker',   icon: 'analytics',    route: '/(app)/tracker'   },
+  { id: 'checklist', label: 'Checklist', icon: 'checkbox',     route: '/(app)/apps'      },
+  { id: 'journal',   label: 'Journal',   icon: 'book',         route: '/(app)/apps'      },
 ] as const;
 
-/* ─── Upcoming events cards ─── */
+// ── Sample upcoming events (placeholder until Supabase events table) ─────────
+
 const UPCOMING_EVENTS = [
   {
-    id: 'new-connections',
-    title: 'New Connections',
+    id: '1',
+    title:    'New Connections',
     location: 'Los Angeles County',
-    imageUri: null as string | null,
-    route: '/(app)/sober-pal',
+    emoji:    '🏛️',
+    bgColor:  Colors.cardTintPurpleLight,
   },
   {
-    id: 'abandon-non',
-    title: 'Abandon Non-Users',
+    id: '2',
+    title:    'New Connections',
     location: 'Toronto, Canada',
-    imageUri: null as string | null,
-    route: '/(app)/meetings',
+    emoji:    '🌐',
+    bgColor:  Colors.cardTintPurpleLight,
   },
 ];
 
-/** Mon=0 … Sun=6, matches progress store convention */
-function todayWeekIndex() {
-  return (new Date().getDay() + 6) % 7;
-}
+// ── Component ────────────────────────────────────────────────────────────────
 
-export default function Home() {
-  const user                                            = useAuthStore(s => s.user);
-  const { sobrietyStartDate, weeklyStreak, markTodayCheckedIn } = useProgressStore();
-  const timer                                           = useSobrietyTimer(sobrietyStartDate);
-  const { openDrawer }                                  = useDrawer();
+export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
 
-  const checklistRef = useRef<BottomSheet>(null);
-  const journalRef   = useRef<BottomSheet>(null);
-  const thumbScale   = useRef(new Animated.Value(1)).current;
+  const user              = useAuthStore((s) => s.user);
+  const sobrietyStartDate = useProgressStore((s) => s.sobrietyStartDate);
+  const weeklyStreak      = useProgressStore((s) => s.weeklyStreak);
+  const markTodayCheckedIn = useProgressStore((s) => s.markTodayCheckedIn);
 
-  const checkedInToday = weeklyStreak[todayWeekIndex()];
+  const daysSober = useMemo(() => {
+    if (!sobrietyStartDate) return 0;
+    const start = new Date(sobrietyStartDate);
+    const diff  = Math.floor((Date.now() - start.getTime()) / 86_400_000);
+    return Math.max(0, diff);
+  }, [sobrietyStartDate]);
+
+  const firstName = (user?.name ?? 'Friend').split(' ')[0];
+
+  // Check-in for today
+  const todayIdx      = (new Date().getDay() + 6) % 7;
+  const checkedInToday = weeklyStreak[todayIdx] ?? false;
 
   const handleCheckIn = useCallback(() => {
-    if (checkedInToday) {
-      Alert.alert('Already checked in! 💜', "You've already done your daily check-in today. Come back tomorrow!");
-      return;
+    if (!checkedInToday) {
+      markTodayCheckedIn(user?.id);
     }
-    Animated.sequence([
-      Animated.spring(thumbScale, { toValue: 1.3, useNativeDriver: true, speed: 20 }),
-      Animated.spring(thumbScale, { toValue: 1.0, useNativeDriver: true, speed: 20 }),
-    ]).start();
-    markTodayCheckedIn();
-    Alert.alert('Checked in! 👍', 'Great work showing up today. Keep that streak going!');
-  }, [checkedInToday, markTodayCheckedIn, thumbScale]);
-
-  const handleQuickAction = useCallback((action: typeof QUICK_ACTIONS[number]) => {
-    if ('route' in action && action.route) {
-      router.push(action.route as any);
-    } else if ('action' in action) {
-      if (action.action === 'checklist') checklistRef.current?.expand();
-      else if (action.action === 'journal') journalRef.current?.expand();
-    }
-  }, []);
-
-  const displayName = user?.name || 'there';
+  }, [checkedInToday, user?.id]);
 
   return (
-    <LinearGradient
-      colors={[Colors.cardTintPurpleLight, Colors.cardTintPurpleMid, Colors.cardTintPurpleFaint, Colors.background]}
-      locations={[0, 0.2, 0.45, 1]}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 0.9, y: 0.5 }}
-      style={{ flex: 1 }}
-    >
-      <SafeAreaView style={styles.safe}>
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* ── Header ── */}
-          <View style={styles.header}>
-            <View>
-              <Text style={styles.greeting}>Welcome Back,</Text>
-              <Text style={styles.name}>{displayName}</Text>
-            </View>
-            <TouchableOpacity style={styles.menuBtn} onPress={openDrawer} accessibilityLabel="Open menu">
-              <Ionicons name="reorder-three-outline" size={26} color={Colors.text} />
+    <View style={styles.root}>
+      {/* ── Subtle purple gradient overlay (top-left, 10% opacity) ── */}
+      <LinearGradient
+        colors={['rgba(171,49,240,0.10)', 'rgba(204,115,254,0.05)', 'transparent']}
+        style={styles.bgOverlay}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        pointerEvents="none"
+      />
+
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 16, paddingBottom: 24 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Header ─────────────────────────────────────────────────────── */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.welcomeLabel}>Welcome Back</Text>
+            <Text style={styles.userName}>{firstName}</Text>
+          </View>
+          <TouchableOpacity onPress={() => router.push('/(app)/settings')} hitSlop={12}>
+            <Ionicons name="menu" size={26} color={Colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Sobriety Arc ───────────────────────────────────────────────── */}
+        <View style={styles.arcWrapper}>
+          <SobrietyCounter daysSober={daysSober} size={230} />
+        </View>
+
+        {/* ── Quick Actions ──────────────────────────────────────────────── */}
+        <View style={styles.actionsRow}>
+          {QUICK_ACTIONS.map((a) => (
+            <TouchableOpacity
+              key={a.id}
+              style={styles.actionBtn}
+              activeOpacity={0.85}
+              onPress={() => router.push(a.route as any)}
+            >
+              <Ionicons name={a.icon as any} size={24} color={Colors.white} />
+              <Text style={styles.actionLabel}>{a.label}</Text>
             </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* ── Daily Reminder / Check-in Card ─────────────────────────────── */}
+        <TouchableOpacity
+          style={styles.checkInCard}
+          activeOpacity={0.92}
+          onPress={handleCheckIn}
+        >
+          {/* Small external link icon */}
+          <TouchableOpacity style={styles.cardArrow} onPress={() => router.push('/(app)/apps')} hitSlop={8}>
+            <Ionicons name="arrow-up-outline" size={14} color={Colors.textMuted} style={{ transform: [{ rotate: '45deg' }] }} />
+          </TouchableOpacity>
+
+          {/* Text content */}
+          <View style={styles.checkInTextCol}>
+            <Text style={styles.reminderLabel}>Daily Reminder</Text>
+            <Text style={styles.checkInHeading}>
+              {checkedInToday ? 'You checked in today! 🎉' : 'Have you checked in\nyet today?'}
+            </Text>
+            <Text style={styles.thisWeekLabel}>This week</Text>
+            <StreakDots streak={weeklyStreak} />
           </View>
 
-          {/* ── Sobriety arc ── */}
-          <View style={styles.arcWrap}>
-            <SobrietyCounter days={timer.days} goal={90} />
-          </View>
+          {/* Thumbs-up 3D emoji */}
+          <Text style={styles.thumbsUp}>👍</Text>
+        </TouchableOpacity>
 
-          {/* ── Quick-action cards (horizontal scroll) ── */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.quickScrollContent}
-            style={styles.quickScroll}
-          >
-            {QUICK_ACTIONS.map(action => (
-              <TouchableOpacity
-                key={action.id}
-                style={styles.quickCard}
-                onPress={() => handleQuickAction(action)}
-                activeOpacity={0.78}
+        {/* ── Upcoming Events ────────────────────────────────────────────── */}
+        <Text style={styles.sectionLabel}>Upcoming Events</Text>
+
+        <View style={styles.eventsRow}>
+          {UPCOMING_EVENTS.map((ev) => (
+            <TouchableOpacity
+              key={ev.id}
+              activeOpacity={0.88}
+              onPress={() => router.push('/(app)/meetings')}
+            >
+              <LinearGradient
+                colors={[Colors.eventGradientStart, Colors.eventGradientEnd]}
+                style={styles.eventCard}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
               >
-                <Ionicons name={action.icon} size={26} color={Colors.white} />
-                <Text style={styles.quickLabel}>{action.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                {/* Link icon */}
+                <View style={styles.eventArrow}>
+                  <Ionicons name="arrow-up-outline" size={12} color={Colors.textMuted} style={{ transform: [{ rotate: '45deg' }] }} />
+                </View>
 
-          {/* ── Daily Reminder card ── */}
-          <View style={styles.reminderCard}>
-            {/* header row */}
-            <View style={styles.reminderHeader}>
-              <Text style={styles.reminderSectionLabel}>Daily Reminder</Text>
-              <TouchableOpacity style={styles.reminderArrowBtn} onPress={handleCheckIn}>
-                <Ionicons name="open-outline" size={14} color={Colors.primary} />
-              </TouchableOpacity>
-            </View>
+                {/* Logo circle */}
+                <View style={styles.eventLogoCircle}>
+                  <Text style={styles.eventEmoji}>{ev.emoji}</Text>
+                </View>
 
-            {/* body */}
-            <View style={styles.reminderBody}>
-              <View style={styles.reminderTextCol}>
-                <Text style={styles.reminderTitle}>
-                  {checkedInToday
-                    ? 'You checked in\ntoday ✓'
-                    : 'Have you checked in\nyet today?'}
-                </Text>
-                <Text style={styles.reminderWeekLabel}>This week</Text>
-                <StreakDots streak={weeklyStreak} />
-              </View>
-
-              <TouchableOpacity onPress={handleCheckIn} activeOpacity={0.85} style={styles.thumbTap}>
-                <Animated.Image
-                  source={thumbsUp}
-                  style={[styles.thumbImage, { transform: [{ scale: thumbScale }] }]}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* ── Upcoming Events ── */}
-          <Text style={styles.sectionLabel}>Upcoming Events</Text>
-          <View style={styles.eventsRow}>
-            {UPCOMING_EVENTS.map(item => (
-              // Outer View carries the shadow; inner wrapper clips gradient to rounded corners
-              <View key={item.id} style={styles.eventCardShadow}>
-                <TouchableOpacity
-                  style={styles.eventCardWrapper}
-                  onPress={() => router.push(item.route as any)}
-                  activeOpacity={0.82}
-                >
-                  <LinearGradient
-                    colors={['rgba(171,49,240,0.18)', 'rgba(204,115,254,0.18)']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
-                    style={styles.eventCard}
-                  >
-                    {/* Top row: avatar + arrow */}
-                    <View style={styles.eventCardTop}>
-                      <View style={styles.eventAvatar}>
-                        {item.imageUri ? (
-                          <Image
-                            source={{ uri: item.imageUri }}
-                            style={styles.eventAvatarImg}
-                            resizeMode="cover"
-                          />
-                        ) : (
-                          <Text style={styles.eventAvatarInitial}>
-                            {item.title.charAt(0)}
-                          </Text>
-                        )}
-                      </View>
-                      <View style={styles.eventArrowBtn}>
-                        <Ionicons name="arrow-forward" size={13} color={Colors.primary} />
-                      </View>
-                    </View>
-
-                    <Text style={styles.eventTitle} numberOfLines={1}>{item.title}</Text>
-                    <Text style={styles.eventLocation}>{item.location}</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-
-          <View style={{ height: 32 }} />
-        </ScrollView>
-
-        {/* Bottom Sheets */}
-        <ChecklistSheet ref={checklistRef} />
-        <JournalSheet ref={journalRef} />
-      </SafeAreaView>
-    </LinearGradient>
+                <Text style={styles.eventTitle} numberOfLines={2}>{ev.title}</Text>
+                <Text style={styles.eventLocation} numberOfLines={1}>{ev.location}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
-/* ─── CARD_W: width showing 4 full buttons + peek of 5th ─── */
-const CARD_W = Math.floor((SCREEN_W - 40 - 3 * 12) / 4.3);
+// ── Styles ───────────────────────────────────────────────────────────────────
+
+const CARD_WIDTH = '47%' as const;
 
 const styles = StyleSheet.create({
-  safe:          { flex: 1, backgroundColor: 'transparent' },
-  scroll:        { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
+  root: { flex: 1, backgroundColor: Colors.white },
 
-  /* ─── Header ─── */
+  bgOverlay: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: 300,
+    height: 300,
+    zIndex: 0,
+  },
+
+  scroll: { flexGrow: 1, paddingHorizontal: 30 },
+
+  // Header
   header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection:  'row',
     justifyContent: 'space-between',
-    paddingTop: Platform.OS === 'android' ? 16 : 12,
-    paddingBottom: 20,
+    alignItems:     'flex-start',
+    marginBottom:   12,
   },
-  greeting: {
-    fontSize: 15,
-    color: Colors.textMuted,
-    fontFamily: Fonts.generalSans,
+  welcomeLabel: {
+    fontFamily: Fonts.jost,
+    fontSize:   16,
+    color:      Colors.textMuted,
+    lineHeight: 22,
   },
-  name: {
-    fontSize: 24,
-    fontFamily: Fonts.generalSansSemiBold,
-    color: Colors.text,
-    marginTop: 2,
-  },
-  menuBtn: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 22,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 6,
-    elevation: 3,
+  userName: {
+    fontFamily: Fonts.poppinsSemiBold,
+    fontSize:   16,
+    color:      Colors.text,
   },
 
-  /* ─── Arc ─── */
-  arcWrap: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
+  // Sobriety arc
+  arcWrapper: { alignItems: 'center', marginVertical: 8 },
 
-  /* ─── Quick-action cards ─── */
-  quickScroll: {
-    marginHorizontal: -20,
-    marginBottom: 20,
+  // Quick actions
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom:  20,
   },
-  quickScrollContent: {
-    paddingHorizontal: 20,
-    gap: 12,
-  },
-  quickCard: {
-    width: CARD_W,
-    paddingTop: 16,
-    paddingBottom: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    gap: 10,
+  actionBtn: {
+    width:          55,
+    height:         60,
     backgroundColor: Colors.primary,
-    borderRadius: 10,
-    shadowColor: Colors.primaryDark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  quickLabel: {
-    fontSize: 11,
-    color: Colors.white,
-    fontFamily: Fonts.generalSansMedium,
-    textAlign: 'center',
-  },
-
-  /* ─── Daily Reminder card ─── */
-  reminderCard: {
-    backgroundColor: Colors.cardTintBlue,
-    borderRadius: 22,
-    padding: 18,
-    marginBottom: 20,
-  },
-  reminderHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-  },
-  reminderSectionLabel: {
-    fontSize: 13,
-    color: Colors.cardCyanText,
-    fontFamily: Fonts.generalSansMedium,
-  },
-  reminderArrowBtn: {
-    width: 30,
-    height: 30,
-    backgroundColor: Colors.white,
-    borderRadius: 10,
-    alignItems: 'center',
+    borderRadius:   10,
+    alignItems:     'center',
     justifyContent: 'center',
+    gap:            4,
   },
-  reminderBody: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-  },
-  reminderTextCol: {
-    flex: 1,
-  },
-  reminderTitle: {
-    fontSize: 22,
-    fontFamily: Fonts.generalSansBold,
-    color: Colors.text,
-    lineHeight: 30,
-    marginBottom: 12,
-  },
-  reminderWeekLabel: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    fontFamily: Fonts.generalSans,
-    marginBottom: 6,
-  },
-  thumbTap: {
-    marginLeft: 8,
-    marginBottom: -4,
-  },
-  thumbImage: {
-    width: 110,
-    height: 110,
+  actionLabel: {
+    fontFamily: Fonts.poppinsMedium,
+    fontSize:   10,
+    color:      Colors.white,
   },
 
-  /* ─── Upcoming Events ─── */
+  // Daily reminder / check-in card
+  checkInCard: {
+    backgroundColor: Colors.checkInCard,
+    borderRadius:    15,
+    padding:         20,
+    marginBottom:    20,
+    flexDirection:   'row',
+    alignItems:      'center',
+    overflow:        'hidden',
+  },
+  checkInTextCol: { flex: 1, gap: 6 },
+  cardArrow: {
+    position: 'absolute',
+    top:      12,
+    right:    12,
+  },
+  reminderLabel: {
+    fontFamily:    Fonts.jostMedium,
+    fontSize:      15,
+    color:         Colors.textMuted,
+    letterSpacing: 0.5,
+  },
+  checkInHeading: {
+    fontFamily:    Fonts.poppinsBold,
+    fontSize:      20,
+    color:         Colors.text,
+    letterSpacing: 0.5,
+    lineHeight:    26,
+  },
+  thisWeekLabel: {
+    fontFamily:    Fonts.poppins,
+    fontSize:      10,
+    color:         Colors.textMuted,
+    letterSpacing: 0.5,
+  },
+  thumbsUp: {
+    fontSize:   60,
+    marginLeft: 12,
+    marginTop:  12,
+  },
+
+  // Upcoming events
   sectionLabel: {
-    fontSize: 17,
-    fontFamily: Fonts.generalSansSemiBold,
-    color: Colors.text,
+    fontFamily:  Fonts.poppinsSemiBold,
+    fontSize:    14,
+    color:       Colors.textMuted,
+    lineHeight:  26,
+    letterSpacing: 0,
     marginBottom: 12,
   },
   eventsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  // Outer shell — carries shadow on both platforms
-  eventCardShadow: {
-    flex: 1,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.09,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  // Inner shell — clips gradient to rounded corners
-  eventCardWrapper: {
-    flex: 1,
-    borderRadius: 20,
-    overflow: 'hidden',
+    flexDirection:  'row',
+    gap:            16,
+    justifyContent: 'space-between',
   },
   eventCard: {
-    padding: 14,
-    minHeight: 139,
-    justifyContent: 'flex-end',
+    width:        147,
+    height:       139,
+    borderRadius: 15,
+    padding:      16,
+    position:     'relative',
   },
-  eventCardTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 18,
+  eventArrow: {
+    position: 'absolute',
+    top:      10,
+    right:    10,
   },
-  eventAvatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+  eventLogoCircle: {
+    width:          40,
+    height:         40,
+    borderRadius:   20,
     backgroundColor: Colors.white,
-    alignItems: 'center',
+    alignItems:     'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    marginBottom:   8,
   },
-  eventAvatarImg: {
-    width: 46,
-    height: 46,
-  },
-  eventAvatarInitial: {
-    fontSize: 20,
-    fontFamily: Fonts.generalSansSemiBold,
-    color: Colors.primary,
-  },
-  eventArrowBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  eventEmoji: { fontSize: 22 },
   eventTitle: {
-    fontSize: 15,
-    fontFamily: Fonts.generalSansSemiBold,
-    color: Colors.text,
-    marginBottom: 4,
+    fontFamily:    Fonts.poppinsMedium,
+    fontSize:      13,
+    color:         Colors.text,
+    letterSpacing: 0.5,
+    lineHeight:    18,
   },
   eventLocation: {
-    fontSize: 11,
-    fontFamily: Fonts.generalSans,
-    color: Colors.textMuted,
-    lineHeight: 16,
+    fontFamily:    Fonts.poppins,
+    fontSize:      10,
+    color:         Colors.text,
+    letterSpacing: 0.5,
+    marginTop:     2,
   },
 });

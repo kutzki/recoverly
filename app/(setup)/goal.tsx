@@ -1,254 +1,123 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/auth';
+import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
-export default function Goal() {
-  const updateUser = useAuthStore(s => s.updateUser);
-  const [goal, setGoal] = useState('');
-  const [focused, setFocused] = useState(false);
-  const [saving, setSaving] = useState(false);
+const GOALS = [
+  { id: 'stay_sober',      label: 'Stay Sober',          emoji: '🌟' },
+  { id: 'rebuild_life',    label: 'Rebuild My Life',      emoji: '🏠' },
+  { id: 'improve_health',  label: 'Improve Health',       emoji: '💪' },
+  { id: 'reconnect',       label: 'Reconnect With Family',emoji: '❤️' },
+  { id: 'find_purpose',    label: 'Find Purpose',         emoji: '🎯' },
+  { id: 'manage_stress',   label: 'Manage Stress',        emoji: '🧘' },
+];
 
-  const handleSubmit = async () => {
-    if (!goal.trim()) return;
-    setSaving(true);
+export default function GoalScreen() {
+  const insets     = useSafeAreaInsets();
+  const updateUser = useAuthStore((s) => s.updateUser);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [loading,  setLoading]  = useState(false);
+
+  const handleNext = async () => {
+    if (!selected) { Alert.alert('Select a goal', 'Please choose your short-term goal.'); return; }
+    setLoading(true);
     try {
-      await updateUser({ shortTermGoal: goal.trim() });
-      router.push('/(setup)/thank-you');
-    } catch {
-      Alert.alert('Error', 'Could not save your goal. Please try again.');
+      await updateUser({ short_term_goal: selected });
+      router.push('/(setup)/challenges');
+    } catch (e: any) {
+      Alert.alert('Error', e.message ?? 'Failed to save.');
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
   return (
-    <LinearGradient
-      colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
-      style={styles.container}
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.kav}
+    <LinearGradient colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]} style={styles.gradient}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 30, paddingBottom: insets.bottom + 40 }]}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+        <View style={styles.progressRow}>
+          {[1, 2, 3].map((s) => (
+            <View key={s} style={[styles.progressDot, s <= 2 && styles.progressActive]} />
+          ))}
+        </View>
+
+        <Text style={styles.stepLabel}>Step 2 of 3</Text>
+        <Text style={styles.heading}>What's your goal?</Text>
+        <Text style={styles.subheading}>Choose what matters most to you right now</Text>
+
+        <View style={styles.grid}>
+          {GOALS.map((g) => (
+            <TouchableOpacity
+              key={g.id}
+              style={[styles.card, selected === g.id && styles.cardSelected]}
+              activeOpacity={0.8}
+              onPress={() => setSelected(g.id)}
+            >
+              <Text style={styles.emoji}>{g.emoji}</Text>
+              <Text style={[styles.cardLabel, selected === g.id && styles.cardLabelSelected]}>
+                {g.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          activeOpacity={0.85}
+          onPress={handleNext}
+          disabled={loading}
         >
-          {/* Back */}
-          <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={24} color={Colors.primary} />
-          </TouchableOpacity>
-
-          {/* Progress */}
-          <View style={styles.progressRow}>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: '75%' }]} />
-            </View>
-            <Text style={styles.progressLabel}>3 of 4</Text>
-          </View>
-
-          <Text style={styles.heading}>Set your short-term goal</Text>
-          <Text style={styles.sub}>
-            Setting goals can guide your recovery journey. Let's define your short-term goals.
-          </Text>
-
-          {/* Goal card */}
-          <View style={[styles.goalCard, focused && styles.goalCardFocused]}>
-            <View style={styles.goalHeader}>
-              <Ionicons name="flag" size={20} color={Colors.primary} />
-              <Text style={styles.goalTitle}>Short-term goal</Text>
-            </View>
-            <TextInput
-              style={styles.goalInput}
-              placeholder="Write your goal here... e.g. Stay sober for 30 days and attend 3 weekly meetings"
-              placeholderTextColor={Colors.textMuted}
-              value={goal}
-              onChangeText={setGoal}
-              multiline
-              numberOfLines={6}
-              textAlignVertical="top"
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-            />
-            <Text style={styles.charCount}>{goal.length}/280</Text>
-          </View>
-
-          {/* Tips */}
-          <View style={styles.tipsBox}>
-            <Text style={styles.tipsTitle}>Goal-setting tips</Text>
-            {[
-              'Make it specific and measurable',
-              'Set a realistic timeframe (30–90 days)',
-              'Focus on one key habit to build',
-            ].map((tip, i) => (
-              <View key={i} style={styles.tipRow}>
-                <View style={styles.tipDot} />
-                <Text style={styles.tipText}>{tip}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Submit */}
-          <TouchableOpacity
-            style={[styles.submitBtn, (!goal.trim() || saving) && styles.submitDisabled]}
-            onPress={handleSubmit}
-            disabled={!goal.trim() || saving}
-          >
-            {saving
-              ? <ActivityIndicator color={Colors.white} />
-              : <>
-                  <Text style={styles.submitText}>Submit</Text>
-                  <Ionicons name="checkmark" size={18} color={Colors.white} />
-                </>
-            }
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          <Text style={styles.buttonText}>{loading ? 'Saving…' : 'Continue'}</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  kav: { flex: 1 },
-  scroll: {
-    flexGrow: 1,
-    paddingTop: 60,
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-  },
-  back: {
-    position: 'absolute',
-    top: 60,
-    left: 20,
-    zIndex: 10,
-    padding: 4,
-  },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 32,
-  },
-  progressTrack: {
-    flex: 1,
-    height: 4,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 2,
-  },
-  progressFill: {
-    height: 4,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-  },
-  progressLabel: { color: Colors.textMuted, fontSize: 12 },
-  heading: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 8,
-  },
-  sub: {
-    fontSize: 15,
-    color: Colors.textMuted,
-    lineHeight: 22,
-    marginBottom: 28,
-  },
-  goalCard: {
+  gradient: { flex: 1 },
+  scroll:   { flexGrow: 1, paddingHorizontal: 30 },
+
+  progressRow:    { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  progressDot:    { flex: 1, height: 4, borderRadius: 2, backgroundColor: Colors.primaryLight },
+  progressActive: { backgroundColor: Colors.primary },
+
+  stepLabel:  { fontFamily: Fonts.jostMedium, fontSize: 12, color: Colors.textMuted, marginBottom: 8  },
+  heading:    { fontFamily: Fonts.poppinsBold, fontSize: 26, color: Colors.text,     marginBottom: 8  },
+  subheading: { fontFamily: Fonts.jost,        fontSize: 15, color: Colors.textMuted,marginBottom: 28 },
+
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 32 },
+
+  card: {
+    width: '47%',
     backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
+    borderRadius: 14,
+    padding: 18,
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1.5,
     borderColor: Colors.border,
-    marginBottom: 20,
   },
-  goalCardFocused: {
+  cardSelected: {
     borderColor: Colors.primary,
+    backgroundColor: Colors.cardTintPurpleFaint,
   },
-  goalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 14,
-  },
-  goalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  goalInput: {
-    fontSize: 15,
-    color: Colors.text,
-    lineHeight: 22,
-    minHeight: 120,
-  },
-  charCount: {
-    fontSize: 11,
-    color: Colors.textMuted,
-    textAlign: 'right',
-    marginTop: 8,
-  },
-  tipsBox: {
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 28,
-    gap: 8,
-  },
-  tipsTitle: {
+  emoji: { fontSize: 32 },
+  cardLabel: {
+    fontFamily: Fonts.poppinsMedium,
     fontSize: 13,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 4,
+    color: Colors.text,
+    textAlign: 'center',
   },
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-  },
-  tipDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.primary,
-    marginTop: 5,
-    opacity: 0.6,
-  },
-  tipText: {
-    flex: 1,
-    fontSize: 13,
-    color: Colors.primary,
-    lineHeight: 19,
-  },
-  submitBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 999,
-    height: 52,
-  },
-  submitDisabled: { opacity: 0.4 },
-  submitText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '700',
-  },
+  cardLabelSelected: { color: Colors.primary },
+
+  button:         { backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
+  buttonDisabled: { opacity: 0.6 },
+  buttonText:     { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.white },
 });

@@ -1,143 +1,72 @@
 import { create } from 'zustand';
+import * as SecureStore from 'expo-secure-store';
+import { supabase } from '../services/supabase';
+import { authService, UserProfile } from '../services/auth';
 import { connectStreamChat, disconnectStreamChat } from '../services/streamChat';
-import { connectStreamFeed, disconnectStreamFeed } from '../services/streamFeed';
-import { initStreamVideo, disconnectStreamVideo } from '../services/streamVideo';
-import { supabase, getProfile } from '../services/supabase';
-import { authService } from '../services/auth';
-import { useProgressStore } from './progress';
-import { useChecklistStore } from './checklist';
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  username: string;
-  sobrietyStartDate?: string;
-  challenges?: string[];
-  shortTermGoal?: string;
-  location?: string;
-  dateOfBirth?: string;
-  bio?: string;
-  sponsor?: { name: string; phone: string };
-  innerCircle?: Array<{ name: string; phone: string }>;
-  isProfileComplete?: boolean;
-}
-
-interface AuthState {
-  user: User | null;
+type AuthState = {
+  user: UserProfile | null;
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  setAuth: (user: User, token: string) => void;
-  updateUser: (updates: Partial<User>) => Promise<void>;
+
+  setAuth: (user: UserProfile, token: string) => Promise<void>;
+  updateUser: (updates: Partial<UserProfile>) => Promise<void>;
   signOut: () => Promise<void>;
   loadStoredAuth: () => Promise<void>;
-}
-
-async function connectStreamServices(user: User) {
-  try {
-    await connectStreamChat(user.id, user.name, undefined, user.challenges, user.sobrietyStartDate);
-  } catch (err) {
-    console.warn('[Auth] StreamChat connect failed:', err);
-  }
-  try {
-    await connectStreamFeed(user.id);
-  } catch (err) {
-    console.warn('[Auth] StreamFeed connect failed:', err);
-  }
-  try {
-    await initStreamVideo(user.id, user.name);
-  } catch (err) {
-    console.warn('[Auth] StreamVideo connect failed:', err);
-  }
-}
-
-async function disconnectStreamServices() {
-  await disconnectStreamChat().catch(() => {});
-  disconnectStreamFeed();
-  await disconnectStreamVideo().catch(() => {});
-}
+};
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  token: null,
-  isLoading: true,
+  user:            null,
+  token:           null,
+  isLoading:       true,
   isAuthenticated: false,
 
-  setAuth: (user, token) => {
+  setAuth: async (user, token) => {
     set({ user, token, isAuthenticated: true, isLoading: false });
-    connectStreamServices(user);
-    if (user.sobrietyStartDate) {
-      useProgressStore.getState().setSobrietyStart(user.sobrietyStartDate);
-    }
-    useProgressStore.getState().loadProgress();
-    useChecklistStore.getState().loadChecklist();
+
+    // Connect Stream Chat in the background — don't block navigation
+    const sobrietyDays = user.sobriety_start_date
+      ? Math.floor((Date.now() - new Date(user.sobriety_start_date).getTime()) / 86_400_000)
+      : 0;
+    connectStreamChat(user.id, user.name ?? user.username ?? 'User', user.avatar_url ?? undefined, sobrietyDays).catch(() => {});
   },
 
   updateUser: async (updates) => {
-    const current = get().user;
-    const updated = {
-      ...(current || { id: '', email: '', name: '', username: '' }),
-      ...updates,
-    } as User;
+    const { user } = get();
+    if (!user) return;
     // Optimistic update
-    set({ user: updated });
+    set({ user: { ...user, ...updates } });
     try {
-      // Persist to Supabase — awaited so callers can catch save failures
-      await authService.updateProfile(updates);
-    } catch (err) {
-      // Revert to previous state if the server update fails
-      set({ user: current });
-      throw err;
+      await authService.updateProfile(user.id, updates);
+    } catch {
+      // Revert on failure
+      set({ user });
     }
   },
 
   signOut: async () => {
-    await disconnectStreamServices();
+    await disconnectStreamChat();
     await authService.signOut();
     set({ user: null, token: null, isAuthenticated: false });
   },
 
   loadStoredAuth: async () => {
     try {
-      // Supabase persists the session automatically via SecureStore adapter
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        const profile = await getProfile(session.user.id);
-
-        if (profile) {
-          const user: User = {
-            id: profile.id,
-            email: session.user.email!,
-            name: profile.name,
-            username: profile.username,
-            sobrietyStartDate: profile.sobriety_start_date ?? undefined,
-            challenges: profile.challenges ?? [],
-            shortTermGoal: profile.short_term_goal ?? undefined,
-            location: profile.location ?? undefined,
-            dateOfBirth: profile.date_of_birth ?? undefined,
-            bio: profile.bio ?? undefined,
-            sponsor: profile.sponsor_name
-              ? { name: profile.sponsor_name, phone: profile.sponsor_phone ?? '' }
-              : undefined,
-            innerCircle: profile.inner_circle ?? [],
-            isProfileComplete: profile.is_profile_complete ?? false,
-          };
-
-          set({ token: session.access_token, user, isAuthenticated: true });
-          connectStreamServices(user);
-
-          if (user.sobrietyStartDate) {
-            useProgressStore.getState().setSobrietyStart(user.sobrietyStartDate);
-          }
-          await useProgressStore.getState().loadProgress();
-          await useChecklistStore.getState().loadChecklist();
-        }
+      const session = await authService.getStoredSession();
+      if (!session) {
+        set({ isLoading: false });
+        return;
       }
-    } catch (e) {
-      console.warn('[Auth] loadStoredAuth error:', e);
-    } finally {
+
+      const profile = await authService.getProfile(session.user.id);
+      if (!profile) {
+        set({ isLoading: false });
+        return;
+      }
+
+      await get().setAuth(profile, session.access_token);
+    } catch {
       set({ isLoading: false });
     }
   },

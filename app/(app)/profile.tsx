@@ -1,506 +1,156 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
-  Dimensions,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
 import { router } from 'expo-router';
-import { Colors } from '../../constants/colors';
-import { Fonts } from '../../constants/fonts';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/auth';
 import { useProgressStore } from '../../store/progress';
-import { useSobrietyTimer } from '../../hooks/useSobrietyTimer';
+import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
+import { useMemo } from 'react';
 
-const SCREEN_W = Dimensions.get('window').width;
-const COVER_H = 160;
+const MENU_ITEMS = [
+  { id: 'tracker',       label: 'Progress Tracker',    icon: 'analytics-outline',     route: '/(app)/tracker'       },
+  { id: 'goals',         label: 'My Goals',            icon: 'flag-outline',          route: '/(app)/goals'         },
+  { id: 'inner-circle',  label: 'Inner Circle',        icon: 'people-circle-outline', route: '/(app)/inner-circle'  },
+  { id: 'sponsor',       label: 'My Sponsor',          icon: 'person-add-outline',    route: '/(app)/sponsor'       },
+  { id: 'crisis-history',label: 'Crisis History',      icon: 'alert-circle-outline',  route: '/(app)/crisis-history'},
+  { id: 'settings',      label: 'Settings',            icon: 'settings-outline',      route: '/(app)/settings'      },
+] as const;
 
-const BADGE_DEFS = [
-  { days: 1,   label: '24 Hours', emoji: '⭐' },
-  { days: 7,   label: '1 Week',   emoji: '🔥' },
-  { days: 30,  label: '30 Days',  emoji: '🏆' },
-  { days: 60,  label: '60 Days',  emoji: '🥈' },
-  { days: 90,  label: '90 Days',  emoji: '🥇' },
-  { days: 180, label: '6 Months', emoji: '💎' },
-  { days: 365, label: '1 Year',   emoji: '👑' },
-];
+export default function ProfileScreen() {
+  const insets      = useSafeAreaInsets();
+  const user        = useAuthStore((s) => s.user);
+  const signOut     = useAuthStore((s) => s.signOut);
+  const sobrietyStartDate = useProgressStore((s) => s.sobrietyStartDate);
 
-// Placeholder friend avatar colors
-const FRIEND_COLORS = ['#9747FF', '#5B8CFF', '#FF7A5B', '#FF5B9A', '#2DD4BF'];
-
-export default function Profile() {
-  const user = useAuthStore(s => s.user);
-  const { sobrietyStartDate, tasksCompleted, checkInsCompleted, meetingsAttended } = useProgressStore();
-  const timer = useSobrietyTimer(sobrietyStartDate);
-
-  const initial = user?.name?.[0]?.toUpperCase() || 'U';
-  const earnedCount = BADGE_DEFS.filter(b => timer.days >= b.days).length;
+  const daysSober = useMemo(() => {
+    if (!sobrietyStartDate) return 0;
+    return Math.max(0, Math.floor((Date.now() - new Date(sobrietyStartDate).getTime()) / 86_400_000));
+  }, [sobrietyStartDate]);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.heading}>Profile</Text>
+        <TouchableOpacity onPress={() => router.push('/(app)/edit-profile')} hitSlop={12}>
+          <Ionicons name="create-outline" size={24} color={Colors.primary} />
+        </TouchableOpacity>
+      </View>
 
-        {/* ── Cover + Avatar ── */}
-        <View style={styles.coverWrap}>
-          <LinearGradient
-            colors={[Colors.primaryDark, Colors.primary, Colors.primaryMid]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.cover}
-          />
-
-          {/* Back + Edit buttons */}
-          <View style={[styles.coverButtons, { top: Platform.OS === 'android' ? 12 : 12 }]}>
-            <TouchableOpacity style={styles.coverBtn} onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={22} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.editPillBtn}
-              onPress={() => router.push('/(app)/edit-profile' as any)}
-            >
-              <Ionicons name="pencil-outline" size={14} color="#fff" />
-              <Text style={styles.editPillText}>Edit</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Avatar overlapping the cover bottom */}
-          <View style={styles.avatarWrap}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initial}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Name + Bio ── */}
-        <View style={styles.nameSection}>
-          <Text style={styles.name}>{user?.name || 'User'}</Text>
-          {user?.username ? (
-            <Text style={styles.username}>
-              {user.username.startsWith('@') ? user.username : `@${user.username}`}
-            </Text>
-          ) : null}
-          {user?.bio ? (
-            <Text style={styles.bio}>{user.bio}</Text>
+      {/* Avatar + name */}
+      <View style={styles.avatarSection}>
+        <View style={styles.avatarCircle}>
+          {user?.avatar_url ? (
+            <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
           ) : (
-            <Text style={styles.bioPlaceholder}>Add a bio to tell your story</Text>
+            <Text style={styles.avatarInitial}>
+              {(user?.name ?? 'U')[0].toUpperCase()}
+            </Text>
           )}
-          {user?.location ? (
-            <View style={styles.locationRow}>
-              <Ionicons name="location-outline" size={13} color={Colors.textMuted} />
-              <Text style={styles.location}>{user.location}</Text>
-            </View>
-          ) : null}
         </View>
+        <Text style={styles.displayName}>{user?.name ?? 'Your Name'}</Text>
+        <Text style={styles.username}>@{user?.username ?? 'username'}</Text>
+        {user?.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
+      </View>
 
-        {/* ── Followers / Posts stats ── */}
-        <View style={styles.statsCard}>
-          <View style={styles.statCol}>
-            <Text style={styles.statValue}>{timer.days > 0 ? timer.days.toLocaleString() : '—'}</Text>
-            <Text style={styles.statLabel}>Days Sober</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statCol}>
-            <Text style={styles.statValue}>{checkInsCompleted}</Text>
-            <Text style={styles.statLabel}>Check-ins</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statCol}>
-            <Text style={styles.statValue}>{meetingsAttended}</Text>
-            <Text style={styles.statLabel}>Meetings</Text>
-          </View>
+      {/* Stats row */}
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{daysSober}</Text>
+          <Text style={styles.statLabel}>Days Sober</Text>
         </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{user?.substance ?? '—'}</Text>
+          <Text style={styles.statLabel}>Substance</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{user?.location ?? '—'}</Text>
+          <Text style={styles.statLabel}>Location</Text>
+        </View>
+      </View>
 
-        {/* ── Connections / Following row ── */}
-        <View style={styles.connectRow}>
+      {/* Menu items */}
+      <View style={styles.menuSection}>
+        {MENU_ITEMS.map((item) => (
           <TouchableOpacity
-            style={styles.followingBtn}
-            onPress={() => router.push('/(app)/inner-circle' as any)}
-            activeOpacity={0.8}
+            key={item.id}
+            style={styles.menuItem}
+            activeOpacity={0.7}
+            onPress={() => router.push(item.route as any)}
           >
-            <Text style={styles.followingBtnText}>Inner Circle</Text>
+            <View style={styles.menuIcon}>
+              <Ionicons name={item.icon as any} size={20} color={Colors.primary} />
+            </View>
+            <Text style={styles.menuLabel}>{item.label}</Text>
+            <Ionicons name="chevron-forward" size={18} color={Colors.textLight} />
           </TouchableOpacity>
+        ))}
+      </View>
 
-          {/* Stacked friend avatar bubbles */}
-          <View style={styles.friendAvatars}>
-            {FRIEND_COLORS.slice(0, 4).map((color, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.friendAvatar,
-                  { backgroundColor: color, marginLeft: i === 0 ? 0 : -10 },
-                ]}
-              />
-            ))}
-            <View style={[styles.friendAvatar, styles.friendAvatarMore, { marginLeft: -10 }]}>
-              <Text style={styles.friendAvatarMoreText}>+</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Horizontal line separator ── */}
-        <View style={styles.separator} />
-
-        {/* ── Badges ── */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Badges</Text>
-            <Text style={styles.sectionMeta}>{earnedCount}/{BADGE_DEFS.length} earned</Text>
-          </View>
-          <View style={styles.badgeGrid}>
-            {BADGE_DEFS.map(b => {
-              const earned = timer.days >= b.days;
-              return (
-                <View key={b.days} style={styles.badge}>
-                  <Text style={[styles.badgeEmoji, !earned && { opacity: 0.2 }]}>{b.emoji}</Text>
-                  <Text style={[styles.badgeLabel, !earned && styles.badgeLabelLocked]}>{b.label}</Text>
-                  {earned ? (
-                    <View style={styles.badgeCheck}>
-                      <Ionicons name="checkmark" size={9} color={Colors.white} />
-                    </View>
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* ── Sponsor ── */}
-        {user?.sponsor ? (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Sponsor</Text>
-              <TouchableOpacity onPress={() => router.push('/(app)/sponsor' as any)}>
-                <Text style={styles.sectionAction}>Edit</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.sponsorCard}>
-              <View style={styles.sponsorAvatar}>
-                <Text style={styles.sponsorInitial}>{user.sponsor.name?.[0]?.toUpperCase() ?? '?'}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.sponsorName}>{user.sponsor.name}</Text>
-                {user.sponsor.phone ? (
-                  <Text style={styles.sponsorPhone}>{user.sponsor.phone}</Text>
-                ) : null}
-              </View>
-              <Ionicons name="hand-right-outline" size={20} color={Colors.primaryLight} />
-            </View>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={styles.addSponsorBtn}
-            onPress={() => router.push('/(app)/sponsor' as any)}
-          >
-            <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
-            <Text style={styles.addSponsorText}>Add a Sponsor</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* ── Account Info ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Info</Text>
-          <View style={styles.infoCard}>
-            {[
-              { label: 'Email',    value: user?.email    || '—', icon: 'mail-outline'     as const },
-              { label: 'Username', value: user?.username ? (user.username.startsWith('@') ? user.username : `@${user.username}`) : '—', icon: 'at-outline' as const },
-              { label: 'Location', value: user?.location || '—', icon: 'location-outline' as const },
-            ].map((row, i, arr) => (
-              <React.Fragment key={i}>
-                <View style={styles.infoRow}>
-                  <View style={styles.infoIconWrap}>
-                    <Ionicons name={row.icon} size={16} color={Colors.primary} />
-                  </View>
-                  <View style={styles.infoContent}>
-                    <Text style={styles.infoLabel}>{row.label}</Text>
-                    <Text style={styles.infoValue}>{row.value}</Text>
-                  </View>
-                </View>
-                {i < arr.length - 1 && <View style={styles.infoDivider} />}
-              </React.Fragment>
-            ))}
-          </View>
-        </View>
-
-        {/* ── Goal ── */}
-        {user?.shortTermGoal ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Short-term Goal</Text>
-            <View style={styles.goalCard}>
-              <Ionicons name="flag" size={18} color={Colors.primary} />
-              <Text style={styles.goalText}>{user.shortTermGoal}</Text>
-            </View>
-          </View>
-        ) : null}
-
-        <View style={{ height: 32 }} />
-      </ScrollView>
-    </SafeAreaView>
+      {/* Sign out */}
+      <TouchableOpacity style={styles.signOutBtn} activeOpacity={0.8} onPress={() => signOut()}>
+        <Text style={styles.signOutText}>Sign Out</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: Colors.background },
-  scroll: { paddingBottom: 20 },
+  root:   { flex: 1, backgroundColor: Colors.white },
+  scroll: { flexGrow: 1, paddingHorizontal: 24 },
 
-  /* ── Cover ── */
-  coverWrap: { height: COVER_H + 44, position: 'relative', marginBottom: 8 },
-  cover: { height: COVER_H, width: '100%' },
-  coverButtons: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  coverBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  editPillBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-  },
-  editPillText: { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: '#fff' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+  heading:{ fontFamily: Fonts.poppinsBold, fontSize: 24, color: Colors.text },
 
-  /* ── Avatar ── */
-  avatarWrap: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+  avatarSection: { alignItems: 'center', marginBottom: 24, gap: 6 },
+  avatarCircle: {
+    width:           80,
+    height:          80,
+    borderRadius:    40,
     backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: Colors.white,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
+    alignItems:      'center',
+    justifyContent:  'center',
+    marginBottom:    4,
   },
-  avatarText: { fontSize: 34, fontFamily: Fonts.generalSansBold, color: Colors.primary },
+  avatarImage:   { width: 80, height: 80, borderRadius: 40 },
+  avatarInitial: { fontFamily: Fonts.poppinsBold, fontSize: 32, color: Colors.primary },
+  displayName:   { fontFamily: Fonts.poppinsBold, fontSize: 20, color: Colors.text },
+  username:      { fontFamily: Fonts.jost, fontSize: 14, color: Colors.textMuted },
+  bio:           { fontFamily: Fonts.jost, fontSize: 13, color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
 
-  /* ── Name / Bio ── */
-  nameSection: { alignItems: 'center', paddingHorizontal: 24, marginTop: 10, marginBottom: 16 },
-  name: { fontSize: 22, fontFamily: Fonts.generalSansBold, color: Colors.text, marginBottom: 2 },
-  username: { fontSize: 14, color: Colors.textMuted, marginBottom: 6 },
-  bio: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 20, marginBottom: 6 },
-  bioPlaceholder: { fontSize: 14, color: Colors.textLight, textAlign: 'center', fontStyle: 'italic', marginBottom: 6 },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  location: { fontSize: 13, color: Colors.textMuted },
+  statsRow: {
+    flexDirection:    'row',
+    backgroundColor:  Colors.cardTintPurpleFaint,
+    borderRadius:     14,
+    padding:          16,
+    marginBottom:     24,
+    alignItems:       'center',
+  },
+  statItem:    { flex: 1, alignItems: 'center', gap: 2 },
+  statValue:   { fontFamily: Fonts.poppinsBold, fontSize: 16, color: Colors.text, textAlign: 'center' },
+  statLabel:   { fontFamily: Fonts.jost, fontSize: 11, color: Colors.textMuted, textAlign: 'center' },
+  statDivider: { width: 1, height: 36, backgroundColor: Colors.border },
 
-  /* ── Stats ── */
-  statsCard: {
-    flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    marginHorizontal: 20,
-    padding: 16,
-    marginBottom: 14,
-    justifyContent: 'space-around',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+  menuSection: { gap: 4, marginBottom: 24 },
+  menuItem: {
+    flexDirection:   'row',
+    alignItems:      'center',
+    paddingVertical: 14,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    gap: 14,
   },
-  statCol: { alignItems: 'center', flex: 1 },
-  statDivider: { width: 1, backgroundColor: Colors.border },
-  statValue: { fontSize: 22, fontFamily: Fonts.generalSansBold, color: Colors.text },
-  statLabel: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
+  menuIcon:  { width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.cardTintPurpleFaint, alignItems: 'center', justifyContent: 'center' },
+  menuLabel: { flex: 1, fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.text },
 
-  /* ── Connect / Following row ── */
-  connectRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  followingBtn: {
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    borderRadius: 20,
-    paddingHorizontal: 22,
-    paddingVertical: 9,
-  },
-  followingBtnText: { fontSize: 14, fontFamily: Fonts.generalSansBold, color: Colors.primary },
-  friendAvatars: { flexDirection: 'row', alignItems: 'center' },
-  friendAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: Colors.white,
-  },
-  friendAvatarMore: {
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  friendAvatarMoreText: {
-    fontSize: 14,
-    fontFamily: Fonts.generalSansBold,
-    color: Colors.primary,
-  },
-
-  /* ── Separator ── */
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-
-  /* ── Sections ── */
-  section: { marginHorizontal: 20, marginBottom: 20 },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  sectionTitle: { fontSize: 16, fontFamily: Fonts.generalSansBold, color: Colors.text },
-  sectionMeta: { fontSize: 13, color: Colors.textMuted },
-  sectionAction: { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: Colors.primary },
-
-  /* ── Badge grid ── */
-  badgeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  badge: { alignItems: 'center', width: 44, gap: 3, position: 'relative' },
-  badgeEmoji: { fontSize: 26 },
-  badgeLabel: { fontSize: 9, color: Colors.text, textAlign: 'center', fontFamily: Fonts.generalSansMedium },
-  badgeLabelLocked: { color: Colors.textMuted },
-  badgeCheck: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  /* ── Sponsor ── */
-  sponsorCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 14,
-    padding: 14,
-    gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  sponsorAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sponsorInitial: { fontSize: 18, fontFamily: Fonts.generalSansBold, color: Colors.primary },
-  sponsorName: { fontSize: 15, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
-  sponsorPhone: { fontSize: 13, color: Colors.textMuted, marginTop: 2 },
-  addSponsorBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    borderStyle: 'dashed',
-    borderRadius: 12,
-    height: 48,
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  addSponsorText: { color: Colors.primary, fontFamily: Fonts.generalSansSemiBold, fontSize: 14 },
-
-  /* ── Account Info ── */
-  infoCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    height: 56,
-    gap: 12,
-  },
-  infoIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoContent: { flex: 1 },
-  infoLabel: { fontSize: 11, color: Colors.textMuted },
-  infoValue: { fontSize: 14, fontFamily: Fonts.generalSansSemiBold, color: Colors.text },
-  infoDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
-    marginLeft: 56,
-  },
-
-  /* ── Goal ── */
-  goalCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 12,
-    padding: 16,
-  },
-  goalText: { flex: 1, fontSize: 14, color: Colors.primary, lineHeight: 22 },
+  signOutBtn:   { borderWidth: 1.5, borderColor: Colors.error, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
+  signOutText:  { fontFamily: Fonts.poppinsSemiBold, fontSize: 15, color: Colors.error },
 });
