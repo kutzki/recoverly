@@ -1,47 +1,32 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Image,
+  ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Location from 'expo-location';
 
 import { useAuthStore }     from '../../store/auth';
 import { useProgressStore } from '../../store/progress';
 import { SobrietyCounter }  from '../../components/ui/SobrietyCounter';
 import { StreakDots }        from '../../components/ui/StreakDots';
+import { CheckInModal }      from '../../components/ui/CheckInModal';
 import { Colors }           from '../../constants/colors';
 import { Fonts }            from '../../constants/fonts';
+import { fetchNearbyMeetings, meetingDayTime, type Meeting } from '../../services/meetings';
 
 // ── Quick-action buttons (row of 5, Figma: 55×60 each) ──────────────────────
 
 const QUICK_ACTIONS = [
-  { id: 'meetings',  label: 'Meeting',   icon: 'people',       route: '/(app)/meetings'  },
-  { id: 'awards',    label: 'Awards',    icon: 'trophy',       route: '/(app)/tracker'   },
-  { id: 'tracker',   label: 'Tracker',   icon: 'analytics',    route: '/(app)/tracker'   },
-  { id: 'checklist', label: 'Checklist', icon: 'checkbox',     route: '/(app)/apps'      },
-  { id: 'journal',   label: 'Journal',   icon: 'book',         route: '/(app)/apps'      },
+  { id: 'meetings',  label: 'Meeting',   icon: 'people',    route: '/(app)/meetings'  },
+  { id: 'awards',    label: 'Awards',    icon: 'trophy',    route: '/(app)/tracker'   },
+  { id: 'tracker',   label: 'Tracker',   icon: 'analytics', route: '/(app)/tracker'   },
+  { id: 'checklist', label: 'Checklist', icon: 'checkbox',  route: '/(app)/apps'      },
+  { id: 'journal',   label: 'Journal',   icon: 'book',      route: '/(app)/journal'   },
 ] as const;
-
-// ── Sample upcoming events (placeholder until Supabase events table) ─────────
-
-const UPCOMING_EVENTS = [
-  {
-    id: '1',
-    title:    'New Connections',
-    location: 'Los Angeles County',
-    emoji:    '🏛️',
-    bgColor:  Colors.cardTintPurpleLight,
-  },
-  {
-    id: '2',
-    title:    'New Connections',
-    location: 'Toronto, Canada',
-    emoji:    '🌐',
-    bgColor:  Colors.cardTintPurpleLight,
-  },
-];
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -53,6 +38,10 @@ export default function HomeScreen() {
   const weeklyStreak      = useProgressStore((s) => s.weeklyStreak);
   const markTodayCheckedIn = useProgressStore((s) => s.markTodayCheckedIn);
 
+  const [checkInVisible, setCheckInVisible] = useState(false);
+  const [meetings, setMeetings]             = useState<Meeting[]>([]);
+  const [meetingsLoading, setMeetingsLoading] = useState(false);
+
   const daysSober = useMemo(() => {
     if (!sobrietyStartDate) return 0;
     const start = new Date(sobrietyStartDate);
@@ -63,14 +52,44 @@ export default function HomeScreen() {
   const firstName = (user?.name ?? 'Friend').split(' ')[0];
 
   // Check-in for today
-  const todayIdx      = (new Date().getDay() + 6) % 7;
+  const todayIdx       = (new Date().getDay() + 6) % 7;
   const checkedInToday = weeklyStreak[todayIdx] ?? false;
 
   const handleCheckIn = useCallback(() => {
     if (!checkedInToday) {
-      markTodayCheckedIn(user?.id);
+      setCheckInVisible(true);
     }
-  }, [checkedInToday, user?.id]);
+  }, [checkedInToday]);
+
+  const handleCheckInConfirm = useCallback(async (mood: number, notes: string) => {
+    await markTodayCheckedIn(user?.id, mood, notes);
+    setCheckInVisible(false);
+  }, [user?.id, markTodayCheckedIn]);
+
+  // Fetch nearby meetings
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setMeetingsLoading(true);
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setMeetingsLoading(false);
+          return;
+        }
+        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        if (cancelled) return;
+        const nearby = await fetchNearbyMeetings(loc.coords.latitude, loc.coords.longitude);
+        if (!cancelled) setMeetings(nearby.slice(0, 4));
+      } catch {
+        // silently fail — no meetings shown
+      } finally {
+        if (!cancelled) setMeetingsLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <View style={styles.root}>
@@ -121,11 +140,11 @@ export default function HomeScreen() {
         {/* ── Daily Reminder / Check-in Card ─────────────────────────────── */}
         <TouchableOpacity
           style={styles.checkInCard}
-          activeOpacity={0.92}
+          activeOpacity={checkedInToday ? 1 : 0.92}
           onPress={handleCheckIn}
         >
           {/* Small external link icon */}
-          <TouchableOpacity style={styles.cardArrow} onPress={() => router.push('/(app)/apps')} hitSlop={8}>
+          <TouchableOpacity style={styles.cardArrow} onPress={() => router.push('/(app)/tracker' as any)} hitSlop={8}>
             <Ionicons name="arrow-up-outline" size={14} color={Colors.textMuted} style={{ transform: [{ rotate: '45deg' }] }} />
           </TouchableOpacity>
 
@@ -144,45 +163,95 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         {/* ── Upcoming Events ────────────────────────────────────────────── */}
-        <Text style={styles.sectionLabel}>Upcoming Events</Text>
-
-        <View style={styles.eventsRow}>
-          {UPCOMING_EVENTS.map((ev) => (
-            <TouchableOpacity
-              key={ev.id}
-              activeOpacity={0.88}
-              onPress={() => router.push('/(app)/meetings')}
-            >
-              <LinearGradient
-                colors={[Colors.eventGradientStart, Colors.eventGradientEnd]}
-                style={styles.eventCard}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-              >
-                {/* Link icon */}
-                <View style={styles.eventArrow}>
-                  <Ionicons name="arrow-up-outline" size={12} color={Colors.textMuted} style={{ transform: [{ rotate: '45deg' }] }} />
-                </View>
-
-                {/* Logo circle */}
-                <View style={styles.eventLogoCircle}>
-                  <Text style={styles.eventEmoji}>{ev.emoji}</Text>
-                </View>
-
-                <Text style={styles.eventTitle} numberOfLines={2}>{ev.title}</Text>
-                <Text style={styles.eventLocation} numberOfLines={1}>{ev.location}</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionLabel}>Upcoming Events</Text>
+          <TouchableOpacity onPress={() => router.push('/(app)/meetings')}>
+            <Text style={styles.sectionLink}>View all</Text>
+          </TouchableOpacity>
         </View>
+
+        {meetingsLoading ? (
+          <View style={styles.meetingsLoader}>
+            <ActivityIndicator size="small" color={Colors.primary} />
+            <Text style={styles.meetingsLoadingText}>Finding nearby meetings…</Text>
+          </View>
+        ) : meetings.length > 0 ? (
+          <View style={styles.eventsRow}>
+            {meetings.slice(0, 2).map((m) => (
+              <TouchableOpacity
+                key={m.id}
+                activeOpacity={0.88}
+                onPress={() => router.push('/(app)/meetings')}
+              >
+                <LinearGradient
+                  colors={[Colors.eventGradientStart, Colors.eventGradientEnd]}
+                  style={styles.eventCard}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                >
+                  {/* Link icon */}
+                  <View style={styles.eventArrow}>
+                    <Ionicons name="arrow-up-outline" size={12} color={Colors.textMuted} style={{ transform: [{ rotate: '45deg' }] }} />
+                  </View>
+
+                  {/* Logo circle */}
+                  <View style={styles.eventLogoCircle}>
+                    <Ionicons name="people-circle-outline" size={26} color={Colors.primary} />
+                  </View>
+
+                  <Text style={styles.eventTitle} numberOfLines={2}>{m.name}</Text>
+                  <Text style={styles.eventLocation} numberOfLines={1}>
+                    {m.city && m.state ? `${m.city}, ${m.state}` : m.location || m.city}
+                  </Text>
+                  <Text style={styles.eventTime} numberOfLines={1}>{meetingDayTime(m)}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.eventsRow}>
+            {/* Fallback placeholder cards */}
+            {[
+              { title: 'AA Meetings Near You', sub: 'Enable location to find local meetings' },
+              { title: 'NA Meetings Near You', sub: 'Recovery support in your area' },
+            ].map((item, i) => (
+              <TouchableOpacity
+                key={i}
+                activeOpacity={0.88}
+                onPress={() => router.push('/(app)/meetings')}
+              >
+                <LinearGradient
+                  colors={[Colors.eventGradientStart, Colors.eventGradientEnd]}
+                  style={styles.eventCard}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                >
+                  <View style={styles.eventArrow}>
+                    <Ionicons name="arrow-up-outline" size={12} color={Colors.textMuted} style={{ transform: [{ rotate: '45deg' }] }} />
+                  </View>
+                  <View style={styles.eventLogoCircle}>
+                    <Image source={require('../../assets/Logo Icon.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
+                  </View>
+                  <Text style={styles.eventTitle} numberOfLines={2}>{item.title}</Text>
+                  <Text style={styles.eventLocation} numberOfLines={2}>{item.sub}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </ScrollView>
+
+      {/* ── Check-in Modal ─────────────────────────────────────────────── */}
+      <CheckInModal
+        visible={checkInVisible}
+        onClose={() => setCheckInVisible(false)}
+        onConfirm={handleCheckInConfirm}
+      />
     </View>
   );
 }
 
 // ── Styles ───────────────────────────────────────────────────────────────────
-
-const CARD_WIDTH = '47%' as const;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
@@ -282,15 +351,39 @@ const styles = StyleSheet.create({
     marginTop:  12,
   },
 
-  // Upcoming events
-  sectionLabel: {
-    fontFamily:  Fonts.poppinsSemiBold,
-    fontSize:    14,
-    color:       Colors.textMuted,
-    lineHeight:  26,
-    letterSpacing: 0,
-    marginBottom: 12,
+  // Section header
+  sectionRow: {
+    flexDirection:  'row',
+    justifyContent: 'space-between',
+    alignItems:     'center',
+    marginBottom:   12,
   },
+  sectionLabel: {
+    fontFamily: Fonts.poppinsSemiBold,
+    fontSize:   14,
+    color:      Colors.textMuted,
+    lineHeight: 26,
+  },
+  sectionLink: {
+    fontFamily: Fonts.jost,
+    fontSize:   13,
+    color:      Colors.primary,
+  },
+
+  // Meetings loader
+  meetingsLoader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 20,
+  },
+  meetingsLoadingText: {
+    fontFamily: Fonts.jost,
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+
+  // Event cards
   eventsRow: {
     flexDirection:  'row',
     gap:            16,
@@ -298,7 +391,7 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     width:        147,
-    height:       139,
+    minHeight:    139,
     borderRadius: 15,
     padding:      16,
     position:     'relative',
@@ -317,7 +410,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom:   8,
   },
-  eventEmoji: { fontSize: 22 },
   eventTitle: {
     fontFamily:    Fonts.poppinsMedium,
     fontSize:      13,
@@ -331,5 +423,11 @@ const styles = StyleSheet.create({
     color:         Colors.text,
     letterSpacing: 0.5,
     marginTop:     2,
+  },
+  eventTime: {
+    fontFamily:    Fonts.jost,
+    fontSize:      10,
+    color:         Colors.primary,
+    marginTop:     3,
   },
 });

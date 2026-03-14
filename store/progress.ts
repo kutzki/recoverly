@@ -16,7 +16,7 @@ type ProgressState = {
   lastWeekReset:     string | null;
 
   setSobrietyStart:    (date: string, userId?: string) => Promise<void>;
-  markTodayCheckedIn:  (userId?: string) => Promise<void>;
+  markTodayCheckedIn:  (userId?: string, mood?: number, notes?: string) => Promise<void>;
   incrementTasks:      () => void;
   incrementMeetings:   () => void;
   loadProgress:        (userId?: string) => Promise<void>;
@@ -50,14 +50,19 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     await _persist(get());
   },
 
-  markTodayCheckedIn: async (userId) => {
+  markTodayCheckedIn: async (userId, mood, notes) => {
     const streak = [...get().weeklyStreak];
     streak[todayDayIndex()] = true;
     set({ weeklyStreak: streak, checkInsCompleted: get().checkInsCompleted + 1 });
 
     if (userId) {
       const today = new Date().toISOString().slice(0, 10);
-      await supabase.from('daily_checkins').upsert({ user_id: userId, checked_in_date: today });
+      await supabase.from('daily_checkins').upsert({
+        user_id: userId,
+        checked_in_date: today,
+        ...(mood !== undefined ? { mood } : {}),
+        ...(notes ? { notes } : {}),
+      });
     }
     await _persist(get());
   },
@@ -94,15 +99,34 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       set({ ...saved });
     }
 
-    // Sync sobriety date from DB if we have a user
-    if (userId && !get().sobrietyStartDate) {
-      const { data } = await supabase
-        .from('profiles')
-        .select('sobriety_start_date')
-        .eq('id', userId)
-        .single();
-      if (data?.sobriety_start_date) {
-        set({ sobrietyStartDate: data.sobriety_start_date });
+    // Sync sobriety date + this week's check-ins from Supabase
+    if (userId) {
+      const today = new Date().toISOString().slice(0, 10);
+      const monday = weekStartISO();
+      const [profileRes, checkinsRes] = await Promise.all([
+        supabase.from('profiles').select('sobriety_start_date').eq('id', userId).single(),
+        supabase.from('daily_checkins')
+          .select('checked_in_date')
+          .eq('user_id', userId)
+          .gte('checked_in_date', monday)
+          .lte('checked_in_date', today),
+      ]);
+      const updates: Partial<ProgressState> = {};
+      if (profileRes.data?.sobriety_start_date) {
+        updates.sobrietyStartDate = profileRes.data.sobriety_start_date;
+      }
+      if (checkinsRes.data && checkinsRes.data.length > 0) {
+        const streak = Array(7).fill(false);
+        checkinsRes.data.forEach(({ checked_in_date }) => {
+          const d = new Date(checked_in_date + 'T00:00:00');
+          const idx = (d.getDay() + 6) % 7; // 0=Mon
+          streak[idx] = true;
+        });
+        updates.weeklyStreak = streak;
+        updates.checkInsCompleted = checkinsRes.data.length;
+      }
+      if (Object.keys(updates).length > 0) {
+        set(updates);
         await _persist(get());
       }
     }
