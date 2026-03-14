@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,7 +23,11 @@ export default function Welcome() {
     >
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.logoCircle}>
-          <Text style={styles.logoEmoji}>🟣</Text>
+          <Image
+            source={require('../../assets/Logo Icon.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
         </View>
 
         <Text style={styles.welcome}>Welcome to</Text>
@@ -54,7 +58,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 24,
   },
-  logoEmoji: { fontSize: 50 },
+  logoImage: { width: 64, height: 64 },
 
   welcome: { fontFamily: Fonts.jost,         fontSize: 18, color: Colors.textMuted },
   appName: { fontFamily: Fonts.poppinsBold,  fontSize: 36, color: Colors.primary   },
