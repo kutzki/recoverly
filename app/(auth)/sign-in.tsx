@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ScrollView, Alert, Image, TextInput as RNTextInput,
+  KeyboardAvoidingView, ScrollView, Alert, Image,
+  TextInput as RNTextInput, ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,6 +21,7 @@ export default function SignIn() {
   const [password,   setPassword]   = useState('');
   const [showPass,   setShowPass]   = useState(false);
   const [loading,    setLoading]    = useState(false);
+  const [googleLoad, setGoogleLoad] = useState(false);
   const passwordRef  = useRef<RNTextInput>(null);
 
   const handleSignIn = async () => {
@@ -38,16 +40,27 @@ export default function SignIn() {
     }
   };
 
+  const handleGoogle = async () => {
+    setGoogleLoad(true);
+    try {
+      const result = await authService.signInWithGoogle();
+      if (result?.session && result.profile) {
+        await setAuth(result.profile, result.session.access_token);
+        router.replace(result.profile.is_profile_complete ? '/(app)/home' : '/(setup)/welcome');
+      }
+    } catch (e: any) {
+      Alert.alert('Google Sign In Failed', e.message ?? 'Could not sign in with Google.');
+    } finally {
+      setGoogleLoad(false);
+    }
+  };
+
   return (
     <LinearGradient
       colors={[Colors.gradientStart, Colors.gradientMid, Colors.gradientEnd]}
       style={styles.gradient}
     >
-      <KeyboardAvoidingView
-        behavior="padding"
-        keyboardVerticalOffset={Platform.OS === 'android' ? 0 : 0}
-        style={styles.kav}
-      >
+      <KeyboardAvoidingView behavior="padding" style={styles.kav}>
         <ScrollView
           contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 40 }]}
           keyboardShouldPersistTaps="handled"
@@ -55,11 +68,7 @@ export default function SignIn() {
         >
           {/* Logo */}
           <Animated.View entering={FadeInDown.duration(400).delay(0)} style={styles.logoArea}>
-            <Image
-              source={require('../../assets/Logo Icon.png')}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
+            <Image source={require('../../assets/Logo Icon.png')} style={styles.logoImage} resizeMode="contain" />
           </Animated.View>
 
           {/* Heading */}
@@ -87,7 +96,12 @@ export default function SignIn() {
             </View>
 
             <View style={styles.field}>
-              <Text style={styles.label}>Password</Text>
+              <View style={styles.labelRow}>
+                <Text style={styles.label}>Password</Text>
+                <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password' as any)}>
+                  <Text style={styles.forgotLink}>Forgot password?</Text>
+                </TouchableOpacity>
+              </View>
               <View style={styles.inputRow}>
                 <TextInput
                   ref={passwordRef}
@@ -100,16 +114,8 @@ export default function SignIn() {
                   returnKeyType="done"
                   onSubmitEditing={handleSignIn}
                 />
-                <TouchableOpacity
-                  onPress={() => setShowPass((v) => !v)}
-                  style={styles.eyeBtn}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons
-                    name={showPass ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={Colors.textMuted}
-                  />
+                <TouchableOpacity onPress={() => setShowPass((v) => !v)} style={styles.eyeBtn} activeOpacity={0.7}>
+                  <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={Colors.textMuted} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -120,7 +126,34 @@ export default function SignIn() {
               onPress={handleSignIn}
               disabled={loading}
             >
-              <Text style={styles.buttonText}>{loading ? 'Signing in…' : 'Sign In'}</Text>
+              {loading
+                ? <ActivityIndicator color={Colors.white} />
+                : <Text style={styles.buttonText}>Sign In</Text>
+              }
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {/* Google */}
+            <TouchableOpacity
+              style={[styles.googleBtn, googleLoad && styles.buttonDisabled]}
+              activeOpacity={0.85}
+              onPress={handleGoogle}
+              disabled={googleLoad}
+            >
+              {googleLoad ? (
+                <ActivityIndicator color={Colors.text} />
+              ) : (
+                <>
+                  <Ionicons name="logo-google" size={18} color="#EA4335" style={{ marginRight: 10 }} />
+                  <Text style={styles.googleBtnText}>Continue with Google</Text>
+                </>
+              )}
             </TouchableOpacity>
           </Animated.View>
 
@@ -149,9 +182,10 @@ const styles = StyleSheet.create({
   subheading: { fontFamily: Fonts.jost, fontSize: 15, color: Colors.textMuted, marginBottom: 36, textAlign: 'center' },
 
   form: { width: '100%', gap: 16, marginBottom: 32 },
-
   field: { gap: 6 },
+  labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   label: { fontFamily: Fonts.poppinsMedium, fontSize: 13, color: Colors.text },
+  forgotLink: { fontFamily: Fonts.jost, fontSize: 13, color: Colors.primary },
 
   input: {
     backgroundColor: Colors.white,
@@ -164,7 +198,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -181,10 +214,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.text,
   },
-  eyeBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
+  eyeBtn: { paddingHorizontal: 14, paddingVertical: 14 },
 
   button: {
     backgroundColor: Colors.primary,
@@ -195,6 +225,22 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.white },
+
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
+  dividerText: { fontFamily: Fonts.jost, fontSize: 13, color: Colors.textMuted },
+
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  googleBtnText: { fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.text },
 
   footer:     { flexDirection: 'row', alignItems: 'center' },
   footerText: { fontFamily: Fonts.jost, fontSize: 14, color: Colors.textMuted },
