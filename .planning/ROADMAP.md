@@ -139,7 +139,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Dashboard Polish | 0/2 | Not started | - |
+| 1. Dashboard Polish | 1/2 | In Progress|  |
 | 2. SOS Polish + Data | 0/TBD | Not started | - |
 | 3. Tracker | 0/TBD | Not started | - |
 | 4. Goals | 0/TBD | Not started | - |

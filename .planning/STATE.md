@@ -4,13 +4,21 @@
 **Milestone 1: Polish & Perfect Existing Screens**
 
 ## Current Phase
-**Phase 1 — Dashboard Pixel Polish** (not started)
+**Phase 1 — Dashboard Pixel Polish** (in progress — plan 02/02 complete)
+
+## Decisions
+- Removed `textTransform: 'capitalize'` from SobrietyCounter label entirely (cleaner than setting 'none')
+- Used `dotCol` wrapper View per dot to decouple column gap (3px) from row gap (5px) in StreakDots
+
+## Last Session
+- Stopped at: Completed 01-dashboard-polish 01-02-PLAN.md
+- 2026-03-15T02:40:34Z
 
 ## Phase Status
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 1 — Dashboard Polish | Not started | Next up |
+| 1 — Dashboard Polish | In progress | Plans 01-01, 01-02 complete |
 | 2 — SOS Polish + Data | Not started | |
 | 3 — Tracker | Not started | |
 | 4 — Goals | Not started | |
