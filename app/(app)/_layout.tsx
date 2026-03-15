@@ -104,7 +104,8 @@ export default function AppLayout() {
       <Tabs.Screen name="sos"            options={{ href: null }} />
       <Tabs.Screen name="chat"           options={{ href: null }} />
       <Tabs.Screen name="user"           options={{ href: null }} />
-      <Tabs.Screen name="call"           options={{ href: null }} />
+      <Tabs.Screen name="call"            options={{ href: null }} />
+      <Tabs.Screen name="companion"       options={{ href: null }} />
     </Tabs>
   );
 }
