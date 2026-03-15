@@ -1,201 +1,151 @@
-# Recoverly — Roadmap
-
-## Milestone 1: Polish & Perfect Existing Screens
-
-**Goal:** Every screen that's already built is Figma-pixel-perfect, fully functional, and data-driven before we add anything new.
-
-**EAS build after each phase. User tests on device. Fix before moving on.**
-
----
-
-### Phase 1 — Dashboard Pixel Polish
-
-**Requirement:** R1
-
-**Goal:** Home screen is indistinguishable from Figma node 0:1940. Every pixel correct.
-
-**Tasks:**
-1. Pull Figma design context (node 0:1940) — verify all spacing, typography, colors
-2. Fix any remaining gradient/arc/card deviations from Figma
-3. Verify check-in modal is functional with mood + notes
-4. Verify streak dots update correctly after check-in
-5. Verify meeting cards load real data (Meeting Guide API)
-6. Add companion FAB placeholder (navigates to coming-soon screen)
-7. Screenshot comparison — fix any diffs before EAS build
-
-**Success criteria:**
-- Home screen matches Figma node 0:1940 at pixel level
-- Check-in flow works end-to-end (modal → Supabase → streak updated)
-- Meeting cards show real data or graceful placeholder
-- No console errors
-
----
-
-### Phase 2 — SOS / Crisis Polish + Data
-
-**Requirement:** R2
-
-**Goal:** All 6 crisis screens are Figma-perfect and incidents are logged to Supabase.
-
-**Tasks:**
-1. Pull Figma design context for each SOS screen
-2. Pixel-match each screen to Figma
-3. Wire `crisis_incidents` Supabase insert on sub-screen open
-4. Log `actions_completed` on CTA taps (call sponsor, find meeting)
-5. Crisis history screen: pull real rows from `crisis_incidents`
-
-**Success criteria:**
-- All 6 screens match Figma
-- Crisis incidents appear in Supabase after testing
-- Crisis history shows real data
-
----
-
-### Phase 3 — Tracker (Real Data)
-
-**Requirement:** R3
-
-**Goal:** Tracker screen is accurate, live, and shows real check-in history.
-
-**Tasks:**
-1. Pull Figma design context for tracker screen
-2. Pixel-match to Figma
-3. Replace any mock data with Supabase `daily_checkins` query
-4. Calendar or list view of check-in history
-5. Milestone detection (30/60/90/180/365 days) + celebration card
-6. Live days-sober count
-
-**Success criteria:**
-- Check-in history matches Supabase data
-- Milestones trigger celebration on correct days
-- Days counter is accurate
-
----
-
-### Phase 4 — Goals (CRUD + Polish)
-
-**Requirement:** R4
-
-**Goal:** Goals screen is fully functional CRUD with Figma-correct UI.
-
-**Tasks:**
-1. Pull Figma design context for goals screen
-2. Pixel-match to Figma
-3. Verify add/edit/delete works with Supabase
-4. Add progress indicator per goal
-5. Target date display + overdue state
-
----
-
-### Phase 5 — Profile (Complete + Polish)
-
-**Requirement:** R5
-
-**Goal:** Profile and Edit Profile are complete, polished, and save to Supabase.
-
-**Tasks:**
-1. Pull Figma design context for profile screens
-2. Pixel-match to Figma
-3. Avatar upload via expo-image-picker → Supabase Storage
-4. All fields save correctly (name, bio, location, sobriety date, substance)
-5. Inner circle + sponsor display
-
----
-
-### Phase 6 — Journal (Full Feature)
-
-**Requirement:** R6
-
-**Goal:** Replace journal placeholder with a full feature.
-
-**Tasks:**
-1. Pull Figma design context for journal screens
-2. Journal list screen — entries from `journal_entries`
-3. New entry screen — mood selector, daily prompt, free text, tags
-4. Photo attachment (expo-image-picker → Supabase Storage)
-5. Save + edit + delete entries
-6. Home screen Journal quick-action navigates here
-
----
-
-## Milestone 2: Sober Companion (AI)
-
-**Goal:** Build the centerpiece feature — the AI companion that defines Recoverly.
-
-**EAS build after each phase.**
-
----
-
-### Phase 7 — Companion Foundation (Guided Flows)
-
-**Requirement:** R7a, R7c
-
-**Goal:** Companion entry point + guided coping sequences work end-to-end.
-
-**Tasks:**
-1. Floating action button on home screen
-2. Companion home screen: mood/situation selector (5 states)
-3. Guided flow for each state (3–4 step sequences)
-4. Quick-action CTAs: call sponsor, find meeting, breathing exercise, start journal entry
-5. Human routing: sponsor dialer, inner circle, crisis lines (988, AA/NA hotlines)
-
----
-
-### Phase 8 — AI Chat (Claude API)
-
-**Requirement:** R7b
-
-**Goal:** Real AI conversation with user-personalized context.
-
-**Tasks:**
-1. Claude API integration (`@anthropic-ai/sdk`) — verify new arch safe (JS-only SDK, no native modules)
-2. System prompt: warm recovery companion, knows user's profile
-3. Context injection: name, days sober, substance, triggers, last 7 days mood
-4. Chat UI: message bubbles, typing indicator, send button
-5. "Talk to a person" escape hatch always visible
-6. Graceful error handling (API timeout, offline)
-
----
-
-## Milestone 3: Social & Connections
-
-**Goal:** Real 1:1 messaging and peer matching.
-
----
-
-### Phase 9 — Messages (Stream Chat)
-
-**Requirement:** R8
-
-**Tasks:**
-1. Wire Stream Chat SDK to messages screen
-2. Conversation list with real channels
-3. Full chat UI using Stream Chat components
-4. DM creation from Find People
-
----
-
-### Phase 10 — Sober Pal Matching
-
-**Requirement:** R9
-
-**Tasks:**
-1. Browse profiles with substance/challenge filter
-2. Send connect request
-3. Accept → create Stream Chat channel
-4. `connections` table in Supabase
-
----
-
-## Build Strategy
-
-| Phase | EAS Build | Notes |
-|-------|-----------|-------|
-| 1 | After phase | Dashboard verified |
-| 3 | After phase | Tracker + SOS verified together (2+3) |
-| 6 | After phase | All polished screens verified |
-| 7 | After phase | Companion guided flows verified |
-| 8 | After phase | AI chat verified |
-| 10 | After phase | Full social verified |
-
-Trigger builds at logical milestones, not every single phase, to save build time. User approves each build before proceeding.
+# Roadmap: Recoverly
+
+## Overview
+
+Polish every existing screen to Figma-pixel-perfect perfection, then build the AI sober companion that defines the app. Three milestones: (1) all existing screens polished + data-driven, (2) the hybrid AI companion, (3) social/messaging features.
+
+## Phases
+
+- [ ] **Phase 1: Dashboard Polish** - Pixel-perfect home screen matching Figma node 0:1940, functional check-in flow
+- [ ] **Phase 2: SOS Polish + Data** - All 6 crisis screens Figma-matched, incidents logged to Supabase
+- [ ] **Phase 3: Tracker** - Real check-in history from Supabase, milestone detection
+- [ ] **Phase 4: Goals** - CRUD goals with progress tracking
+- [ ] **Phase 5: Profile** - Complete profile view/edit, avatar upload
+- [ ] **Phase 6: Journal** - Full journal feature (mood, prompts, entries, photos)
+- [ ] **Phase 7: Companion Guided Flows** - Floating FAB, situation selector, coping sequences, human routing
+- [ ] **Phase 8: AI Chat** - Claude API integration, personalized context, chat UI
+- [ ] **Phase 9: Messages** - Stream Chat SDK wired to messages screen
+- [ ] **Phase 10: Sober Pal** - Peer matching and connect system
+
+## Phase Details
+
+### Phase 1: Dashboard Polish
+**Goal**: Home screen is indistinguishable from Figma node 0:1940. Check-in flow works end-to-end. Real meeting data in event cards.
+**Depends on**: Nothing (first phase)
+**Requirements**: R1
+**Success Criteria** (what must be TRUE):
+  1. Home screen matches Figma node 0:1940 at pixel level (gradient, arc, quick actions, check-in card, meetings)
+  2. Check-in modal opens, accepts mood + notes, saves to Supabase, updates streak dots
+  3. Meeting cards show real AA/NA data from Meeting Guide API (or graceful placeholder)
+  4. Companion FAB placeholder is visible on home screen
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — CompanionFAB component, companion screen, layout registration, home.tsx integration
+- [ ] 01-02-PLAN.md — Arc label casing fix, StreakDots day abbreviations
+
+### Phase 2: SOS Polish + Data
+**Goal**: All 6 crisis screens Figma-perfect. Every crisis incident and action logged to Supabase.
+**Depends on**: Phase 1
+**Requirements**: R2
+**Success Criteria** (what must be TRUE):
+  1. All 6 SOS screens match Figma designs
+  2. Opening a crisis sub-screen writes a row to crisis_incidents in Supabase
+  3. Tapping a CTA (call sponsor, find meeting) logs to actions_completed
+  4. Crisis history screen shows real Supabase data
+**Plans**: TBD
+
+### Phase 3: Tracker
+**Goal**: Tracker screen is accurate and data-driven. Real check-in history, live streak, milestone celebrations.
+**Depends on**: Phase 2
+**Requirements**: R3
+**Success Criteria** (what must be TRUE):
+  1. Tracker displays real daily_checkins data from Supabase
+  2. Days sober counter is accurate and live
+  3. Check-in history is viewable (calendar or list)
+  4. Milestone days (30/60/90/180/365) trigger a celebration card
+**Plans**: TBD
+
+### Phase 4: Goals
+**Goal**: Goals screen is fully functional CRUD with Figma-correct UI and progress tracking.
+**Depends on**: Phase 3
+**Requirements**: R4
+**Success Criteria** (what must be TRUE):
+  1. Goals list pulls from user_goals in Supabase
+  2. User can add, edit, delete, and complete goals
+  3. Each goal shows a progress indicator and target date
+  4. Overdue goals are visually distinguished
+**Plans**: TBD
+
+### Phase 5: Profile
+**Goal**: Profile and Edit Profile screens are complete, polished, and save all fields to Supabase.
+**Depends on**: Phase 4
+**Requirements**: R5
+**Success Criteria** (what must be TRUE):
+  1. Profile screen matches Figma with all fields visible
+  2. Avatar upload works (expo-image-picker → Supabase Storage)
+  3. All profile fields save correctly to profiles table
+  4. Inner circle and sponsor are displayed correctly
+**Plans**: TBD
+
+### Phase 6: Journal
+**Goal**: Journal placeholder replaced with full feature — mood, guided prompts, free text, photos, tags.
+**Depends on**: Phase 5
+**Requirements**: R6
+**Success Criteria** (what must be TRUE):
+  1. Journal list shows past entries sorted by date with mood emoji + preview
+  2. New entry screen has mood selector, daily prompt, free text body, and tags
+  3. Entries save to journal_entries in Supabase
+  4. Photo attachment works via expo-image-picker
+  5. Home screen Journal quick-action navigates to journal list
+**Plans**: TBD
+
+### Phase 7: Companion Guided Flows
+**Goal**: Floating FAB on home launches companion. Situation selector + guided coping sequences + human routing all work.
+**Depends on**: Phase 6
+**Requirements**: R7a, R7c
+**Success Criteria** (what must be TRUE):
+  1. Floating FAB visible on home screen, opens companion
+  2. Situation selector shows 5 states (urge, anxious, lonely, relapsed, checking in)
+  3. Each state has a 3-4 step guided coping sequence with relevant CTAs
+  4. Sponsor dialer, inner circle dialer, and crisis lines (988) all work
+  5. "Find meeting now" routes to meetings screen
+**Plans**: TBD
+
+### Phase 8: AI Chat
+**Goal**: Claude API chat with personalized user context. Warm, knowledgeable companion responses.
+**Depends on**: Phase 7
+**Requirements**: R7b
+**Success Criteria** (what must be TRUE):
+  1. AI chat responds to freeform user messages via Claude API
+  2. Each conversation includes: user name, days sober, substance, triggers, last 7 days mood
+  3. Chat UI has message bubbles, typing indicator, send button
+  4. "Talk to a person" button always visible and functional
+  5. Graceful error handling (offline, API timeout)
+**Plans**: TBD
+
+### Phase 9: Messages
+**Goal**: Real 1:1 messaging via Stream Chat SDK wired to the messages screen.
+**Depends on**: Phase 8
+**Requirements**: R8
+**Success Criteria** (what must be TRUE):
+  1. Messages screen shows real Stream Chat conversation list with unread counts
+  2. Opening a conversation shows full chat UI
+  3. DMs can be created from Find People screen
+**Plans**: TBD
+
+### Phase 10: Sober Pal
+**Goal**: Recovery peer browsing and matching system with connection requests.
+**Depends on**: Phase 9
+**Requirements**: R9
+**Success Criteria** (what must be TRUE):
+  1. Users can browse recovery peer profiles filtered by substance/challenges
+  2. Connect request can be sent and accepted
+  3. Accepted match creates a Stream Chat DM channel
+  4. Connections stored in Supabase connections table
+**Plans**: TBD
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Dashboard Polish | 0/2 | Not started | - |
+| 2. SOS Polish + Data | 0/TBD | Not started | - |
+| 3. Tracker | 0/TBD | Not started | - |
+| 4. Goals | 0/TBD | Not started | - |
+| 5. Profile | 0/TBD | Not started | - |
+| 6. Journal | 0/TBD | Not started | - |
+| 7. Companion Guided Flows | 0/TBD | Not started | - |
+| 8. AI Chat | 0/TBD | Not started | - |
+| 9. Messages | 0/TBD | Not started | - |
+| 10. Sober Pal | 0/TBD | Not started | - |
