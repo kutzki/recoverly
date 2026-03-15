@@ -24,9 +24,9 @@ import { fetchNearbyMeetings, meetingDayTime, type Meeting } from '../../service
 const QUICK_ACTIONS = [
   { id: 'meetings',  label: 'Meeting',   icon: 'people',    route: '/(app)/meetings'  },
   { id: 'awards',    label: 'Awards',    icon: 'trophy',    route: '/(app)/tracker'   },
-  { id: 'tracker',   label: 'Tracker',   icon: 'analytics', route: '/(app)/tracker'   },
-  { id: 'checklist', label: 'Checklist', icon: 'checkbox',  route: '/(app)/apps'      },
-  { id: 'journal',   label: 'Journal',   icon: 'book',      route: '/(app)/journal'   },
+  { id: 'tracker',   label: 'Tracker',   icon: 'sync-circle',      route: '/(app)/tracker'   },
+  { id: 'checklist', label: 'Checklist', icon: 'checkmark-circle', route: '/(app)/apps'      },
+  { id: 'journal',   label: 'Journal',   icon: 'journal-outline',  route: '/(app)/journal'   },
 ] as const;
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -121,7 +121,7 @@ export default function HomeScreen() {
 
         {/* ── Sobriety Arc ───────────────────────────────────────────────── */}
         <View style={styles.arcWrapper}>
-          <SobrietyCounter daysSober={daysSober} size={230} />
+          <SobrietyCounter daysSober={daysSober} size={220} />
         </View>
 
         {/* ── Quick Actions ──────────────────────────────────────────────── */}

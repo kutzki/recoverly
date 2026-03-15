@@ -14,7 +14,7 @@ const LEFT_TABS  = [
   { name: 'apps',      icon: 'grid-outline',   activeIcon: 'grid'    as const },
 ];
 const RIGHT_TABS = [
-  { name: 'journal', icon: 'book-outline',   activeIcon: 'book'    as const },
+  { name: 'journal', icon: 'heart-outline',  activeIcon: 'heart'   as const },
   { name: 'profile', icon: 'person-outline', activeIcon: 'person'  as const },
 ];
 
@@ -49,7 +49,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       {LEFT_TABS.map(renderTab)}
 
-      {/* Panic Button — center, raised */}
+      {/* Panic Button — center, badge with downward tip */}
       <TouchableOpacity
         style={styles.panicWrapper}
         activeOpacity={0.85}
@@ -63,6 +63,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
         >
           <Text style={styles.panicBang}>!</Text>
         </LinearGradient>
+        <View style={styles.panicTip} />
         <Text style={styles.panicLabel}>{'Panic\nButton'}</Text>
       </TouchableOpacity>
 
@@ -135,18 +136,31 @@ const styles = StyleSheet.create({
   panicWrapper: {
     flex:       1,
     alignItems: 'center',
-    marginTop:  -22,
+    marginTop:  -2,
   },
   panicGradient: {
-    width:          125,
-    height:         34,
-    borderRadius:   4,
+    width:                  100,
+    height:                 30,
+    borderTopLeftRadius:    8,
+    borderTopRightRadius:   8,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius:0,
     alignItems:     'center',
     justifyContent: 'center',
   },
+  panicTip: {
+    width:            0,
+    height:           0,
+    borderLeftWidth:  18,
+    borderRightWidth: 18,
+    borderTopWidth:   13,
+    borderLeftColor:  'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor:   Colors.primaryMid,
+  },
   panicBang: {
     color:      Colors.white,
-    fontSize:   16,
+    fontSize:   15,
     fontFamily: Fonts.poppinsBold,
   },
   panicLabel: {
@@ -154,7 +168,7 @@ const styles = StyleSheet.create({
     fontSize:   10,
     color:      '#9d9d9d',
     textAlign:  'center',
-    marginTop:  4,
+    marginTop:  3,
     lineHeight: 13,
   },
 });

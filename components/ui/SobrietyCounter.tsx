@@ -21,20 +21,23 @@ function arcPath(cx: number, cy: number, r: number, startDeg: number, endDeg: nu
   return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
 }
 
-export function SobrietyCounter({ daysSober, size = 230 }: Props) {
+export function SobrietyCounter({ daysSober, size = 220 }: Props) {
   const cx = size / 2;
   const cy = size / 2;
-  const r  = size * 0.38;
+  const r  = size * 0.40;
   const strokeWidth = size * 0.055;
 
-  // Arc spans 210° (from -105° to +105° — slightly more than a semicircle)
-  const startAngle = -210;
-  const endAngle   = 30;
+  // Horseshoe arc opens at bottom — left (−90°) clockwise over top to right (90°)
+  const startAngle = -90;
+  const endAngle   = 90;
   const progress   = Math.min(daysSober / 365, 1);
   const fillAngle  = startAngle + (endAngle - startAngle) * progress;
 
+  // Container only shows upper half of SVG (arc never goes below cy)
+  const containerH = Math.round(cy + strokeWidth / 2 + 6);
+
   return (
-    <View style={{ width: size, height: size * 0.65, alignItems: 'center' }}>
+    <View style={{ width: size, height: containerH, alignItems: 'center' }}>
       <Svg width={size} height={size} style={{ position: 'absolute', top: 0 }}>
         <Defs>
           <SvgGradient id="arcGrad" x1="0" y1="0" x2="1" y2="0">
@@ -64,10 +67,10 @@ export function SobrietyCounter({ daysSober, size = 230 }: Props) {
         )}
       </Svg>
 
-      {/* Centre text */}
-      <View style={[styles.center, { top: size * 0.24 }]}>
+      {/* Centre text — vertically centred in the visible arc space */}
+      <View style={[styles.center, { top: size * 0.17 }]}>
         <Text style={styles.days}>{daysSober}</Text>
-        <Text style={styles.label}>days sober</Text>
+        <Text style={styles.label}>Days Sober</Text>
       </View>
     </View>
   );
@@ -86,7 +89,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: Fonts.poppins,
-    fontSize: 20,
+    fontSize: 16,
     color: Colors.text,
   },
 });
