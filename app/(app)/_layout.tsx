@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react';
 import { Tabs, router } from 'expo-router';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,27 +7,27 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
+import { PanicOverlay, type PanicOverlayHandle } from '../../components/ui/PanicOverlay';
 
 // ── Tab definitions (4 real tabs + panic button in center) ───────────────────
 
-const LEFT_TABS  = [
-  { name: 'home',      icon: 'home-outline',   activeIcon: 'home'    as const },
-  { name: 'apps',      icon: 'grid-outline',   activeIcon: 'grid'    as const },
+const LEFT_TABS = [
+  { name: 'home',    icon: 'home-outline',   activeIcon: 'home'   as const },
+  { name: 'apps',    icon: 'grid-outline',   activeIcon: 'grid'   as const },
 ];
 const RIGHT_TABS = [
-  { name: 'journal', icon: 'heart-outline',  activeIcon: 'heart'   as const },
-  { name: 'profile', icon: 'person-outline', activeIcon: 'person'  as const },
+  { name: 'journal', icon: 'heart-outline',  activeIcon: 'heart'  as const },
+  { name: 'profile', icon: 'person-outline', activeIcon: 'person' as const },
 ];
 
 // ── Custom bottom tab bar ────────────────────────────────────────────────────
 
-function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+type TabBarProps = BottomTabBarProps & { onPanic: () => void };
+
+function CustomTabBar({ state, navigation, onPanic }: TabBarProps) {
   const insets = useSafeAreaInsets();
 
-  const renderTab = (
-    item: { name: string; icon: string; activeIcon: string },
-    i: number,
-  ) => {
+  const renderTab = (item: { name: string; icon: string; activeIcon: string }) => {
     const routeIndex = state.routes.findIndex((r) => r.name === item.name);
     const isActive   = state.index === routeIndex;
     return (
@@ -49,11 +50,11 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       {LEFT_TABS.map(renderTab)}
 
-      {/* Panic Button — center, badge with downward tip */}
+      {/* Panic Button — center badge with downward chevron tip */}
       <TouchableOpacity
         style={styles.panicWrapper}
         activeOpacity={0.85}
-        onPress={() => router.push('/(app)/sos')}
+        onPress={onPanic}
       >
         <LinearGradient
           colors={[Colors.primaryDark, Colors.primaryMid]}
@@ -75,78 +76,97 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 // ── Layout ───────────────────────────────────────────────────────────────────
 
 export default function AppLayout() {
+  const overlayRef = useRef<PanicOverlayHandle>(null);
+
+  // Navigate to SOS using replace so the back stack doesn't stack SOS screens
+  const handleNavigateToSOS = useCallback(() => {
+    router.push('/(app)/sos');
+  }, []);
+
+  const handlePanic = useCallback(() => {
+    overlayRef.current?.activate();
+  }, []);
+
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
-      {/* Visible tabs */}
-      <Tabs.Screen name="home"    />
-      <Tabs.Screen name="apps"    />
-      <Tabs.Screen name="journal" />
-      <Tabs.Screen name="profile" />
+    <View style={styles.root}>
+      <Tabs
+        tabBar={(props) => <CustomTabBar {...props} onPanic={handlePanic} />}
+        screenOptions={{ headerShown: false }}
+      >
+        {/* Visible tabs */}
+        <Tabs.Screen name="home"    />
+        <Tabs.Screen name="apps"    />
+        <Tabs.Screen name="journal" />
+        <Tabs.Screen name="profile" />
 
-      {/* Hidden — not in tab bar */}
-      <Tabs.Screen name="favorites" options={{ href: null }} />
+        {/* Hidden — not in tab bar */}
+        <Tabs.Screen name="favorites" options={{ href: null }} />
 
-      {/* Hidden screens — accessible by push, not shown in tab bar */}
-      <Tabs.Screen name="tracker"        options={{ href: null }} />
-      <Tabs.Screen name="goals"          options={{ href: null }} />
-      <Tabs.Screen name="edit-profile"   options={{ href: null }} />
-      <Tabs.Screen name="messages"       options={{ href: null }} />
-      <Tabs.Screen name="find-users"     options={{ href: null }} />
-      <Tabs.Screen name="sober-pal"      options={{ href: null }} />
-      <Tabs.Screen name="sponsor"        options={{ href: null }} />
-      <Tabs.Screen name="inner-circle"   options={{ href: null }} />
-      <Tabs.Screen name="meetings"       options={{ href: null }} />
-      <Tabs.Screen name="resource-hub"   options={{ href: null }} />
-      <Tabs.Screen name="crisis-history" options={{ href: null }} />
-      <Tabs.Screen name="settings"       options={{ href: null }} />
-      <Tabs.Screen name="sos"            options={{ href: null }} />
-      <Tabs.Screen name="chat"           options={{ href: null }} />
-      <Tabs.Screen name="user"           options={{ href: null }} />
-      <Tabs.Screen name="call"            options={{ href: null }} />
-      <Tabs.Screen name="companion"       options={{ href: null }} />
-    </Tabs>
+        {/* Hidden screens — accessible by push, not shown in tab bar */}
+        <Tabs.Screen name="tracker"        options={{ href: null }} />
+        <Tabs.Screen name="goals"          options={{ href: null }} />
+        <Tabs.Screen name="edit-profile"   options={{ href: null }} />
+        <Tabs.Screen name="messages"       options={{ href: null }} />
+        <Tabs.Screen name="find-users"     options={{ href: null }} />
+        <Tabs.Screen name="sober-pal"      options={{ href: null }} />
+        <Tabs.Screen name="sponsor"        options={{ href: null }} />
+        <Tabs.Screen name="inner-circle"   options={{ href: null }} />
+        <Tabs.Screen name="meetings"       options={{ href: null }} />
+        <Tabs.Screen name="resource-hub"   options={{ href: null }} />
+        <Tabs.Screen name="crisis-history" options={{ href: null }} />
+        <Tabs.Screen name="settings"       options={{ href: null }} />
+        <Tabs.Screen name="sos"            options={{ href: null }} />
+        <Tabs.Screen name="chat"           options={{ href: null }} />
+        <Tabs.Screen name="user"           options={{ href: null }} />
+        <Tabs.Screen name="call"           options={{ href: null }} />
+        <Tabs.Screen name="companion"      options={{ href: null }} />
+      </Tabs>
+
+      {/* Full-screen panic overlay — slides up over everything including tab bar */}
+      <PanicOverlay ref={overlayRef} onNavigate={handleNavigateToSOS} />
+    </View>
   );
 }
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
+
   bar: {
-    flexDirection:    'row',
-    backgroundColor:  Colors.navBackground,
-    borderTopWidth:   1,
-    borderTopColor:   Colors.navBorder,
-    alignItems:       'center',
-    paddingTop:       8,
-    // Figma: DROP_SHADOW #00000019, offset(10,-10), radius 54
-    shadowColor:      '#000000',
-    shadowOffset:     { width: 10, height: -10 },
-    shadowOpacity:    0.098,
-    shadowRadius:     54,
-    elevation:        20,
+    flexDirection:   'row',
+    backgroundColor: Colors.navBackground,
+    borderTopWidth:  1,
+    borderTopColor:  Colors.navBorder,
+    alignItems:      'center',
+    paddingTop:      8,
+    shadowColor:     '#000000',
+    shadowOffset:    { width: 10, height: -10 },
+    shadowOpacity:   0.098,
+    shadowRadius:    54,
+    elevation:       20,
   },
   tabItem: {
-    flex:         1,
-    alignItems:   'center',
+    flex:          1,
+    alignItems:    'center',
     paddingBottom: 4,
   },
+
+  // Panic Button
   panicWrapper: {
     flex:       1,
     alignItems: 'center',
     marginTop:  -2,
   },
   panicGradient: {
-    width:                  100,
-    height:                 30,
-    borderTopLeftRadius:    8,
-    borderTopRightRadius:   8,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius:0,
-    alignItems:     'center',
-    justifyContent: 'center',
+    width:                   100,
+    height:                  30,
+    borderTopLeftRadius:     8,
+    borderTopRightRadius:    8,
+    borderBottomLeftRadius:  0,
+    borderBottomRightRadius: 0,
+    alignItems:              'center',
+    justifyContent:          'center',
   },
   panicTip: {
     width:            0,

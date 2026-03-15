@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -51,7 +52,7 @@ export default function SOSIndexScreen() {
   const innerCircle: any[] = Array.isArray(user?.inner_circle) ? (user?.inner_circle as any[]) : [];
 
   return (
-    <View style={styles.root}>
+    <Animated.View entering={FadeIn.duration(220).delay(120)} style={styles.root}>
       <LinearGradient
         colors={[Colors.primaryDark, Colors.primaryMid]}
         style={styles.headerGrad}
@@ -140,7 +141,7 @@ export default function SOSIndexScreen() {
           ))}
         </View>
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 }
 
