@@ -14,6 +14,7 @@ import { useProgressStore } from '../../store/progress';
 import { SobrietyCounter }  from '../../components/ui/SobrietyCounter';
 import { StreakDots }        from '../../components/ui/StreakDots';
 import { CheckInModal }      from '../../components/ui/CheckInModal';
+import { CompanionFAB }     from '../../components/ui/CompanionFAB';
 import { Colors }           from '../../constants/colors';
 import { Fonts }            from '../../constants/fonts';
 import { fetchNearbyMeetings, meetingDayTime, type Meeting } from '../../services/meetings';
@@ -32,6 +33,7 @@ const QUICK_ACTIONS = [
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const fabBottom = insets.bottom + 70;
 
   const user              = useAuthStore((s) => s.user);
   const sobrietyStartDate = useProgressStore((s) => s.sobrietyStartDate);
@@ -248,6 +250,12 @@ export default function HomeScreen() {
         visible={checkInVisible}
         onClose={() => setCheckInVisible(false)}
         onConfirm={handleCheckInConfirm}
+      />
+
+      {/* ── Companion FAB ──────────────────────────────────────────────── */}
+      <CompanionFAB
+        onPress={() => router.push('/(app)/companion' as any)}
+        bottomOffset={fabBottom}
       />
     </View>
   );
