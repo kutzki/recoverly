@@ -1,0 +1,12 @@
+{
+  "project": "recoverly",
+  "version": "1.0.0",
+  "workflow": {
+    "researchBeforePlanning": true,
+    "requirePlanApproval": true,
+    "atomicCommits": true,
+    "buildAfterMilestone": true
+  },
+  "model_profile": "quality",
+  "created": "2026-03-15"
+}
