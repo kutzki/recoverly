@@ -1,5 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
+
+const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 type Props = {
   streak: boolean[]; // length 7, index 0 = Monday
@@ -9,11 +12,11 @@ export function StreakDots({ streak }: Props) {
   return (
     <View style={styles.row}>
       {streak.map((done, i) => (
-        <View
-          key={i}
-          style={[styles.dot, done ? styles.dotFilled : styles.dotEmpty]}
-        >
-          {done && <Text style={styles.check}>✓</Text>}
+        <View key={i} style={styles.dotCol}>
+          <View style={[styles.dot, done ? styles.dotFilled : styles.dotEmpty]}>
+            {done && <Text style={styles.check}>✓</Text>}
+          </View>
+          <Text style={styles.dayLabel}>{DAY_LABELS[i]}</Text>
         </View>
       ))}
     </View>
@@ -26,6 +29,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     gap: 5,
+  },
+  dotCol: {
+    alignItems: 'center',
+    gap: 3,
   },
   dot: {
     width: DOT,
@@ -46,5 +53,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 9,
     lineHeight: 11,
+  },
+  dayLabel: {
+    fontFamily: Fonts.poppins,
+    fontSize: 9,
+    color: Colors.textMuted,
   },
 });
