@@ -61,7 +61,7 @@ Each task was committed atomically:
 1. **Task 1: Fix arc label casing in SobrietyCounter** - `5ece672` (fix)
 2. **Task 2: Add day abbreviation labels to StreakDots** - `7bfdfec` (feat)
 
-**Plan metadata:** (docs commit follows)
+**Plan metadata:** `31094b5` (docs: complete dashboard label polish plan)
 
 ## Files Created/Modified
 
@@ -93,3 +93,12 @@ None - no external service configuration required.
 ---
 *Phase: 01-dashboard-polish*
 *Completed: 2026-03-15*
+
+## Self-Check: PASSED
+
+- FOUND: components/ui/SobrietyCounter.tsx
+- FOUND: components/ui/StreakDots.tsx
+- FOUND: .planning/phases/01-dashboard-polish/01-02-SUMMARY.md
+- FOUND commit: 5ece672 (Task 1)
+- FOUND commit: 7bfdfec (Task 2)
+- FOUND commit: 31094b5 (docs/metadata)
