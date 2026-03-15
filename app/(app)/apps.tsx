@@ -6,16 +6,14 @@ import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
 const APP_ITEMS = [
-  { id: 'tracker',       label: 'Tracker',        icon: 'analytics-outline',     route: '/(app)/tracker',       desc: 'Monitor your progress'         },
-  { id: 'goals',         label: 'Goals',           icon: 'flag-outline',          route: '/(app)/goals',         desc: 'Set and track your goals'      },
-  { id: 'inner-circle',  label: 'Inner Circle',    icon: 'people-circle-outline', route: '/(app)/inner-circle',  desc: 'Your support network'          },
-  { id: 'sponsor',       label: 'Sponsor',         icon: 'person-add-outline',    route: '/(app)/sponsor',       desc: 'Connect with your sponsor'     },
-  { id: 'sober-pal',     label: 'Sober Pal',       icon: 'hand-left-outline',     route: '/(app)/sober-pal',     desc: 'Find a recovery partner'       },
-  { id: 'meetings',      label: 'Meetings',        icon: 'calendar-outline',      route: '/(app)/meetings',      desc: 'Nearby AA/NA meetings'         },
-  { id: 'resource-hub',  label: 'Resource Hub',    icon: 'library-outline',       route: '/(app)/resource-hub',  desc: 'Articles & tools'              },
-  { id: 'messages',      label: 'Messages',        icon: 'chatbubble-outline',    route: '/(app)/messages',      desc: 'Chat with your community'      },
-  { id: 'find-users',    label: 'Find People',     icon: 'search-outline',        route: '/(app)/find-users',    desc: 'Connect with others'           },
-  { id: 'settings',      label: 'Settings',        icon: 'settings-outline',      route: '/(app)/settings',      desc: 'App preferences'               },
+  { id: 'tracker',      label: 'Tracker',       icon: 'analytics-outline',     route: '/(app)/tracker',      desc: 'Monitor your progress'     },
+  { id: 'goals',        label: 'Goals',          icon: 'flag-outline',          route: '/(app)/goals',        desc: 'Set and track your goals'  },
+  { id: 'inner-circle', label: 'Inner Circle',   icon: 'people-circle-outline', route: '/(app)/inner-circle', desc: 'Your support network'      },
+  { id: 'sponsor',      label: 'Sponsor',        icon: 'person-add-outline',    route: '/(app)/sponsor',      desc: 'Connect with your sponsor' },
+  { id: 'meetings',     label: 'Meetings',       icon: 'calendar-outline',      route: '/(app)/meetings',     desc: 'Nearby AA/NA meetings'     },
+  { id: 'resource-hub', label: 'Resource Hub',   icon: 'library-outline',       route: '/(app)/resource-hub', desc: 'Articles & tools'          },
+  { id: 'find-users',   label: 'Find People',    icon: 'search-outline',        route: '/(app)/find-users',   desc: 'Connect with others'       },
+  { id: 'settings',     label: 'Settings',       icon: 'settings-outline',      route: '/(app)/settings',     desc: 'App preferences'           },
 ] as const;
 
 export default function AppsScreen() {

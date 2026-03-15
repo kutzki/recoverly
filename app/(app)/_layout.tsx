@@ -14,8 +14,8 @@ const LEFT_TABS  = [
   { name: 'apps',      icon: 'grid-outline',   activeIcon: 'grid'    as const },
 ];
 const RIGHT_TABS = [
-  { name: 'favorites', icon: 'heart-outline',  activeIcon: 'heart'   as const },
-  { name: 'profile',   icon: 'person-outline', activeIcon: 'person'  as const },
+  { name: 'journal', icon: 'book-outline',   activeIcon: 'book'    as const },
+  { name: 'profile', icon: 'person-outline', activeIcon: 'person'  as const },
 ];
 
 // ── Custom bottom tab bar ────────────────────────────────────────────────────
@@ -80,10 +80,13 @@ export default function AppLayout() {
       screenOptions={{ headerShown: false }}
     >
       {/* Visible tabs */}
-      <Tabs.Screen name="home"      />
-      <Tabs.Screen name="apps"      />
-      <Tabs.Screen name="favorites" />
-      <Tabs.Screen name="profile"   />
+      <Tabs.Screen name="home"    />
+      <Tabs.Screen name="apps"    />
+      <Tabs.Screen name="journal" />
+      <Tabs.Screen name="profile" />
+
+      {/* Hidden — not in tab bar */}
+      <Tabs.Screen name="favorites" options={{ href: null }} />
 
       {/* Hidden screens — accessible by push, not shown in tab bar */}
       <Tabs.Screen name="tracker"        options={{ href: null }} />
