@@ -140,31 +140,39 @@ export default function HomeScreen() {
         </View>
 
         {/* ── Daily Reminder / Check-in Card ─────────────────────────────── */}
-        <TouchableOpacity
-          style={styles.checkInCard}
-          activeOpacity={checkedInToday ? 1 : 0.92}
-          onPress={handleCheckIn}
-        >
-          {/* Small external link icon */}
-          <TouchableOpacity style={styles.cardArrow} onPress={() => router.push('/(app)/tracker' as any)} hitSlop={8}>
-            <Ionicons name="arrow-up-outline" size={14} color={Colors.textMuted} style={{ transform: [{ rotate: '45deg' }] }} />
+        {/* Wrapper so the thumbs-up image can sit outside the TouchableOpacity
+            (prevents it from fading with the card's activeOpacity) */}
+        <View style={styles.checkInCardContainer}>
+          <TouchableOpacity
+            style={styles.checkInCard}
+            activeOpacity={checkedInToday ? 1 : 0.92}
+            onPress={handleCheckIn}
+          >
+            {/* Small external link icon */}
+            <TouchableOpacity style={styles.cardArrow} onPress={() => router.push('/(app)/tracker' as any)} hitSlop={8}>
+              <Ionicons name="arrow-up-outline" size={14} color={Colors.textMuted} style={{ transform: [{ rotate: '45deg' }] }} />
+            </TouchableOpacity>
+
+            {/* Text content */}
+            <View style={styles.checkInTextCol}>
+              <Text style={styles.reminderLabel}>Daily Reminder</Text>
+              <Text style={styles.checkInHeading}>
+                {checkedInToday ? 'You checked in today! 🎉' : 'Have you checked in\nyet today?'}
+              </Text>
+              <Text style={styles.thisWeekLabel}>This week</Text>
+              <StreakDots streak={weeklyStreak} />
+            </View>
           </TouchableOpacity>
 
-          {/* Text content */}
-          <View style={styles.checkInTextCol}>
-            <Text style={styles.reminderLabel}>Daily Reminder</Text>
-            <Text style={styles.checkInHeading}>
-              {checkedInToday ? 'You checked in today! 🎉' : 'Have you checked in\nyet today?'}
-            </Text>
-            <Text style={styles.thisWeekLabel}>This week</Text>
-            <StreakDots streak={weeklyStreak} />
+          {/* 3D thumbs-up — absolutely positioned over card, no touch events */}
+          <View style={styles.thumbsUpImg} pointerEvents="none">
+            <Image
+              source={require('../../assets/images/thumbs-up.png')}
+              style={{ width: 140, height: 140 }}
+              resizeMode="contain"
+            />
           </View>
-
-          {/* Thumbs-up — right side, overlaps card bottom like Figma */}
-          <View style={styles.thumbsUpWrap} pointerEvents="none">
-            <Text style={styles.thumbsUp}>👍</Text>
-          </View>
-        </TouchableOpacity>
+        </View>
 
         {/* ── Upcoming Events ────────────────────────────────────────────── */}
         <View style={styles.sectionRow}>
@@ -321,12 +329,15 @@ const styles = StyleSheet.create({
   },
 
   // Daily reminder / check-in card
+  checkInCardContainer: {
+    marginBottom: 28,
+    // Height must be enough for the card + the thumb overflow
+  },
   checkInCard: {
     backgroundColor: Colors.checkInCard,
     borderRadius:    15,
     padding:         20,
-    paddingRight:    90,
-    marginBottom:    28,
+    paddingRight:    100,   // keep text from sitting behind the thumb image
     flexDirection:   'row',
     alignItems:      'center',
     minHeight:       150,
@@ -356,13 +367,10 @@ const styles = StyleSheet.create({
     color:         Colors.textMuted,
     letterSpacing: 0.5,
   },
-  thumbsUpWrap: {
-    position:   'absolute',
-    right:      -4,
-    bottom:     -8,
-  },
-  thumbsUp: {
-    fontSize: 90,
+  thumbsUpImg: {
+    position: 'absolute',
+    right:    -8,
+    bottom:   -12,
   },
 
   // Section header

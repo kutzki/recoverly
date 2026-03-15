@@ -1,17 +1,20 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { Tabs, router, usePathname } from 'expo-router';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 import { PanicOverlay, type PanicOverlayHandle } from '../../components/ui/PanicOverlay';
 
-// ── Tab definitions (4 real tabs + panic button in center) ───────────────────
+// ── Tab definitions ───────────────────────────────────────────────────────────
 
-const LEFT_TABS = [
+const LEFT_TABS  = [
   { name: 'home',    icon: 'home-outline',   activeIcon: 'home'   as const },
   { name: 'apps',    icon: 'grid-outline',   activeIcon: 'grid'   as const },
 ];
@@ -22,9 +25,13 @@ const RIGHT_TABS = [
 
 // ── Custom bottom tab bar ────────────────────────────────────────────────────
 
-type TabBarProps = BottomTabBarProps & { onPanic: () => void };
+type TabBarProps = BottomTabBarProps & {
+  onPanic:       () => void;
+  onPanicDrag:   (px: number) => void;
+  onPanicCancel: () => void;
+};
 
-function CustomTabBar({ state, navigation, onPanic }: TabBarProps) {
+function CustomTabBar({ state, navigation, onPanic, onPanicDrag, onPanicCancel }: TabBarProps) {
   const insets = useSafeAreaInsets();
 
   const renderTab = (item: { name: string; icon: string; activeIcon: string }) => {
@@ -46,27 +53,55 @@ function CustomTabBar({ state, navigation, onPanic }: TabBarProps) {
     );
   };
 
+  // Pan gesture: drag upward = slide the panic overlay into view
+  // Tap gesture: immediate activate (slide-up animation)
+  // Exclusive: pan takes priority when the finger moves; falls back to tap
+  const panGesture = Gesture.Pan()
+    .minDistance(8)
+    .onUpdate((e) => {
+      'worklet';
+      if (e.translationY < 0) {
+        runOnJS(onPanicDrag)(Math.abs(e.translationY));
+      }
+    })
+    .onEnd((e) => {
+      'worklet';
+      // Commit if dragged >80px up OR fast upward flick
+      if (e.translationY < -80 || e.velocityY < -400) {
+        runOnJS(onPanic)();
+      } else {
+        runOnJS(onPanicCancel)();
+      }
+    });
+
+  const tapGesture = Gesture.Tap()
+    .maxDuration(500)
+    .onEnd(() => {
+      'worklet';
+      runOnJS(onPanic)();
+    });
+
+  const panicGesture = Gesture.Exclusive(panGesture, tapGesture);
+
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       {LEFT_TABS.map(renderTab)}
 
-      {/* Panic Button — center badge with downward chevron tip */}
-      <TouchableOpacity
-        style={styles.panicWrapper}
-        activeOpacity={0.85}
-        onPress={onPanic}
-      >
-        <LinearGradient
-          colors={[Colors.primaryDark, Colors.primaryMid]}
-          style={styles.panicGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-        >
-          <Text style={styles.panicBang}>!</Text>
-        </LinearGradient>
-        <View style={styles.panicTip} />
-        <Text style={styles.panicLabel}>{'Panic\nButton'}</Text>
-      </TouchableOpacity>
+      {/* Panic Button — center, raised. GestureDetector handles both tap & pan. */}
+      <GestureDetector gesture={panicGesture}>
+        <View style={styles.panicWrapper}>
+          <LinearGradient
+            colors={[Colors.primaryDark, Colors.primaryMid]}
+            style={styles.panicGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+          >
+            <Text style={styles.panicBang}>!</Text>
+          </LinearGradient>
+          <View style={styles.panicTip} />
+          <Text style={styles.panicLabel}>{'Panic\nButton'}</Text>
+        </View>
+      </GestureDetector>
 
       {RIGHT_TABS.map(renderTab)}
     </View>
@@ -76,24 +111,49 @@ function CustomTabBar({ state, navigation, onPanic }: TabBarProps) {
 // ── Layout ───────────────────────────────────────────────────────────────────
 
 export default function AppLayout() {
-  const overlayRef = useRef<PanicOverlayHandle>(null);
-  const pathname   = usePathname();
+  const overlayRef  = useRef<PanicOverlayHandle>(null);
+  const sosOpenRef  = useRef(false);          // lock: true once SOS is open
+  const pathname    = usePathname();
 
-  // replace (not push) so SOS never stacks on top of itself in the history
+  // When the user navigates away from SOS (back button), unlock the guard
+  useEffect(() => {
+    if (!pathname.includes('/sos')) {
+      sosOpenRef.current = false;
+    }
+  }, [pathname]);
+
+  // Navigate using replace so SOS can never stack on itself
   const handleNavigateToSOS = useCallback(() => {
+    sosOpenRef.current = true;
     router.replace('/(app)/sos');
   }, []);
 
+  // Guard: if already on SOS (any sub-screen) do nothing
   const handlePanic = useCallback(() => {
-    // Guard: if already on any SOS screen, don't open another one
-    if (pathname.includes('/sos')) return;
+    if (sosOpenRef.current || pathname.includes('/sos')) return;
     overlayRef.current?.activate();
   }, [pathname]);
+
+  const handlePanicDrag = useCallback((px: number) => {
+    if (sosOpenRef.current || pathname.includes('/sos')) return;
+    overlayRef.current?.drag(px);
+  }, [pathname]);
+
+  const handlePanicCancel = useCallback(() => {
+    overlayRef.current?.cancelDrag();
+  }, []);
 
   return (
     <View style={styles.root}>
       <Tabs
-        tabBar={(props) => <CustomTabBar {...props} onPanic={handlePanic} />}
+        tabBar={(props) => (
+          <CustomTabBar
+            {...props}
+            onPanic={handlePanic}
+            onPanicDrag={handlePanicDrag}
+            onPanicCancel={handlePanicCancel}
+          />
+        )}
         screenOptions={{ headerShown: false }}
       >
         {/* Visible tabs */}
