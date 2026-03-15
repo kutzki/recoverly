@@ -9,10 +9,13 @@
 ## Decisions
 - Removed `textTransform: 'capitalize'` from SobrietyCounter label entirely (cleaner than setting 'none')
 - Used `dotCol` wrapper View per dot to decouple column gap (3px) from row gap (5px) in StreakDots
+- CompanionFAB accepts bottomOffset prop (caller provides insets context) — keeps component reusable
+- FAB placed after CheckInModal in JSX for correct z-order without explicit zIndex
+- companion registered as hidden tab (href: null) — consistent with call/sos pattern in _layout.tsx
 
 ## Last Session
-- Stopped at: Completed 01-dashboard-polish 01-02-PLAN.md
-- 2026-03-15T02:40:34Z
+- Stopped at: Completed 01-dashboard-polish 01-01-PLAN.md
+- 2026-03-15T05:59:54Z
 
 ## Phase Status
 

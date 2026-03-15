@@ -6,7 +6,7 @@ Polish every existing screen to Figma-pixel-perfect perfection, then build the A
 
 ## Phases
 
-- [ ] **Phase 1: Dashboard Polish** - Pixel-perfect home screen matching Figma node 0:1940, functional check-in flow
+- [x] **Phase 1: Dashboard Polish** - Pixel-perfect home screen matching Figma node 0:1940, functional check-in flow (completed 2026-03-15)
 - [ ] **Phase 2: SOS Polish + Data** - All 6 crisis screens Figma-matched, incidents logged to Supabase
 - [ ] **Phase 3: Tracker** - Real check-in history from Supabase, milestone detection
 - [ ] **Phase 4: Goals** - CRUD goals with progress tracking
@@ -139,7 +139,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Dashboard Polish | 1/2 | In Progress|  |
+| 1. Dashboard Polish | 2/2 | Complete   | 2026-03-15 |
 | 2. SOS Polish + Data | 0/TBD | Not started | - |
 | 3. Tracker | 0/TBD | Not started | - |
 | 4. Goals | 0/TBD | Not started | - |
