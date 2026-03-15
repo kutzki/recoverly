@@ -93,12 +93,12 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.root}>
-      {/* ── Subtle purple gradient overlay (top-left, 10% opacity) ── */}
+      {/* ── Full-screen background gradient (matches Figma gradient square) ── */}
       <LinearGradient
-        colors={['rgba(171,49,240,0.10)', 'rgba(204,115,254,0.05)', 'transparent']}
-        style={styles.bgOverlay}
+        colors={['rgba(171,49,240,0.13)', 'rgba(204,115,254,0.07)', 'rgba(200,242,255,0.08)', 'transparent']}
+        style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        end={{ x: 1, y: 0.7 }}
         pointerEvents="none"
       />
 
@@ -158,8 +158,10 @@ export default function HomeScreen() {
             <StreakDots streak={weeklyStreak} />
           </View>
 
-          {/* Thumbs-up 3D emoji */}
-          <Text style={styles.thumbsUp}>👍</Text>
+          {/* Thumbs-up — right side, overlaps card bottom like Figma */}
+          <View style={styles.thumbsUpWrap} pointerEvents="none">
+            <Text style={styles.thumbsUp}>👍</Text>
+          </View>
         </TouchableOpacity>
 
         {/* ── Upcoming Events ────────────────────────────────────────────── */}
@@ -315,10 +317,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.checkInCard,
     borderRadius:    15,
     padding:         20,
-    marginBottom:    20,
+    paddingRight:    90,
+    marginBottom:    28,
     flexDirection:   'row',
     alignItems:      'center',
-    overflow:        'hidden',
+    minHeight:       150,
   },
   checkInTextCol: { flex: 1, gap: 6 },
   cardArrow: {
@@ -345,10 +348,13 @@ const styles = StyleSheet.create({
     color:         Colors.textMuted,
     letterSpacing: 0.5,
   },
+  thumbsUpWrap: {
+    position:   'absolute',
+    right:      -4,
+    bottom:     -8,
+  },
   thumbsUp: {
-    fontSize:   60,
-    marginLeft: 12,
-    marginTop:  12,
+    fontSize: 90,
   },
 
   // Section header

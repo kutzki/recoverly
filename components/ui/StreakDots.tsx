@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '../../constants/colors';
 
 type Props = {
@@ -12,7 +12,9 @@ export function StreakDots({ streak }: Props) {
         <View
           key={i}
           style={[styles.dot, done ? styles.dotFilled : styles.dotEmpty]}
-        />
+        >
+          {done && <Text style={styles.check}>✓</Text>}
+        </View>
       ))}
     </View>
   );
@@ -29,13 +31,20 @@ const styles = StyleSheet.create({
     width: DOT,
     height: DOT,
     borderRadius: DOT / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dotFilled: {
     backgroundColor: Colors.primary,
   },
   dotEmpty: {
-    backgroundColor: '#E0D0F0',
-    borderWidth: 1,
-    borderColor: '#D0C0E8',
+    backgroundColor: 'rgba(183,64,255,0.12)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(183,64,255,0.25)',
+  },
+  check: {
+    color: '#fff',
+    fontSize: 9,
+    lineHeight: 11,
   },
 });

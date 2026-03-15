@@ -46,7 +46,7 @@ export function SobrietyCounter({ daysSober, size = 230 }: Props) {
         {/* Track */}
         <Path
           d={arcPath(cx, cy, r, startAngle, endAngle)}
-          stroke={Colors.arcTrack}
+          stroke={Colors.arcBlue}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           fill="none"
