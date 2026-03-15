@@ -67,7 +67,7 @@ export function SobrietyCounter({ daysSober, size = 230 }: Props) {
       {/* Centre text */}
       <View style={[styles.center, { top: size * 0.24 }]}>
         <Text style={styles.days}>{daysSober}</Text>
-        <Text style={styles.label}>Days Sober</Text>
+        <Text style={styles.label}>days sober</Text>
       </View>
     </View>
   );
@@ -88,6 +88,5 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.poppins,
     fontSize: 20,
     color: Colors.text,
-    textTransform: 'capitalize',
   },
 });
