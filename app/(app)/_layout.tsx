@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react';
-import { Tabs, router } from 'expo-router';
+import { Tabs, router, usePathname } from 'expo-router';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -77,15 +77,18 @@ function CustomTabBar({ state, navigation, onPanic }: TabBarProps) {
 
 export default function AppLayout() {
   const overlayRef = useRef<PanicOverlayHandle>(null);
+  const pathname   = usePathname();
 
-  // Navigate to SOS using replace so the back stack doesn't stack SOS screens
+  // replace (not push) so SOS never stacks on top of itself in the history
   const handleNavigateToSOS = useCallback(() => {
-    router.push('/(app)/sos');
+    router.replace('/(app)/sos');
   }, []);
 
   const handlePanic = useCallback(() => {
+    // Guard: if already on any SOS screen, don't open another one
+    if (pathname.includes('/sos')) return;
     overlayRef.current?.activate();
-  }, []);
+  }, [pathname]);
 
   return (
     <View style={styles.root}>

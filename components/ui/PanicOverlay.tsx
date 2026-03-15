@@ -1,5 +1,5 @@
-import { useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { useRef, useImperativeHandle, forwardRef, useCallback, useState } from 'react';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,8 +11,6 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../constants/colors';
 
-const SCREEN_H = Dimensions.get('window').height;
-
 export type PanicOverlayHandle = {
   activate: () => void;
 };
@@ -21,50 +19,60 @@ type Props = {
   onNavigate: () => void;
 };
 
-type Phase = 'idle' | 'sliding' | 'visible' | 'fading';
+type Phase = 'idle' | 'sliding' | 'navigated' | 'fading';
 
-// Full-screen purple overlay that:
-//   1. Slides up from bottom (380ms ease-out)  → calls onNavigate
-//   2. Fades out (280ms) while SOS screen renders beneath it
-// Double-tap during slide: skips to full-screen instantly, then navigates
+// Full-screen purple overlay:
+//   tap  → slides up from bottom (400ms ease-out) → calls onNavigate → fades out
+//   tap during slide → snaps to full-screen instantly → calls onNavigate → fades out
+//
+// pointerEvents='box-only' while active so nothing beneath can be tapped through it.
 export const PanicOverlay = forwardRef<PanicOverlayHandle, Props>(
   function PanicOverlay({ onNavigate }, ref) {
-    const translateY = useSharedValue(SCREEN_H);
+    const { height: windowH } = useWindowDimensions();
+    // Extra 200px buffer covers Android nav bar / status bar beyond window height
+    const OFFSCREEN = windowH + 200;
+
+    const translateY = useSharedValue(OFFSCREEN);
     const opacity    = useSharedValue(1);
     const phase      = useRef<Phase>('idle');
     const didNav     = useRef(false);
 
-    // ── reset to hidden state ─────────────────────────────────────────────
+    // Drives pointerEvents — true while sliding/navigating/fading
+    const [blocking, setBlocking] = useState(false);
+
+    // ── Reset to fully-hidden, non-interactive state ──────────────────────
     const reset = useCallback(() => {
-      cancelAnimation(translateY);
-      cancelAnimation(opacity);
-      translateY.value = SCREEN_H;
-      opacity.value    = 1;
       phase.current    = 'idle';
       didNav.current   = false;
-    }, [translateY, opacity]);
+      translateY.value = OFFSCREEN;
+      opacity.value    = 1;
+      setBlocking(false);
+    }, [translateY, opacity, OFFSCREEN]);
 
-    // ── navigate + fade out the overlay ──────────────────────────────────
+    // ── Navigate then fade the overlay away ──────────────────────────────
     const doNavigate = useCallback(() => {
       if (didNav.current) return;
       didNav.current = true;
-      phase.current  = 'fading';
+      phase.current  = 'navigated';
+
+      // Fire navigation — SOS screen mounts beneath the still-visible overlay
       onNavigate();
-      // Small delay so the SOS screen has a frame to mount before we fade
+
+      // Brief pause so the SOS screen has a frame to render, then fade out overlay
       setTimeout(() => {
-        opacity.value = withTiming(0, { duration: 280 }, () => {
+        phase.current = 'fading';
+        opacity.value = withTiming(0, { duration: 300 }, () => {
           runOnJS(reset)();
         });
       }, 80);
     }, [onNavigate, opacity, reset]);
 
-    // ── public: trigger the panic animation ──────────────────────────────
+    // ── Public: trigger the animation ────────────────────────────────────
     const activate = useCallback(() => {
-      // Already navigating/fading — ignore extra taps
-      if (phase.current === 'fading' || phase.current === 'visible') return;
+      if (phase.current === 'navigated' || phase.current === 'fading') return;
 
+      // Double-tap during slide → snap to top instantly then navigate
       if (phase.current === 'sliding') {
-        // Double-tap: jump overlay to full-screen immediately, then navigate
         cancelAnimation(translateY);
         translateY.value = withTiming(0, { duration: 60 }, () => {
           runOnJS(doNavigate)();
@@ -72,13 +80,14 @@ export const PanicOverlay = forwardRef<PanicOverlayHandle, Props>(
         return;
       }
 
-      // idle → slide up
-      phase.current    = 'sliding';
+      // idle → slide up from bottom
+      phase.current = 'sliding';
+      setBlocking(true); // block touches through the overlay immediately
+
       translateY.value = withTiming(0, {
-        duration: 380,
+        duration: 400,
         easing:   Easing.out(Easing.cubic),
       }, () => {
-        phase.current = 'visible';
         runOnJS(doNavigate)();
       });
     }, [translateY, doNavigate]);
@@ -91,7 +100,11 @@ export const PanicOverlay = forwardRef<PanicOverlayHandle, Props>(
     }));
 
     return (
-      <Animated.View style={[styles.overlay, animStyle]} pointerEvents="none">
+      <Animated.View
+        style={[styles.overlay, animStyle]}
+        // box-only = overlay intercepts touches while active; none = invisible & passthrough when idle
+        pointerEvents={blocking ? 'box-only' : 'none'}
+      >
         <LinearGradient
           colors={[Colors.primaryDark, Colors.primaryMid]}
           style={StyleSheet.absoluteFill}
