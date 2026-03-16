@@ -1,4 +1,5 @@
 import { Linking } from 'react-native';
+import { router } from 'expo-router';
 import { SOSResponseScreen } from '../../../components/sos/SOSResponseScreen';
 import { Colors } from '../../../constants/colors';
 
@@ -31,7 +32,7 @@ export default function JustRelapsedScreen() {
           id: 'meeting',
           label: 'Find a meeting today',
           body: 'Getting to a meeting — even if it\'s online — today can make a significant difference in what happens next.',
-          cta: { label: '📍 Find a Meeting', action: () => Linking.openURL('https://www.aa.org/find-aa') },
+          cta: { label: '📍 Find a Meeting', action: () => router.push('/(app)/meetings' as any) },
         },
         {
           id: 'reset',

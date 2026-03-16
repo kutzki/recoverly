@@ -1,12 +1,13 @@
 import { Linking } from 'react-native';
 import { SOSResponseScreen } from '../../../components/sos/SOSResponseScreen';
+import { Colors } from '../../../constants/colors';
 
 export default function SelfHarmScreen() {
   return (
     <SOSResponseScreen
       incidentType="self_harm"
       headerTitle="You Are Not Alone"
-      headerColor="#FF3B30"
+      headerColor={Colors.sosRedBright}
       headerEmoji="🆘"
       affirmation="These feelings are real and overwhelming, but they are not permanent. Help is available right now."
       steps={[

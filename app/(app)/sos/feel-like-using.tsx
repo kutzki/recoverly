@@ -1,4 +1,5 @@
 import { Linking } from 'react-native';
+import { router } from 'expo-router';
 import { SOSResponseScreen } from '../../../components/sos/SOSResponseScreen';
 import { Colors } from '../../../constants/colors';
 
@@ -20,7 +21,7 @@ export default function FeelLikeUsingScreen() {
           id: 'call_sponsor',
           label: 'Call your sponsor NOW',
           body: 'This is exactly the moment your sponsor is there for. Pick up the phone and call them immediately.',
-          cta: { label: '📞 Open Sponsor Screen', action: () => {} },
+          cta: { label: '📞 Open Sponsor Screen', action: () => router.push('/(app)/sponsor' as any) },
         },
         {
           id: 'urge_surf',

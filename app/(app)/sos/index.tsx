@@ -34,7 +34,7 @@ const CRISIS_OPTIONS = [
     id: 'self_harm',
     label: "I'm thinking about self-harm",
     emoji: '🆘',
-    color: '#FF3B30',
+    color: Colors.sosRedBright,
     route: '/(app)/sos/self-harm',
   },
   {
