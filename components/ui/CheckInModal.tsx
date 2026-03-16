@@ -58,7 +58,7 @@ export function CheckInModal({ visible, onClose, onConfirm }: Props) {
 
           <KeyboardAvoidingView behavior="padding" style={styles.kavWrapper}>
             <Animated.View
-              entering={SlideInDown.springify().damping(18)}
+              entering={SlideInDown.duration(250)}
               exiting={SlideOutDown.duration(200)}
               style={styles.sheet}
             >

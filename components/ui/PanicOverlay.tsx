@@ -1,5 +1,5 @@
 import { useRef, useImperativeHandle, forwardRef, useCallback, useState } from 'react';
-import { StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -8,56 +8,50 @@ import Animated, {
   runOnJS,
   Easing,
   cancelAnimation,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../constants/colors';
 
 export type PanicOverlayHandle = {
-  /** Programmatic tap: slide up from bottom (400ms) then navigate */
+  /** Tap: slide up from current position (or offscreen) */
   activate: () => void;
-  /** Live drag from gesture: moves overlay to follow finger (no animation) */
-  drag: (distancePx: number) => void;
-  /** Gesture released too early: spring back to offscreen */
+  /** Drag committed (threshold passed): snap to top + navigate */
+  commitDrag: () => void;
+  /** Drag cancelled (released early): spring back down */
   cancelDrag: () => void;
 };
 
 type Props = {
+  /** Shared value owned by parent — updated directly by gesture worklet */
+  translateY: SharedValue<number>;
+  offscreen: number;
   onNavigate: () => void;
 };
 
 type Phase = 'idle' | 'sliding' | 'navigated' | 'fading';
 
 export const PanicOverlay = forwardRef<PanicOverlayHandle, Props>(
-  function PanicOverlay({ onNavigate }, ref) {
-    const { height: windowH } = useWindowDimensions();
-    // Extra buffer covers Android nav bar / status bar area
-    const OFFSCREEN = windowH + 200;
-
-    const translateY = useSharedValue(OFFSCREEN);
-    const opacity    = useSharedValue(1);
-    const phase      = useRef<Phase>('idle');
-    const didNav     = useRef(false);
-
+  function PanicOverlay({ translateY, offscreen, onNavigate }, ref) {
+    const opacity  = useSharedValue(1);
+    const phase    = useRef<Phase>('idle');
+    const didNav   = useRef(false);
     const [blocking, setBlocking] = useState(false);
 
-    // ── Reset to fully-hidden, non-interactive state ──────────────────────
     const reset = useCallback(() => {
       phase.current    = 'idle';
       didNav.current   = false;
-      translateY.value = OFFSCREEN;
+      translateY.value = offscreen;
       opacity.value    = 1;
       setBlocking(false);
-    }, [translateY, opacity, OFFSCREEN]);
+    }, [translateY, opacity, offscreen]);
 
-    // ── Navigate then fade the overlay away ──────────────────────────────
     const doNavigate = useCallback(() => {
       if (didNav.current) return;
       didNav.current = true;
       phase.current  = 'navigated';
-
       onNavigate();
-
-      // Brief pause so the SOS screen has a frame to render, then fade out
+      // Short pause so SOS screen has a frame to mount, then fade overlay away
       setTimeout(() => {
         phase.current = 'fading';
         opacity.value = withTiming(0, { duration: 300 }, () => {
@@ -66,11 +60,11 @@ export const PanicOverlay = forwardRef<PanicOverlayHandle, Props>(
       }, 80);
     }, [onNavigate, opacity, reset]);
 
-    // ── Programmatic tap: slide up from bottom ────────────────────────────
+    // Tap: animate from wherever translateY is now → 0
     const activate = useCallback(() => {
       if (phase.current === 'navigated' || phase.current === 'fading') return;
 
-      // Double-tap during slide → snap to top instantly then navigate
+      // Second tap during slide → snap immediately
       if (phase.current === 'sliding') {
         cancelAnimation(translateY);
         translateY.value = withTiming(0, { duration: 60 }, () => {
@@ -81,7 +75,6 @@ export const PanicOverlay = forwardRef<PanicOverlayHandle, Props>(
 
       phase.current = 'sliding';
       setBlocking(true);
-
       translateY.value = withTiming(0, {
         duration: 400,
         easing:   Easing.out(Easing.cubic),
@@ -90,33 +83,34 @@ export const PanicOverlay = forwardRef<PanicOverlayHandle, Props>(
       });
     }, [translateY, doNavigate]);
 
-    // ── Live drag: follow finger position ────────────────────────────────
-    const drag = useCallback((distancePx: number) => {
+    // Drag committed: snap remaining distance to top
+    const commitDrag = useCallback(() => {
       if (phase.current === 'navigated' || phase.current === 'fading') return;
-      if (phase.current === 'idle') {
-        phase.current = 'sliding';
-        setBlocking(true);
-      }
-      // translateY=OFFSCREEN is fully hidden; translateY=0 is fully visible
-      // As distancePx grows (finger moving up), overlay slides into view
-      const next = Math.max(0, OFFSCREEN - distancePx * 2.5);
-      translateY.value = next;
-    }, [translateY, OFFSCREEN]);
+      phase.current = 'sliding';
+      setBlocking(true);
+      cancelAnimation(translateY);
+      translateY.value = withTiming(0, {
+        duration: 200,
+        easing:   Easing.out(Easing.quad),
+      }, () => {
+        runOnJS(doNavigate)();
+      });
+    }, [translateY, doNavigate]);
 
-    // ── Cancel drag: spring back to offscreen ─────────────────────────────
+    // Drag cancelled: spring back offscreen
     const cancelDrag = useCallback(() => {
-      if (phase.current !== 'sliding') return;
+      if (phase.current === 'navigated' || phase.current === 'fading') return;
       phase.current = 'idle';
       setBlocking(false);
       cancelAnimation(translateY);
-      translateY.value = withSpring(OFFSCREEN, {
+      translateY.value = withSpring(offscreen, {
         damping:   25,
         stiffness: 260,
         mass:      0.8,
       });
-    }, [translateY, OFFSCREEN]);
+    }, [translateY, offscreen]);
 
-    useImperativeHandle(ref, () => ({ activate, drag, cancelDrag }));
+    useImperativeHandle(ref, () => ({ activate, commitDrag, cancelDrag }));
 
     const animStyle = useAnimatedStyle(() => ({
       transform: [{ translateY: translateY.value }],

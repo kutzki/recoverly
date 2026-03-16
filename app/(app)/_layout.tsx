@@ -1,37 +1,45 @@
 import { useRef, useCallback, useEffect } from 'react';
 import { Tabs, router, usePathname } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View, Text, StyleSheet, TouchableOpacity, useWindowDimensions,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import { useSharedValue, runOnJS, type SharedValue } from 'react-native-reanimated';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 import { PanicOverlay, type PanicOverlayHandle } from '../../components/ui/PanicOverlay';
 
 // ── Tab definitions ───────────────────────────────────────────────────────────
 
-const LEFT_TABS  = [
-  { name: 'home',    icon: 'home-outline',   activeIcon: 'home'   as const },
-  { name: 'apps',    icon: 'grid-outline',   activeIcon: 'grid'   as const },
+const LEFT_TABS = [
+  { name: 'home',    icon: 'home-outline',  activeIcon: 'home'   as const },
+  { name: 'apps',    icon: 'grid-outline',  activeIcon: 'grid'   as const },
 ];
 const RIGHT_TABS = [
-  { name: 'journal', icon: 'heart-outline',  activeIcon: 'heart'  as const },
-  { name: 'profile', icon: 'person-outline', activeIcon: 'person' as const },
+  { name: 'journal', icon: 'heart-outline', activeIcon: 'heart'  as const },
+  { name: 'profile', icon: 'person-outline',activeIcon: 'person' as const },
 ];
 
 // ── Custom bottom tab bar ────────────────────────────────────────────────────
 
 type TabBarProps = BottomTabBarProps & {
-  onPanic:       () => void;
-  onPanicDrag:   (px: number) => void;
-  onPanicCancel: () => void;
+  onPanic:         () => void;
+  onPanicCommit:   () => void;
+  onPanicCancel:   () => void;
+  panicTranslateY: SharedValue<number>;
+  offscreen:       number;
+  canPanic:        SharedValue<number>;
 };
 
-function CustomTabBar({ state, navigation, onPanic, onPanicDrag, onPanicCancel }: TabBarProps) {
+function CustomTabBar({
+  state, navigation,
+  onPanic, onPanicCommit, onPanicCancel,
+  panicTranslateY, offscreen, canPanic,
+}: TabBarProps) {
   const insets = useSafeAreaInsets();
 
   const renderTab = (item: { name: string; icon: string; activeIcon: string }) => {
@@ -53,31 +61,32 @@ function CustomTabBar({ state, navigation, onPanic, onPanicDrag, onPanicCancel }
     );
   };
 
-  // Pan gesture: drag upward = slide the panic overlay into view
-  // Tap gesture: immediate activate (slide-up animation)
-  // Exclusive: pan takes priority when the finger moves; falls back to tap
+  // Pan: finger drags upward → overlay follows in real-time (pure worklet, no JS hop)
   const panGesture = Gesture.Pan()
     .minDistance(8)
     .onUpdate((e) => {
       'worklet';
+      if (canPanic.value === 0) return;
       if (e.translationY < 0) {
-        runOnJS(onPanicDrag)(Math.abs(e.translationY));
+        panicTranslateY.value = Math.max(0, offscreen - Math.abs(e.translationY) * 2.5);
       }
     })
     .onEnd((e) => {
       'worklet';
-      // Commit if dragged >80px up OR fast upward flick
+      if (canPanic.value === 0) return;
       if (e.translationY < -80 || e.velocityY < -400) {
-        runOnJS(onPanic)();
+        runOnJS(onPanicCommit)();
       } else {
         runOnJS(onPanicCancel)();
       }
     });
 
+  // Tap: immediate slide-up animation
   const tapGesture = Gesture.Tap()
     .maxDuration(500)
     .onEnd(() => {
       'worklet';
+      if (canPanic.value === 0) return;
       runOnJS(onPanic)();
     });
 
@@ -87,7 +96,7 @@ function CustomTabBar({ state, navigation, onPanic, onPanicDrag, onPanicCancel }
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       {LEFT_TABS.map(renderTab)}
 
-      {/* Panic Button — center, raised. GestureDetector handles both tap & pan. */}
+      {/* Panic Button — center, raised above bar */}
       <GestureDetector gesture={panicGesture}>
         <View style={styles.panicWrapper}>
           <LinearGradient
@@ -98,7 +107,6 @@ function CustomTabBar({ state, navigation, onPanic, onPanicDrag, onPanicCancel }
           >
             <Text style={styles.panicBang}>!</Text>
           </LinearGradient>
-          <View style={styles.panicTip} />
           <Text style={styles.panicLabel}>{'Panic\nButton'}</Text>
         </View>
       </GestureDetector>
@@ -111,34 +119,43 @@ function CustomTabBar({ state, navigation, onPanic, onPanicDrag, onPanicCancel }
 // ── Layout ───────────────────────────────────────────────────────────────────
 
 export default function AppLayout() {
-  const overlayRef  = useRef<PanicOverlayHandle>(null);
-  const sosOpenRef  = useRef(false);          // lock: true once SOS is open
-  const pathname    = usePathname();
+  const { height: windowH } = useWindowDimensions();
+  const OFFSCREEN = windowH + 200;
 
-  // When the user navigates away from SOS (back button), unlock the guard
+  const overlayRef      = useRef<PanicOverlayHandle>(null);
+  const sosOpenRef      = useRef(false);
+  const pathname        = usePathname();
+
+  // Shared values owned here — gesture worklet updates them directly
+  const panicTranslateY = useSharedValue(OFFSCREEN);
+  const canPanic        = useSharedValue(1); // 1=allowed, 0=blocked (on SOS)
+
+  // Keep canPanic in sync with route; also reset sosOpenRef on leaving SOS
   useEffect(() => {
-    if (!pathname.includes('/sos')) {
-      sosOpenRef.current = false;
-    }
-  }, [pathname]);
+    const onSOS = pathname.includes('/sos');
+    canPanic.value    = onSOS ? 0 : 1;
+    sosOpenRef.current = onSOS;
+  }, [pathname, canPanic]);
 
-  // Navigate using replace so SOS can never stack on itself
   const handleNavigateToSOS = useCallback(() => {
     sosOpenRef.current = true;
+    canPanic.value     = 0;
     router.replace('/(app)/sos');
+  }, [canPanic]);
+
+  // Tap → slide-up animation then navigate
+  const handlePanic = useCallback(() => {
+    if (sosOpenRef.current) return;
+    overlayRef.current?.activate();
   }, []);
 
-  // Guard: if already on SOS (any sub-screen) do nothing
-  const handlePanic = useCallback(() => {
-    if (sosOpenRef.current || pathname.includes('/sos')) return;
-    overlayRef.current?.activate();
-  }, [pathname]);
+  // Drag past threshold → snap to top + navigate
+  const handlePanicCommit = useCallback(() => {
+    if (sosOpenRef.current) return;
+    overlayRef.current?.commitDrag();
+  }, []);
 
-  const handlePanicDrag = useCallback((px: number) => {
-    if (sosOpenRef.current || pathname.includes('/sos')) return;
-    overlayRef.current?.drag(px);
-  }, [pathname]);
-
+  // Drag released too early → spring back
   const handlePanicCancel = useCallback(() => {
     overlayRef.current?.cancelDrag();
   }, []);
@@ -150,8 +167,11 @@ export default function AppLayout() {
           <CustomTabBar
             {...props}
             onPanic={handlePanic}
-            onPanicDrag={handlePanicDrag}
+            onPanicCommit={handlePanicCommit}
             onPanicCancel={handlePanicCancel}
+            panicTranslateY={panicTranslateY}
+            offscreen={OFFSCREEN}
+            canPanic={canPanic}
           />
         )}
         screenOptions={{ headerShown: false }}
@@ -162,10 +182,8 @@ export default function AppLayout() {
         <Tabs.Screen name="journal" />
         <Tabs.Screen name="profile" />
 
-        {/* Hidden — not in tab bar */}
-        <Tabs.Screen name="favorites" options={{ href: null }} />
-
-        {/* Hidden screens — accessible by push, not shown in tab bar */}
+        {/* Hidden screens */}
+        <Tabs.Screen name="favorites"      options={{ href: null }} />
         <Tabs.Screen name="tracker"        options={{ href: null }} />
         <Tabs.Screen name="goals"          options={{ href: null }} />
         <Tabs.Screen name="edit-profile"   options={{ href: null }} />
@@ -185,8 +203,13 @@ export default function AppLayout() {
         <Tabs.Screen name="companion"      options={{ href: null }} />
       </Tabs>
 
-      {/* Full-screen panic overlay — slides up over everything including tab bar */}
-      <PanicOverlay ref={overlayRef} onNavigate={handleNavigateToSOS} />
+      {/* Full-screen panic overlay — slides over everything including tab bar */}
+      <PanicOverlay
+        ref={overlayRef}
+        translateY={panicTranslateY}
+        offscreen={OFFSCREEN}
+        onNavigate={handleNavigateToSOS}
+      />
     </View>
   );
 }
@@ -215,35 +238,22 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
 
-  // Panic Button
+  // Panic Button — pill raised above tab bar (no triangle)
   panicWrapper: {
     flex:       1,
     alignItems: 'center',
-    marginTop:  -2,
+    marginTop:  -22,
   },
   panicGradient: {
-    width:                   100,
-    height:                  30,
-    borderTopLeftRadius:     8,
-    borderTopRightRadius:    8,
-    borderBottomLeftRadius:  0,
-    borderBottomRightRadius: 0,
-    alignItems:              'center',
-    justifyContent:          'center',
-  },
-  panicTip: {
-    width:            0,
-    height:           0,
-    borderLeftWidth:  18,
-    borderRightWidth: 18,
-    borderTopWidth:   13,
-    borderLeftColor:  'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor:   Colors.primaryMid,
+    width:        125,
+    height:       34,
+    borderRadius: 4,
+    alignItems:   'center',
+    justifyContent: 'center',
   },
   panicBang: {
     color:      Colors.white,
-    fontSize:   15,
+    fontSize:   16,
     fontFamily: Fonts.poppinsBold,
   },
   panicLabel: {
@@ -251,7 +261,7 @@ const styles = StyleSheet.create({
     fontSize:   10,
     color:      '#9d9d9d',
     textAlign:  'center',
-    marginTop:  3,
+    marginTop:  4,
     lineHeight: 13,
   },
 });
