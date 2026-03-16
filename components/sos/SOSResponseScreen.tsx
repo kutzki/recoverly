@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,19 +30,44 @@ export function SOSResponseScreen({ incidentType, headerTitle, headerColor, head
   const user      = useAuthStore((s) => s.user);
   const [done, setDone] = useState<Record<string, boolean>>({});
 
+  const incidentIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    async function logOpen() {
+      try {
+        const { data } = await supabase
+          .from('crisis_incidents')
+          .insert({ user_id: user!.id, incident_type: incidentType, actions_completed: [] })
+          .select('id')
+          .single();
+        if (!cancelled && data) incidentIdRef.current = data.id;
+      } catch { /* non-blocking */ }
+    }
+    logOpen();
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function logCTAAction(actionId: string) {
+    if (!incidentIdRef.current) return;
+    try {
+      const { data: existing } = await supabase
+        .from('crisis_incidents')
+        .select('actions_completed')
+        .eq('id', incidentIdRef.current)
+        .single();
+      const updated = [...(existing?.actions_completed ?? []), actionId];
+      await supabase
+        .from('crisis_incidents')
+        .update({ actions_completed: updated })
+        .eq('id', incidentIdRef.current);
+    } catch { /* non-blocking */ }
+  }
+
   const toggleStep = (id: string) => setDone((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  const handleFinish = async () => {
-    const actionsCompleted = Object.entries(done).filter(([, v]) => v).map(([k]) => k);
-    if (user?.id) {
-      try {
-        await supabase.from('crisis_incidents').insert({
-          user_id: user.id,
-          incident_type: incidentType,
-          actions_completed: actionsCompleted,
-        });
-      } catch { /* ignore — don't block UX */ }
-    }
+  const handleFinish = () => {
     Alert.alert(
       'You did it 💪',
       "You just survived a tough moment. Every step you took matters. You're stronger than you know.",
@@ -89,7 +114,10 @@ export function SOSResponseScreen({ incidentType, headerTitle, headerColor, head
               <Text style={[styles.stepLabel, done[step.id] && styles.stepLabelDone]}>{step.label}</Text>
               <Text style={styles.stepText}>{step.body}</Text>
               {step.cta && !done[step.id] && (
-                <TouchableOpacity style={styles.ctaBtn} onPress={step.cta.action}>
+                <TouchableOpacity style={styles.ctaBtn} onPress={() => {
+                  logCTAAction(step.id);
+                  step.cta!.action();
+                }}>
                   <Text style={styles.ctaText}>{step.cta.label}</Text>
                 </TouchableOpacity>
               )}
