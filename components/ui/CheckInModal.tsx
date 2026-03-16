@@ -4,7 +4,7 @@ import {
   KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard,
   ActivityIndicator,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
@@ -58,8 +58,8 @@ export function CheckInModal({ visible, onClose, onConfirm }: Props) {
 
           <KeyboardAvoidingView behavior="padding" style={styles.kavWrapper}>
             <Animated.View
-              entering={SlideInDown.duration(250)}
-              exiting={SlideOutDown.duration(200)}
+              entering={FadeIn.duration(200)}
+              exiting={FadeOut.duration(150)}
               style={styles.sheet}
             >
               {/* Handle */}
