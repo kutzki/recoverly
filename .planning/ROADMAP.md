@@ -6,7 +6,7 @@ Polish every existing screen to Figma-pixel-perfect perfection, then build the A
 
 ## Phases
 
-- [x] **Phase 1: Dashboard Polish** - Pixel-perfect home screen matching Figma node 0:1940, functional check-in flow (completed 2026-03-15)
+- [x] **Phase 1: Dashboard Polish** - Pixel-perfect home screen matching Figma node 0:1940, functional check-in flow (completed 2026-03-15)
 - [ ] **Phase 2: SOS Polish + Data** - All 6 crisis screens Figma-matched, incidents logged to Supabase
 - [ ] **Phase 3: Tracker** - Real check-in history from Supabase, milestone detection
 - [ ] **Phase 4: Goals** - CRUD goals with progress tracking
@@ -43,7 +43,11 @@ Plans:
   2. Opening a crisis sub-screen writes a row to crisis_incidents in Supabase
   3. Tapping a CTA (call sponsor, find meeting) logs to actions_completed
   4. Crisis history screen shows real Supabase data
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Data/logic fixes: open-logging, CTA-tap logging, broken CTAs, inline color, crisis-history wiring
+- [ ] 02-02-PLAN.md — Figma pixel polish for all 6 SOS screens + human verification checkpoint
 
 ### Phase 3: Tracker
 **Goal**: Tracker screen is accurate and data-driven. Real check-in history, live streak, milestone celebrations.
@@ -140,7 +144,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Dashboard Polish | 2/2 | Complete   | 2026-03-15 |
-| 2. SOS Polish + Data | 0/TBD | Not started | - |
+| 2. SOS Polish + Data | 0/2 | Not started | - |
 | 3. Tracker | 0/TBD | Not started | - |
 | 4. Goals | 0/TBD | Not started | - |
 | 5. Profile | 0/TBD | Not started | - |
