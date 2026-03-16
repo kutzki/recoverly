@@ -84,7 +84,7 @@ export function SOSResponseScreen({ incidentType, headerTitle, headerColor, head
               <Ionicons name="arrow-back" size={24} color={Colors.white} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{headerTitle}</Text>
-            <Text style={{ fontSize: 24 }}>{headerEmoji}</Text>
+            <Text style={styles.headerEmoji}>{headerEmoji}</Text>
           </View>
           <Text style={styles.affirmation}>{affirmation}</Text>
         </View>
@@ -137,11 +137,12 @@ const styles = StyleSheet.create({
   root:       { flex: 1, backgroundColor: Colors.white },
   headerGrad: { width: '100%' },
   headerRow:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  headerTitle:{ fontFamily: Fonts.poppinsBold, fontSize: 18, color: Colors.white, flex: 1, marginLeft: 8 },
-  affirmation:{ fontFamily: Fonts.jost, fontSize: 15, color: 'rgba(255,255,255,0.9)', lineHeight: 24 },
+  headerTitle: { fontFamily: Fonts.poppinsBold, fontSize: 18, color: Colors.white, flex: 1, marginLeft: 8 },
+  headerEmoji: { fontSize: 24 },
+  affirmation: { fontFamily: Fonts.jost, fontSize: 15, color: 'rgba(255,255,255,0.9)', lineHeight: 24 },
 
   scroll:      { paddingHorizontal: 24, paddingTop: 24 },
-  stepsLabel:  { fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.text, marginBottom: 16 },
+  stepsLabel:  { fontFamily: Fonts.poppinsSemiBold, fontSize: 15, color: Colors.text, marginBottom: 16 },
 
   stepCard:     { flexDirection: 'row', gap: 14, backgroundColor: Colors.cardTintPurpleFaint, borderRadius: 12, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: Colors.primaryLight },
   stepCardDone: { opacity: 0.75 },
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
   stepLabel:    { fontFamily: Fonts.poppinsSemiBold, fontSize: 14, color: Colors.text },
   stepLabelDone:{ textDecorationLine: 'line-through', color: Colors.textMuted },
   stepText:     { fontFamily: Fonts.jost, fontSize: 13, color: Colors.textMuted, lineHeight: 20 },
-  ctaBtn:       { alignSelf: 'flex-start', marginTop: 8, backgroundColor: Colors.primary, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 14 },
+  ctaBtn:       { alignSelf: 'flex-start', marginTop: 8, backgroundColor: Colors.primary, borderRadius: 999, paddingVertical: 8, paddingHorizontal: 16 },
   ctaText:      { fontFamily: Fonts.poppinsMedium, fontSize: 12, color: Colors.white },
 
   finishBtn:  { backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 8 },

@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
 
   scroll: { paddingHorizontal: 24, paddingTop: 24 },
 
-  sectionLabel: { fontFamily: Fonts.poppinsSemiBold, fontSize: 14, color: Colors.text, marginBottom: 12 },
+  sectionLabel: { fontFamily: Fonts.poppinsSemiBold, fontSize: 13, color: Colors.text, marginBottom: 12 },
 
   options: { gap: 10, marginBottom: 28 },
   optionCard: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     shadowRadius:   4,
     elevation:      2,
   },
-  optionEmoji: { fontSize: 28 },
+  optionEmoji: { fontSize: 32 },
   optionLabel: { flex: 1, fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.text },
 
   contacts: { gap: 10, marginBottom: 28 },
@@ -188,5 +188,5 @@ const styles = StyleSheet.create({
 
   helplines: { gap: 10, marginBottom: 28 },
   helplineCard:  { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: Colors.sosBgRed, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: Colors.sosBorderRed },
-  helplineLabel: { flex: 1, fontFamily: Fonts.poppinsMedium, fontSize: 14, color: Colors.text },
+  helplineLabel: { flex: 1, fontFamily: Fonts.poppinsMedium, fontSize: 13, color: Colors.text },
 });

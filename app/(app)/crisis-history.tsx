@@ -124,5 +124,5 @@ const styles = StyleSheet.create({
 
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 2 },
   pill:    { backgroundColor: Colors.primaryLight, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 2 },
-  pillText:{ fontFamily: Fonts.jost, fontSize: 11, color: Colors.primary },
+  pillText:{ fontFamily: Fonts.jost, fontSize: 12, color: Colors.primary },
 });
