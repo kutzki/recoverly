@@ -4,7 +4,7 @@
 **Milestone 1: Polish & Perfect Existing Screens**
 
 ## Current Phase
-**Phase 1 — Dashboard Pixel Polish** (in progress — plan 02/02 complete)
+**Phase 2 — SOS Polish + Data** (in progress — plan 01/03 complete)
 
 ## Decisions
 - Removed `textTransform: 'capitalize'` from SobrietyCounter label entirely (cleaner than setting 'none')
@@ -12,17 +12,20 @@
 - CompanionFAB accepts bottomOffset prop (caller provides insets context) — keeps component reusable
 - FAB placed after CheckInModal in JSX for correct z-order without explicit zIndex
 - companion registered as hidden tab (href: null) — consistent with call/sos pattern in _layout.tsx
+- incidentIdRef (useRef) used instead of useState to avoid re-renders on async DB write in SOSResponseScreen
+- logCTAAction is fire-and-forget (no await at call site) to avoid blocking CTA navigation
+- handleFinish simplified to Alert-only since row is already created on mount
 
 ## Last Session
-- Stopped at: Completed 01-dashboard-polish 01-01-PLAN.md
-- 2026-03-15T05:59:54Z
+- Stopped at: Completed 02-sos-polish-data 02-01-PLAN.md
+- 2026-03-16T00:00:00Z
 
 ## Phase Status
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 1 — Dashboard Polish | In progress | Plans 01-01, 01-02 complete |
-| 2 — SOS Polish + Data | Not started | |
+| 1 — Dashboard Polish | Complete | Plans 01-01, 01-02 complete |
+| 2 — SOS Polish + Data | In progress | Plan 02-01 complete |
 | 3 — Tracker | Not started | |
 | 4 — Goals | Not started | |
 | 5 — Profile | Not started | |

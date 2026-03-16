@@ -144,7 +144,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Dashboard Polish | 2/2 | Complete   | 2026-03-15 |
-| 2. SOS Polish + Data | 0/2 | Not started | - |
+| 2. SOS Polish + Data | 1/2 | In Progress|  |
 | 3. Tracker | 0/TBD | Not started | - |
 | 4. Goals | 0/TBD | Not started | - |
 | 5. Profile | 0/TBD | Not started | - |
