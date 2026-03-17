@@ -7,7 +7,7 @@ Polish every existing screen to Figma-pixel-perfect perfection, then build the A
 ## Phases
 
 - [x] **Phase 1: Dashboard Polish** - Pixel-perfect home screen matching Figma node 0:1940, functional check-in flow (completed 2026-03-15)
-- [x] **Phase 2: SOS Polish + Data** - All 6 crisis screens Figma-matched, incidents logged to Supabase (completed 2026-03-16)
+- [x] **Phase 2: SOS Polish + Data** - All 6 crisis screens Figma-matched, incidents logged to Supabase (completed 2026-03-16)
 - [ ] **Phase 3: Tracker** - Real check-in history from Supabase, milestone detection
 - [ ] **Phase 4: Goals** - CRUD goals with progress tracking
 - [ ] **Phase 5: Profile** - Complete profile view/edit, avatar upload
@@ -58,7 +58,10 @@ Plans:
   2. Days sober counter is accurate and live
   3. Check-in history is viewable (calendar or list)
   4. Milestone days (30/60/90/180/365) trigger a celebration card
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 03-01-PLAN.md — loadAllHistory store action, CalendarGrid component, CelebrationModal component, tracker.tsx wiring
 
 ### Phase 4: Goals
 **Goal**: Goals screen is fully functional CRUD with Figma-correct UI and progress tracking.
@@ -145,7 +148,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Dashboard Polish | 2/2 | Complete   | 2026-03-15 |
 | 2. SOS Polish + Data | 2/2 | Complete   | 2026-03-16 |
-| 3. Tracker | 0/TBD | Not started | - |
+| 3. Tracker | 0/1 | Not started | - |
 | 4. Goals | 0/TBD | Not started | - |
 | 5. Profile | 0/TBD | Not started | - |
 | 6. Journal | 0/TBD | Not started | - |
