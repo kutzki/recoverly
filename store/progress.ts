@@ -14,12 +14,14 @@ type ProgressState = {
   meetingsAttended:  number;
   meetingsTarget:    number;
   lastWeekReset:     string | null;
+  checkinHistory:    string[];    // ISO date strings, e.g. ["2026-03-16", ...]
 
   setSobrietyStart:    (date: string, userId?: string) => Promise<void>;
   markTodayCheckedIn:  (userId?: string, mood?: number, notes?: string) => Promise<void>;
   incrementTasks:      () => void;
   incrementMeetings:   () => void;
   loadProgress:        (userId?: string) => Promise<void>;
+  loadAllHistory:      (userId: string) => Promise<void>;
 };
 
 const weekStartISO = () => {
@@ -41,6 +43,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   meetingsAttended:  0,
   meetingsTarget:    7,
   lastWeekReset:     null,
+  checkinHistory:    [],
 
   setSobrietyStart: async (date, userId) => {
     set({ sobrietyStartDate: date });
@@ -75,6 +78,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   incrementMeetings: () => {
     set({ meetingsAttended: get().meetingsAttended + 1 });
     _persist(get());
+  },
+
+  loadAllHistory: async (userId) => {
+    const { data, error } = await supabase
+      .from('daily_checkins')
+      .select('checked_in_date')
+      .eq('user_id', userId)
+      .order('checked_in_date', { ascending: false });
+    if (error) return; // silent fail — screen degrades gracefully
+    set({ checkinHistory: (data ?? []).map((r) => r.checked_in_date as string) });
   },
 
   loadProgress: async (userId) => {
