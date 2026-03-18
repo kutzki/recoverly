@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, StyleSheet, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,21 +9,55 @@ import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
 type Goal = {
-  id: string;
-  title: string;
-  description?: string;
-  completed: boolean;
-  created_at: string;
+  id:           string;
+  title:        string;
+  description:  string | null;
+  category:     string;            // 'recovery' | 'personal' | 'work' | 'health'
+  target_date:  string | null;     // ISO date string "YYYY-MM-DD" or null
+  completed:    boolean;
+  completed_at: string | null;
+  created_at:   string;
 };
+
+const CATEGORIES = [
+  { id: 'recovery', label: 'Recovery', color: Colors.primary },
+  { id: 'personal', label: 'Personal', color: Colors.goalBlue },
+  { id: 'health',   label: 'Health',   color: Colors.goalGreen },
+  { id: 'work',     label: 'Work',     color: Colors.goalAmber },
+] as const;
+
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
+function isOverdue(goal: Goal): boolean {
+  return !goal.completed && !!goal.target_date && goal.target_date < todayISO();
+}
+
+function isValidDate(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(s + 'T00:00:00');
+  return !isNaN(d.getTime());
+}
 
 export default function GoalsScreen() {
   const insets = useSafeAreaInsets();
   const user   = useAuthStore((s) => s.user);
   const qc     = useQueryClient();
 
-  const [showAdd, setShowAdd]   = useState(false);
-  const [title, setTitle]       = useState('');
-  const [desc,  setDesc]        = useState('');
+  const [showModal, setShowModal]     = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [title, setTitle]             = useState('');
+  const [desc,  setDesc]              = useState('');
+  const [category, setCategory]       = useState('recovery');
+  const [targetDate, setTargetDate]   = useState('');
+
+  useEffect(() => {
+    if (showModal) {
+      setTitle(editingGoal?.title ?? '');
+      setDesc(editingGoal?.description ?? '');
+      setCategory(editingGoal?.category ?? 'recovery');
+      setTargetDate(editingGoal?.target_date ?? '');
+    }
+  }, [showModal]);
 
   const { data: goals = [] } = useQuery<Goal[]>({
     queryKey: ['goals', user?.id],
@@ -33,32 +67,73 @@ export default function GoalsScreen() {
         .from('user_goals')
         .select('*')
         .eq('user_id', user!.id)
+        .order('completed', { ascending: true })
+        .order('target_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
   });
 
-  const addGoal = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from('user_goals').insert({
-        user_id: user!.id, title, description: desc || null,
-      });
-      if (error) throw error;
+  const saveMutation = useMutation({
+    mutationFn: async (payload: {
+      title: string;
+      description: string | null;
+      category: string;
+      target_date: string | null;
+    }) => {
+      if (editingGoal) {
+        const { error } = await supabase
+          .from('user_goals')
+          .update(payload)
+          .eq('id', editingGoal.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('user_goals').insert({
+          user_id: user!.id,
+          ...payload,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['goals'] });
-      setTitle(''); setDesc(''); setShowAdd(false);
+      setShowModal(false);
+      setEditingGoal(null);
     },
-    onError: (e: any) => Alert.alert('Error', e.message),
+    onError: (e: Error) => Alert.alert('Error', e.message),
   });
 
   const toggleGoal = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      await supabase.from('user_goals').update({ completed, completed_at: completed ? new Date().toISOString() : null }).eq('id', id);
+      const { error } = await supabase
+        .from('user_goals')
+        .update({ completed, completed_at: completed ? new Date().toISOString() : null })
+        .eq('id', id);
+      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['goals'] }),
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('user_goals').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['goals'] }),
+    onError: (e: Error) => Alert.alert('Error', e.message),
+  });
+
+  function handleDelete(goal: Goal) {
+    Alert.alert(
+      'Delete Goal',
+      `Remove "${goal.title}"? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteMutation.mutate(goal.id) },
+      ],
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -68,10 +143,24 @@ export default function GoalsScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.heading}>My Goals</Text>
-          <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)}>
+          <TouchableOpacity style={styles.addBtn} onPress={() => { setEditingGoal(null); setShowModal(true); }}>
             <Ionicons name="add" size={20} color={Colors.white} />
           </TouchableOpacity>
         </View>
+
+        {goals.length > 0 && (() => {
+          const total = goals.length;
+          const done  = goals.filter((g) => g.completed).length;
+          const pct   = total === 0 ? 0 : done / total;
+          return (
+            <View style={styles.progressSection}>
+              <Text style={styles.progressLabel}>{done} of {total} goals complete</Text>
+              <View style={styles.progressTrack}>
+                <View style={[styles.progressFill, { width: `${Math.round(pct * 100)}%` as any }]} />
+              </View>
+            </View>
+          );
+        })()}
 
         {goals.length === 0 ? (
           <View style={styles.empty}>
@@ -84,7 +173,11 @@ export default function GoalsScreen() {
             {goals.map((g) => (
               <TouchableOpacity
                 key={g.id}
-                style={[styles.goalCard, g.completed && styles.goalCardDone]}
+                style={[
+                  styles.goalCard,
+                  g.completed && styles.goalCardDone,
+                  isOverdue(g) && styles.goalCardOverdue,
+                ]}
                 activeOpacity={0.8}
                 onPress={() => toggleGoal.mutate({ id: g.id, completed: !g.completed })}
               >
@@ -94,6 +187,46 @@ export default function GoalsScreen() {
                 <View style={styles.goalText}>
                   <Text style={[styles.goalTitle, g.completed && styles.goalTitleDone]}>{g.title}</Text>
                   {g.description ? <Text style={styles.goalDesc}>{g.description}</Text> : null}
+                  <View style={styles.goalMeta}>
+                    {/* Category badge */}
+                    {(() => {
+                      const cat = CATEGORIES.find((c) => c.id === g.category) ?? CATEGORIES[0];
+                      return (
+                        <View style={[styles.categoryBadge, { backgroundColor: cat.color + '22' }]}>
+                          <Text style={[styles.categoryBadgeText, { color: cat.color }]}>{cat.label}</Text>
+                        </View>
+                      );
+                    })()}
+                    {/* Target date chip */}
+                    {g.target_date ? (
+                      <View style={[styles.dateBadge, isOverdue(g) && styles.dateBadgeOverdue]}>
+                        <Ionicons
+                          name="calendar-outline"
+                          size={11}
+                          color={isOverdue(g) ? Colors.warning : Colors.textMuted}
+                        />
+                        <Text style={[styles.dateBadgeText, isOverdue(g) && styles.dateBadgeTextOverdue]}>
+                          {g.target_date}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </View>
+                <View style={styles.cardActions}>
+                  <TouchableOpacity
+                    onPress={() => { setEditingGoal(g); setShowModal(true); }}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    style={styles.cardActionBtn}
+                  >
+                    <Ionicons name="pencil-outline" size={16} color={Colors.textMuted} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(g)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    style={styles.cardActionBtn}
+                  >
+                    <Ionicons name="trash-outline" size={16} color={Colors.sosRed} />
+                  </TouchableOpacity>
                 </View>
               </TouchableOpacity>
             ))}
@@ -101,11 +234,13 @@ export default function GoalsScreen() {
         )}
       </ScrollView>
 
-      {/* Add Goal Modal */}
-      <Modal visible={showAdd} transparent animationType="slide">
+      {/* Add / Edit Goal Modal */}
+      <Modal visible={showModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>New Goal</Text>
+            <Text style={styles.modalTitle}>{editingGoal ? 'Edit Goal' : 'New Goal'}</Text>
+
+            {/* Title input */}
             <TextInput
               style={styles.input}
               placeholder="Goal title"
@@ -114,6 +249,8 @@ export default function GoalsScreen() {
               onChangeText={setTitle}
               returnKeyType="next"
             />
+
+            {/* Description input */}
             <TextInput
               style={[styles.input, styles.inputMulti]}
               placeholder="Description (optional)"
@@ -122,16 +259,67 @@ export default function GoalsScreen() {
               onChangeText={setDesc}
               multiline
             />
+
+            {/* Category picker */}
+            <Text style={styles.fieldLabel}>Category</Text>
+            <View style={styles.categoryRow}>
+              {CATEGORIES.map((cat) => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[
+                    styles.categoryPill,
+                    category === cat.id && { backgroundColor: cat.color, borderColor: cat.color },
+                  ]}
+                  onPress={() => setCategory(cat.id)}
+                >
+                  <Text
+                    style={[
+                      styles.categoryPillText,
+                      category === cat.id && styles.categoryPillTextActive,
+                    ]}
+                  >
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Target date input */}
+            <Text style={styles.fieldLabel}>Target Date <Text style={styles.fieldLabelMuted}>(YYYY-MM-DD, optional)</Text></Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. 2026-06-01"
+              placeholderTextColor={Colors.placeholderText}
+              value={targetDate}
+              onChangeText={setTargetDate}
+              keyboardType="numeric"
+              maxLength={10}
+            />
+
+            {/* Buttons */}
             <View style={styles.modalBtns}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAdd(false)}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => { setShowModal(false); setEditingGoal(null); }}
+              >
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.saveBtn, !title.trim() && styles.saveBtnDisabled]}
-                disabled={!title.trim() || addGoal.isPending}
-                onPress={() => addGoal.mutate()}
+                disabled={!title.trim() || saveMutation.isPending}
+                onPress={() => {
+                  const td = targetDate.trim();
+                  saveMutation.mutate({
+                    title: title.trim(),
+                    description: desc.trim() || null,
+                    category,
+                    target_date: td && isValidDate(td) ? td : null,
+                  });
+                }}
               >
-                <Text style={styles.saveText}>{addGoal.isPending ? 'Saving…' : 'Add Goal'}</Text>
+                <Text style={styles.saveText}>
+                  {saveMutation.isPending ? 'Saving…' : editingGoal ? 'Save Changes' : 'Add Goal'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -156,12 +344,87 @@ const styles = StyleSheet.create({
   list: { gap: 12 },
   goalCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: Colors.cardTintPurpleFaint, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: Colors.primaryLight },
   goalCardDone: { opacity: 0.7 },
+  goalCardOverdue: {
+    borderColor: Colors.warning,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.warning,
+  },
   checkbox:     { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: Colors.primary, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   checkboxDone: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   goalText:     { flex: 1 },
   goalTitle:    { fontFamily: Fonts.poppinsMedium, fontSize: 14, color: Colors.text },
   goalTitleDone:{ textDecorationLine: 'line-through', color: Colors.textMuted },
   goalDesc:     { fontFamily: Fonts.jost, fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+
+  goalMeta: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 6,
+  },
+  categoryBadge: {
+    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  categoryBadgeText: {
+    fontFamily: Fonts.jostMedium,
+    fontSize: 11,
+  },
+  dateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    backgroundColor: Colors.cardTintPurpleFaint,
+    borderWidth: 1,
+    borderColor: Colors.primaryLight,
+  },
+  dateBadgeOverdue: {
+    borderColor: Colors.warning,
+    backgroundColor: '#FFF8F0',
+  },
+  dateBadgeText: {
+    fontFamily: Fonts.jostMedium,
+    fontSize: 11,
+    color: Colors.textMuted,
+  },
+  dateBadgeTextOverdue: {
+    color: Colors.warning,
+  },
+
+  cardActions: {
+    flexDirection: 'column',
+    gap: 8,
+    justifyContent: 'flex-start',
+    paddingTop: 2,
+  },
+  cardActionBtn: {
+    padding: 2,
+  },
+
+  progressSection: {
+    marginBottom: 16,
+    gap: 6,
+  },
+  progressLabel: {
+    fontFamily: Fonts.jost,
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+  progressTrack: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.primaryLight,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.primary,
+  },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modal:        { backgroundColor: Colors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, gap: 14 },
@@ -174,4 +437,39 @@ const styles = StyleSheet.create({
   saveBtn:      { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: Colors.primary, alignItems: 'center' },
   saveBtnDisabled: { opacity: 0.5 },
   saveText:     { fontFamily: Fonts.poppinsSemiBold, fontSize: 15, color: Colors.white },
+
+  fieldLabel: {
+    fontFamily: Fonts.jostMedium,
+    fontSize: 13,
+    color: Colors.text,
+    marginBottom: 6,
+    marginTop: 2,
+  },
+  fieldLabelMuted: {
+    fontFamily: Fonts.jost,
+    color: Colors.textMuted,
+    fontSize: 12,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 4,
+  },
+  categoryPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    backgroundColor: Colors.white,
+  },
+  categoryPillText: {
+    fontFamily: Fonts.jostMedium,
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+  categoryPillTextActive: {
+    color: Colors.white,
+  },
 });
