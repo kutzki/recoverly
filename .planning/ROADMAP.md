@@ -148,7 +148,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Dashboard Polish | 2/2 | Complete   | 2026-03-15 |
 | 2. SOS Polish + Data | 2/2 | Complete   | 2026-03-16 |
-| 3. Tracker | 1/1 | Complete   | 2026-03-18 |
+| 3. Tracker | 1/1 | Complete    | 2026-03-18 |
 | 4. Goals | 0/TBD | Not started | - |
 | 5. Profile | 0/TBD | Not started | - |
 | 6. Journal | 0/TBD | Not started | - |
