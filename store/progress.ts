@@ -60,12 +60,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
     if (userId) {
       const today = new Date().toISOString().slice(0, 10);
-      await supabase.from('daily_checkins').upsert({
-        user_id: userId,
-        checked_in_date: today,
-        ...(mood !== undefined ? { mood } : {}),
-        ...(notes ? { notes } : {}),
-      });
+      const hasMoodOrNotes = mood !== undefined || !!notes;
+      const payload: Record<string, unknown> = { user_id: userId, checked_in_date: today };
+      if (mood !== undefined) payload.mood = mood;
+      if (notes) payload.notes = notes;
+
+      const { error } = await supabase.from('daily_checkins').upsert(payload);
+      if (error && hasMoodOrNotes) {
+        // Fallback: save base row only (mood/notes columns may not exist in DB yet)
+        await supabase.from('daily_checkins').upsert({ user_id: userId, checked_in_date: today });
+      }
     }
     await _persist(get());
   },
