@@ -1,11 +1,13 @@
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useProgressStore } from '../../store/progress';
 import { useAuthStore } from '../../store/auth';
 import { SobrietyCounter } from '../../components/ui/SobrietyCounter';
 import { StreakDots } from '../../components/ui/StreakDots';
 import { MilestoneCard } from '../../components/ui/MilestoneCard';
+import { CalendarGrid } from '../../components/ui/CalendarGrid';
+import { CelebrationModal } from '../../components/ui/CelebrationModal';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
@@ -18,10 +20,20 @@ export default function TrackerScreen() {
   const checkInsCompleted = useProgressStore((s) => s.checkInsCompleted);
   const meetingsAttended  = useProgressStore((s) => s.meetingsAttended);
 
+  const checkinHistory = useProgressStore((s) => s.checkinHistory);
+  const loadAllHistory = useProgressStore((s) => s.loadAllHistory);
+  const user           = useAuthStore((s) => s.user);
+
   const daysSober = useMemo(() => {
     if (!sobrietyStartDate) return 0;
     return Math.max(0, Math.floor((Date.now() - new Date(sobrietyStartDate).getTime()) / 86_400_000));
   }, [sobrietyStartDate]);
+
+  useEffect(() => {
+    if (user?.id) loadAllHistory(user.id);
+  }, [user?.id]);
+
+  const checkedDates = useMemo(() => new Set(checkinHistory), [checkinHistory]);
 
   const progressPct = Math.min(tasksCompleted / tasksTarget, 1);
 
@@ -44,6 +56,12 @@ export default function TrackerScreen() {
         <Text style={styles.cardSub}>{weeklyStreak.filter(Boolean).length} of 7 days this week</Text>
       </View>
 
+      {/* Check-in History calendar */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Check-in History</Text>
+        <CalendarGrid checkedDates={checkedDates} />
+      </View>
+
       {/* Stats */}
       <View style={styles.statsRow}>
         {[
@@ -61,6 +79,8 @@ export default function TrackerScreen() {
       {/* Milestones */}
       <Text style={styles.sectionLabel}>Milestones</Text>
       <MilestoneCard daysSober={daysSober} />
+
+      <CelebrationModal daysSober={daysSober} userId={user?.id ?? null} />
     </ScrollView>
   );
 }
