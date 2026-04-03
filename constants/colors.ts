@@ -56,6 +56,12 @@ export const Colors = {
   feedCyan:  '#06B6D4',
   feedLike:  '#EF4444',
 
+  // ── Notifications ─────────────────────────────────────────────────────────
+  notifBlueBtn:   '#1664fd',
+  notifPurpleBtn: '#bd51ff',
+  notifTimeText:  '#808080',
+  notifImageBg:   '#d9d9d9',
+
   // ── Goals / Categories ────────────────────────────────────────────────────
   goalGreen: '#10B981',
   goalAmber: '#F59E0B',

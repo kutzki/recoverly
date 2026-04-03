@@ -73,7 +73,43 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 
 // ── Layout ───────────────────────────────────────────────────────────────────
 
+import { useEffect } from 'react';
+import { Alert } from 'react-native';
+import { useAuthStore } from '../../store/auth';
+import { notificationService } from '../../services/notifications';
+
 export default function AppLayout() {
+  const user = useAuthStore((s) => s.user);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const sub = notificationService.subscribeToNotifications(user.id, (notif) => {
+      if (notif.is_read) return;
+      
+      const actorName = notif.actor?.name ?? 'Someone';
+      let title = 'New Notification';
+      let body = notif.content ?? '';
+
+      if (notif.type === 'LINK_REQUEST') {
+        title = 'Guardian Request';
+        body = `${actorName} wants to watch over your recovery.`;
+      } else if (notif.type === 'CHEER') {
+        title = 'New Cheer! 🎉';
+        body = `${actorName} cheered your progress!`;
+      }
+
+      Alert.alert(title, body, [
+        { text: 'View', onPress: () => router.push('/(app)/notifications') },
+        { text: 'OK', style: 'cancel' }
+      ]);
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [user]);
+
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
@@ -100,8 +136,12 @@ export default function AppLayout() {
       <Tabs.Screen name="settings"       options={{ href: null }} />
       <Tabs.Screen name="sos"            options={{ href: null }} />
       <Tabs.Screen name="chat"           options={{ href: null }} />
+      <Tabs.Screen name="notifications"  options={{ href: null }} />
+      <Tabs.Screen name="check-in"       options={{ href: null }} />
+      <Tabs.Screen name="awards"         options={{ href: null }} />
       <Tabs.Screen name="user"           options={{ href: null }} />
       <Tabs.Screen name="call"           options={{ href: null }} />
+      <Tabs.Screen name="guardian"       options={{ href: null }} />
     </Tabs>
   );
 }

@@ -15,6 +15,9 @@ export type UserProfile = {
   sponsor_name: string | null;
   sponsor_phone: string | null;
   inner_circle: { name: string; phone: string; relationship?: string }[] | null;
+  user_type: 'SEEKER' | 'GUARDIAN';
+  guardian_code: string | null;
+  guardian_code_expires_at: string | null;
   is_profile_complete: boolean;
   created_at: string;
 };

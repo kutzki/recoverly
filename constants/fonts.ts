@@ -12,6 +12,11 @@ export const Fonts = {
   // Jost — body text, captions, sublabels, inputs
   jost:       'Jost_400Regular',
   jostMedium: 'Jost_500Medium',
+
+  // Aliases for Figma generated code
+  generalSansRegular: 'Poppins_400Regular',
+  generalSansMedium:  'Poppins_500Medium',
+  generalSansBold:    'Poppins_700Bold',
 };
 
 export const FontSizes = {

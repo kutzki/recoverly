@@ -43,6 +43,7 @@ export default function SettingsScreen() {
         { label: 'Edit Profile', icon: 'person-outline', onPress: () => router.push('/(app)/edit-profile') },
         { label: 'My Sponsor',   icon: 'person-add-outline', onPress: () => router.push('/(app)/sponsor') },
         { label: 'Inner Circle', icon: 'people-circle-outline', onPress: () => router.push('/(app)/inner-circle') },
+        { label: 'Guardian Ecosystem', icon: 'shield-checkmark-outline', onPress: () => router.push('/(app)/guardian' as any) },
       ],
     },
     {

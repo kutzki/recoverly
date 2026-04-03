@@ -1,191 +1,273 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions, StatusBar } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuthStore } from '../../../store/auth';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { useSharedValue, useAnimatedStyle, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import { Colors } from '../../../constants/colors';
 import { Fonts } from '../../../constants/fonts';
 
+const { width } = Dimensions.get('window');
+
+// 1:1 Figma Palette
+const BRAND_GRADIENT = ['#4B0082', '#00D1FF']; // Indigo to Cyan
+const SOS_BG = '#F8F7FF';
+
 const CRISIS_OPTIONS = [
-  {
-    id: 'bad_day',
-    label: "I'm having a bad day",
-    emoji: '😔',
-    color: Colors.sosOrange,
-    route: '/(app)/sos/bad-day',
-  },
-  {
-    id: 'feel_like_using',
-    label: "I feel like using",
-    emoji: '🚨',
-    color: Colors.sosRed,
-    route: '/(app)/sos/feel-like-using',
-  },
-  {
-    id: 'just_relapsed',
-    label: "I just relapsed",
-    emoji: '💔',
-    color: Colors.sosDark,
-    route: '/(app)/sos/just-relapsed',
-  },
-  {
-    id: 'self_harm',
-    label: "I'm thinking about self-harm",
-    emoji: '🆘',
-    color: '#FF3B30',
-    route: '/(app)/sos/self-harm',
-  },
-  {
-    id: 'feeling_anxious',
-    label: "I'm feeling anxious",
-    emoji: '🌊',
-    color: Colors.sosPurple,
-    route: '/(app)/sos/feeling-anxious',
-  },
-] as const;
+  { id: 'feel_like_using', label: "I Feel Like Using", route: '/(app)/sos/feel-like-using' },
+  { id: 'just_relapsed', label: "Just Relapsed", route: '/(app)/sos/just-relapsed' },
+  { id: 'self_harm', label: "Self-Harm", route: '/(app)/sos/self-harm' },
+  { id: 'bad_day', label: "Having a Bad Day", route: '/(app)/sos/bad-day' },
+  { id: 'feeling_anxious', label: "Feeling Anxious", route: '/(app)/sos/feeling-anxious' },
+];
+
+function AnimatedListOption({ opt, index }: { opt: any, index: number }) {
+  const translateY = useSharedValue(30);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    const delay = 400 + (index * 80);
+    translateY.value = withDelay(delay, withSpring(0, { damping: 15 }));
+    opacity.value = withDelay(delay, withTiming(1, { duration: 400 }));
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }]
+  }));
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <TouchableOpacity
+        style={styles.optionCard}
+        activeOpacity={0.9}
+        onPress={() => router.push(opt.route as any)}
+      >
+        <Text style={styles.optionLabel}>{opt.label}</Text>
+        <View style={styles.optionChevronBg}>
+          <Ionicons name="chevron-forward" size={16} color="#4B0082" />
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
+function AnimatedHeroCard({ title, icon, index, onPress }: { title: string, icon: string, index: number, onPress: () => void }) {
+  const scale = useSharedValue(0.9);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    const delay = index * 100;
+    scale.value = withDelay(delay, withSpring(1, { damping: 12 }));
+    opacity.value = withDelay(delay, withTiming(1, { duration: 400 }));
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }]
+  }));
+
+  return (
+    <Animated.View style={[styles.heroCardContainer, animatedStyle]}>
+      <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.9} onPress={onPress}>
+        <LinearGradient
+          colors={BRAND_GRADIENT}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroCard}
+        >
+          <View style={styles.heroIconBox}>
+            <Ionicons name={icon as any} size={22} color="#4B0082" />
+          </View>
+          <Text style={styles.heroTitle}>{title}</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
 
 export default function SOSIndexScreen() {
   const insets = useSafeAreaInsets();
-  const user   = useAuthStore((s) => s.user);
-  const innerCircle: any[] = Array.isArray(user?.inner_circle) ? (user?.inner_circle as any[]) : [];
 
   return (
     <View style={styles.root}>
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Background Gradient */}
       <LinearGradient
-        colors={[Colors.primaryDark, Colors.primaryMid]}
-        style={styles.headerGrad}
-      >
-        <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 24, paddingBottom: 24 }}>
-          <View style={styles.headerRow}>
-            <TouchableOpacity onPress={() => router.back()} hitSlop={12}>
-              <Ionicons name="arrow-back" size={24} color={Colors.white} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>SOS — I Need Help</Text>
-            <View style={{ width: 24 }} />
-          </View>
-          <Text style={styles.headerSub}>
-            You're safe. Choose what you're going through and we'll guide you through it.
-          </Text>
-        </View>
-      </LinearGradient>
+        colors={[SOS_BG, Colors.white]}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="close" size={24} color="#1A1A43" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Crisis Support</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Crisis options */}
-        <Text style={styles.sectionLabel}>What's going on?</Text>
-        <View style={styles.options}>
-          {CRISIS_OPTIONS.map((opt) => (
-            <TouchableOpacity
-              key={opt.id}
-              style={[styles.optionCard, { borderLeftColor: opt.color }]}
-              activeOpacity={0.85}
-              onPress={() => router.push(opt.route as any)}
-            >
-              <Text style={styles.optionEmoji}>{opt.emoji}</Text>
-              <Text style={styles.optionLabel}>{opt.label}</Text>
-              <Ionicons name="chevron-forward" size={20} color={Colors.textLight} />
-            </TouchableOpacity>
+        <View style={styles.welcomeBlock}>
+          <Text style={styles.welcomeTitle}>You're not alone.</Text>
+          <Text style={styles.welcomeSub}>Choose an option below to get immediate support.</Text>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.heroRow}>
+          <AnimatedHeroCard 
+            title="Meeting Now" 
+            icon="people" 
+            index={0} 
+            onPress={() => router.push('/(app)/sos/recommended-meetings')} 
+          />
+          <AnimatedHeroCard 
+            title="Inner Circle" 
+            icon="call" 
+            index={1} 
+            onPress={() => router.push('/(app)/inner-circle')} 
+          />
+        </View>
+
+        {/* Crisis Options */}
+        <View style={styles.optionsList}>
+          <Text style={styles.listSectionTitle}>How are you feeling?</Text>
+          {CRISIS_OPTIONS.map((opt, idx) => (
+            <AnimatedListOption key={opt.id} opt={opt} index={idx} />
           ))}
         </View>
 
-        {/* Emergency contacts */}
-        {innerCircle.length > 0 && (
-          <>
-            <Text style={styles.sectionLabel}>Call Your Support</Text>
-            <View style={styles.contacts}>
-              {innerCircle.slice(0, 3).map((c: any, i: number) => (
-                <TouchableOpacity
-                  key={i}
-                  style={styles.contactCard}
-                  activeOpacity={0.8}
-                  onPress={() => Linking.openURL(`tel:${c.phone}`)}
-                >
-                  <View style={styles.contactAvatar}>
-                    <Text style={styles.contactInitial}>{c.name[0].toUpperCase()}</Text>
-                  </View>
-                  <View style={styles.contactInfo}>
-                    <Text style={styles.contactName}>{c.name}</Text>
-                    <Text style={styles.contactRel}>{c.relationship || 'Support contact'}</Text>
-                  </View>
-                  <View style={styles.callBtn}>
-                    <Ionicons name="call" size={18} color={Colors.white} />
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
-        )}
-
-        {/* Crisis helplines */}
-        <Text style={styles.sectionLabel}>Crisis Helplines</Text>
-        <View style={styles.helplines}>
-          {[
-            { label: 'SAMHSA Helpline (24/7)',    phone: '18006624357' },
-            { label: 'Crisis Text Line (24/7)',   phone: 'sms:741741'  },
-            { label: 'National Suicide Hotline',  phone: '988'         },
-          ].map((h) => (
-            <TouchableOpacity
-              key={h.phone}
-              style={styles.helplineCard}
-              activeOpacity={0.8}
-              onPress={() => Linking.openURL(h.phone.startsWith('sms') ? h.phone : `tel:${h.phone}`)}
-            >
-              <Ionicons name="call-outline" size={20} color={Colors.sosRed} />
-              <Text style={styles.helplineLabel}>{h.label}</Text>
-              <Ionicons name="chevron-forward" size={18} color={Colors.textLight} />
-            </TouchableOpacity>
-          ))}
-        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.white },
-
-  headerGrad:  { width: '100%' },
-  headerRow:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  headerTitle: { fontFamily: Fonts.poppinsBold, fontSize: 18, color: Colors.white },
-  headerSub:   { fontFamily: Fonts.jost, fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 22 },
-
-  scroll: { paddingHorizontal: 24, paddingTop: 24 },
-
-  sectionLabel: { fontFamily: Fonts.poppinsSemiBold, fontSize: 14, color: Colors.text, marginBottom: 12 },
-
-  options: { gap: 10, marginBottom: 28 },
-  optionCard: {
-    flexDirection:  'row',
-    alignItems:     'center',
-    gap:            14,
-    backgroundColor: Colors.white,
-    borderRadius:   12,
-    padding:        16,
-    borderWidth:    1,
-    borderColor:    Colors.border,
-    borderLeftWidth: 4,
-    shadowColor:    '#000',
-    shadowOffset:   { width: 0, height: 1 },
-    shadowOpacity:  0.06,
-    shadowRadius:   4,
-    elevation:      2,
+  root: {
+    flex: 1,
+    backgroundColor: SOS_BG,
   },
-  optionEmoji: { fontSize: 28 },
-  optionLabel: { flex: 1, fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.text },
-
-  contacts: { gap: 10, marginBottom: 28 },
-  contactCard:    { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Colors.cardTintPurpleFaint, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: Colors.primaryLight },
-  contactAvatar:  { width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  contactInitial: { fontFamily: Fonts.poppinsBold, fontSize: 18, color: Colors.primary },
-  contactInfo:    { flex: 1 },
-  contactName:    { fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.text },
-  contactRel:     { fontFamily: Fonts.jost, fontSize: 12, color: Colors.textMuted },
-  callBtn:        { width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
-
-  helplines: { gap: 10, marginBottom: 28 },
-  helplineCard:  { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: Colors.sosBgRed, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: Colors.sosBorderRed },
-  helplineLabel: { flex: 1, fontFamily: Fonts.poppinsMedium, fontSize: 14, color: Colors.text },
+  header: {
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontFamily: Fonts.poppinsBold,
+    fontSize: 18,
+    color: '#1A1A43',
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  scroll: {
+    paddingHorizontal: 24,
+  },
+  welcomeBlock: {
+    marginBottom: 32,
+    marginTop: 10,
+  },
+  welcomeTitle: {
+    fontFamily: Fonts.poppinsBold,
+    fontSize: 28,
+    color: '#1A1A43',
+  },
+  welcomeSub: {
+    fontFamily: Fonts.jost,
+    fontSize: 15,
+    color: '#768DB5',
+    marginTop: 4,
+    lineHeight: 22,
+  },
+  heroRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 16,
+    marginBottom: 40,
+  },
+  heroCardContainer: {
+    flex: 1,
+    aspectRatio: 1,
+  },
+  heroCard: {
+    flex: 1,
+    borderRadius: 30,
+    padding: 24,
+    justifyContent: 'flex-end',
+    shadowColor: '#4B0082',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  heroIconBox: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    width: 44,
+    height: 44,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroTitle: {
+    fontFamily: Fonts.poppinsBold,
+    fontSize: 18,
+    color: Colors.white,
+    lineHeight: 24,
+  },
+  optionsList: {
+    gap: 12,
+  },
+  listSectionTitle: {
+    fontFamily: Fonts.poppinsBold,
+    fontSize: 18,
+    color: '#1A1A43',
+    marginBottom: 8,
+  },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  optionLabel: {
+    fontFamily: Fonts.poppinsBold,
+    fontSize: 16,
+    color: '#4B0082', 
+  },
+  optionChevronBg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3E8FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });

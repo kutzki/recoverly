@@ -26,7 +26,8 @@ const weekStartISO = () => {
   const d = new Date();
   const day = d.getDay(); // 0=Sun
   d.setDate(d.getDate() - ((day + 6) % 7)); // Monday
-  return d.toISOString().slice(0, 10);
+  // Avoid toISOString() since it shifts timezones and causes false resets!
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
 const todayDayIndex = () => (new Date().getDay() + 6) % 7; // 0=Mon
@@ -44,22 +45,24 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
   setSobrietyStart: async (date, userId) => {
     set({ sobrietyStartDate: date });
+    await _persist(get()); // Off-line first local save
+
     if (userId) {
-      await supabase.from('profiles').update({ sobriety_start_date: date }).eq('id', userId);
+      // Background sync, don't await/crash offline
+      supabase.from('profiles').update({ sobriety_start_date: date }).eq('id', userId).then((res) => { if (res.error) console.error(res.error); });
     }
-    await _persist(get());
   },
 
   markTodayCheckedIn: async (userId) => {
     const streak = [...get().weeklyStreak];
     streak[todayDayIndex()] = true;
     set({ weeklyStreak: streak, checkInsCompleted: get().checkInsCompleted + 1 });
+    await _persist(get()); // Off-line first local save
 
     if (userId) {
       const today = new Date().toISOString().slice(0, 10);
-      await supabase.from('daily_checkins').upsert({ user_id: userId, checked_in_date: today });
+      supabase.from('daily_checkins').upsert({ user_id: userId, checked_in_date: today }).then((res) => { if (res.error) console.error(res.error); });
     }
-    await _persist(get());
   },
 
   incrementTasks: () => {
@@ -94,16 +97,20 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       set({ ...saved });
     }
 
-    // Sync sobriety date from DB if we have a user
+    // Sync sobriety date from DB if we have a user and are online
     if (userId && !get().sobrietyStartDate) {
-      const { data } = await supabase
-        .from('profiles')
-        .select('sobriety_start_date')
-        .eq('id', userId)
-        .single();
-      if (data?.sobriety_start_date) {
-        set({ sobrietyStartDate: data.sobriety_start_date });
-        await _persist(get());
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('sobriety_start_date')
+          .eq('id', userId)
+          .single();
+        if (data?.sobriety_start_date) {
+          set({ sobrietyStartDate: data.sobriety_start_date });
+          await _persist(get());
+        }
+      } catch (e) {
+        // Offline - fail silently
       }
     }
   },

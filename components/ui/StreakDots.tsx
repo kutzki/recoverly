@@ -1,4 +1,5 @@
 import { View, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 
 type Props = {
@@ -12,30 +13,32 @@ export function StreakDots({ streak }: Props) {
         <View
           key={i}
           style={[styles.dot, done ? styles.dotFilled : styles.dotEmpty]}
-        />
+        >
+          {done && <Ionicons name="checkmark-sharp" size={14} color={Colors.white} />}
+        </View>
       ))}
     </View>
   );
 }
 
-const DOT = 15;
+const DOT = 20;
 
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    gap: 5,
+    gap: 6,
   },
   dot: {
     width: DOT,
     height: DOT,
     borderRadius: DOT / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dotFilled: {
     backgroundColor: Colors.primary,
   },
   dotEmpty: {
-    backgroundColor: '#E0D0F0',
-    borderWidth: 1,
-    borderColor: '#D0C0E8',
+    backgroundColor: Colors.white,
   },
 });

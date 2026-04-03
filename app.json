@@ -2,7 +2,7 @@
   "expo": {
     "name": "recoverly",
     "slug": "recoverly",
-    "version": "2.0.1",
+    "version": "2.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -23,7 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.recoverly.app",
-      "versionCode": 20001,
+      "versionCode": 20003,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",
@@ -56,7 +56,15 @@
         }
       ],
       "expo-secure-store",
-      "expo-image-picker"
+      "expo-image-picker",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "newArchEnabled": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

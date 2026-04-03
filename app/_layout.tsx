@@ -5,6 +5,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { SideMenu } from '../components/ui/SideMenu';
+import { JournalModal } from '../components/ui/JournalModal';
+import { ChecklistModal } from '../components/ui/ChecklistModal';
 
 // NOTE: Fonts are loaded natively by the expo-font plugin in app.json.
 // DO NOT add useFonts() here. DO NOT add a null-return guard. Either will crash the app.
@@ -27,6 +30,9 @@ export default function RootLayout() {
               <Stack.Screen name="(setup)" />
               <Stack.Screen name="(app)" />
             </Stack>
+            <SideMenu />
+            <JournalModal />
+            <ChecklistModal />
           </ErrorBoundary>
         </QueryClientProvider>
       </SafeAreaProvider>
