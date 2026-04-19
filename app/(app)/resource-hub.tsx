@@ -1,8 +1,16 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
+
+const INSURANCE_CARD = {
+  title: 'Ameriwell Care',
+  desc: 'Connect your insurance plan for care coordination & benefits',
+  icon: 'heart-circle-outline',
+  color: Colors.goalBlue,
+};
 
 const CATEGORIES = [
   {
@@ -47,6 +55,22 @@ export default function ResourceHubScreen() {
       <Text style={styles.heading}>Resource Hub</Text>
       <Text style={styles.subheading}>Trusted resources for every step of your recovery</Text>
 
+      {/* ── Ameriwell Care Banner ──────────────────────────────────────────── */}
+      <TouchableOpacity
+        style={styles.insuranceBanner}
+        activeOpacity={0.85}
+        onPress={() => router.push('/(app)/ameriwell-care' as any)}
+      >
+        <View style={[styles.insuranceIconWrap, { backgroundColor: INSURANCE_CARD.color + '20' }]}>
+          <Ionicons name={INSURANCE_CARD.icon as any} size={28} color={INSURANCE_CARD.color} />
+        </View>
+        <View style={styles.insuranceText}>
+          <Text style={styles.insuranceTitle}>{INSURANCE_CARD.title}</Text>
+          <Text style={styles.insuranceDesc}>{INSURANCE_CARD.desc}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={INSURANCE_CARD.color} />
+      </TouchableOpacity>
+
       {CATEGORIES.map((cat) => (
         <View key={cat.id} style={styles.category}>
           <Text style={[styles.catLabel, { color: cat.color }]}>{cat.label}</Text>
@@ -86,4 +110,15 @@ const styles = StyleSheet.create({
   resourceText:  { flex: 1 },
   resourceTitle: { fontFamily: Fonts.poppinsMedium, fontSize: 14, color: Colors.text },
   resourceDesc:  { fontFamily: Fonts.jost, fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+
+  insuranceBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: Colors.goalBlue + '10',
+    borderRadius: 16, padding: 16, marginBottom: 24,
+    borderWidth: 1.5, borderColor: Colors.goalBlue + '30',
+  },
+  insuranceIconWrap: { width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center' },
+  insuranceText:     { flex: 1 },
+  insuranceTitle:    { fontFamily: Fonts.poppinsSemiBold, fontSize: 15, color: Colors.text },
+  insuranceDesc:     { fontFamily: Fonts.jost, fontSize: 12, color: Colors.textMuted, marginTop: 2 },
 });
