@@ -8,6 +8,8 @@ import * as SecureStore from 'expo-secure-store';
 import { useMeetingsFilterStore } from '../../store/meetingsFilter';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
+import { FilterChips } from '../../components/ui/FilterChips';
+import { TYPE_LABELS, FORMAT_LABELS, COMMUNITY_LABELS, LANGUAGE_LABELS } from '../../services/meetings';
 
 const MEETING_TYPES = ['AA', 'NA', 'Other'];
 
@@ -15,11 +17,45 @@ export default function MeetingsFilterScreen() {
   const insets = useSafeAreaInsets();
 
   const meetingType  = useMeetingsFilterStore((s) => s.meetingType);
-  const category     = useMeetingsFilterStore((s) => s.category);
-  const attendeeType = useMeetingsFilterStore((s) => s.attendeeType);
+  const langFilter   = useMeetingsFilterStore((s) => s.langFilter);
+  const typeFilter   = useMeetingsFilterStore((s) => s.typeFilter);
+  const formatFilter = useMeetingsFilterStore((s) => s.formatFilter);
+  const communityFilter = useMeetingsFilterStore((s) => s.communityFilter);
   const onlineOnly   = useMeetingsFilterStore((s) => s.onlineOnly);
   const rangeValue   = useMeetingsFilterStore((s) => s.rangeValue);
   const setFilters   = useMeetingsFilterStore((s) => s.setFilters);
+
+
+  const filterGroups = [
+    {
+      id: 'type',
+      label: 'Open/Closed',
+      options: Object.entries(TYPE_LABELS).map(([k, v]) => ({ key: k, label: v })),
+      selected: typeFilter,
+      onSelect: (val: string | null) => setFilters({ typeFilter: val }),
+    },
+    {
+      id: 'format',
+      label: 'Format',
+      options: Object.entries(FORMAT_LABELS).map(([k, v]) => ({ key: k, label: v })),
+      selected: formatFilter,
+      onSelect: (val: string | null) => setFilters({ formatFilter: val }),
+    },
+    {
+      id: 'community',
+      label: 'Community',
+      options: Object.entries(COMMUNITY_LABELS).map(([k, v]) => ({ key: k, label: v })),
+      selected: communityFilter,
+      onSelect: (val: string | null) => setFilters({ communityFilter: val }),
+    },
+    {
+      id: 'lang',
+      label: 'Language',
+      options: Object.entries(LANGUAGE_LABELS).map(([k, v]) => ({ key: k, label: v })),
+      selected: langFilter,
+      onSelect: (val: string | null) => setFilters({ langFilter: val }),
+    },
+  ];
 
   const handleApply = async () => {
     // Mark onboarding as seen (must match key in meetings.tsx)
@@ -82,22 +118,10 @@ export default function MeetingsFilterScreen() {
           </View>
         </View>
 
-        {/* Categories Dropdown */}
+        {/* API Filters */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Categories</Text>
-          <TouchableOpacity style={styles.dropdownBtn} activeOpacity={0.8}>
-            <Text style={styles.dropdownText}>{category}</Text>
-            <Ionicons name="chevron-down" size={20} color="#bd51ff" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Attendee Type Dropdown */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Attendee Type</Text>
-          <TouchableOpacity style={styles.dropdownBtn} activeOpacity={0.8}>
-            <Text style={styles.dropdownText}>{attendeeType}</Text>
-            <Ionicons name="chevron-down" size={20} color="#bd51ff" />
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Advanced Filters</Text>
+          <FilterChips groups={filterGroups} />
         </View>
 
         {/* Online Availability Checkbox */}

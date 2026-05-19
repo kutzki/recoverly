@@ -9,6 +9,10 @@ type MeetingsFilterState = {
   attendeeType: string;
   onlineOnly:   boolean;
   rangeValue:   number;
+  langFilter:   string | null;
+  typeFilter:   string | null;
+  formatFilter: string | null;
+  communityFilter: string | null;
 
   setFilters: (filters: Partial<Omit<MeetingsFilterState, 'setFilters' | 'loadFilters'>>) => void;
   loadFilters: () => Promise<void>;
@@ -20,6 +24,10 @@ export const useMeetingsFilterStore = create<MeetingsFilterState>((set, get) => 
   attendeeType: 'Male',
   onlineOnly:   false,
   rangeValue:   50,
+  langFilter:   'en',
+  typeFilter:   null,
+  formatFilter: null,
+  communityFilter: null,
 
   setFilters: (filters) => {
     set(filters as any);
@@ -31,6 +39,10 @@ export const useMeetingsFilterStore = create<MeetingsFilterState>((set, get) => 
       attendeeType: state.attendeeType,
       onlineOnly:   state.onlineOnly,
       rangeValue:   state.rangeValue,
+      langFilter:   state.langFilter,
+      typeFilter:   state.typeFilter,
+      formatFilter: state.formatFilter,
+      communityFilter: state.communityFilter,
       ...filters,
     })).catch(() => {});
   },

@@ -11,6 +11,8 @@ import * as Haptics from 'expo-haptics';
 
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
+import { MeetingDetailModal } from '../../components/ui/MeetingDetailModal';
+import { Meeting } from '../../services/meetings';
 import { useAuthStore } from '../../store/auth';
 
 const { width, height } = Dimensions.get('window');
@@ -80,6 +82,7 @@ export default function MeetingsMapScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const [selectedPin, setSelectedPin] = useState<string | null>(null);
+  const [selectedMeetingDetail, setSelectedMeetingDetail] = useState<Meeting | null>(null);
 
   const handlePinPress = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -179,7 +182,24 @@ export default function MeetingsMapScreen() {
             <TouchableOpacity 
               key={meeting.id} 
               style={[styles.meetingCard, selectedPin === meeting.id && styles.meetingCardActive]}
-              onPress={() => setSelectedPin(meeting.id)}
+              onPress={() => {
+                setSelectedPin(meeting.id);
+                // Creating a mock Meeting to display in the modal
+                setSelectedMeetingDetail({
+                  slug: meeting.id,
+                  name: meeting.name,
+                  nextEventUTC: new Date().toISOString(),
+                  rtc: '',
+                  languages: ['en'],
+                  communities: [],
+                  features: [],
+                  formats: [],
+                  type: meeting.type === 'AA' ? 'O' : 'C',
+                  // Fallbacks for optional fields
+                  conference_url: '',
+                  conference_phone: '',
+                });
+              }}
               activeOpacity={0.8}
             >
               <LinearGradient
@@ -216,6 +236,7 @@ export default function MeetingsMapScreen() {
           ))}
         </ScrollView>
       </Animated.View>
+      <MeetingDetailModal meeting={selectedMeetingDetail} onClose={() => setSelectedMeetingDetail(null)} />
     </View>
   );
 }
