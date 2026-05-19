@@ -9,20 +9,20 @@ import { Colors } from '../../../constants/colors';
 import { Fonts } from '../../../constants/fonts';
 
 const RECOMMENDATIONS = [
-  { id: 'sponsor',  label: 'Call your Sponsor' },
+  { id: 'sponsor', label: 'Call your Sponsor' },
   { id: 'meditate', label: 'Meditate' },
-  { id: 'meeting',  label: 'Attend a Meeting' },
+  { id: 'meeting', label: 'Attend a Meeting' },
 ];
 
 export default function FeelLikeUsingScreen() {
   const insets = useSafeAreaInsets();
-  
-  const [activeTab, setActiveTab] = useState('meditate'); 
-  const [completedRecs, setCompletedRecs] = useState<string[]>(['sponsor']); // Mocking first one as completed per the screenshot
+
+  const [activeTab, setActiveTab] = useState('meditate');
+  const [completedRecs, setCompletedRecs] = useState<Set<string>>(new Set(['sponsor'])); // Mocking first one as completed per the screenshot
 
   const markComplete = (id: string) => {
-    if (!completedRecs.includes(id)) {
-      setCompletedRecs(prev => [...prev, id]);
+    if (!completedRecs.has(id)) {
+      setCompletedRecs((prev) => new Set([...prev, id]));
     }
   };
 
@@ -42,7 +42,7 @@ export default function FeelLikeUsingScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >
@@ -53,12 +53,12 @@ export default function FeelLikeUsingScreen() {
 
           <View style={styles.recsList}>
             {RECOMMENDATIONS.map((rec) => {
-              const isCompleted = completedRecs.includes(rec.id);
+              const isCompleted = completedRecs.has(rec.id);
               const isActive = activeTab === rec.id;
-              
+
               return (
-                <TouchableOpacity 
-                  key={rec.id} 
+                <TouchableOpacity
+                  key={rec.id}
                   style={[styles.recItem, isActive && styles.recItemActive]}
                   activeOpacity={0.8}
                   onPress={() => setActiveTab(rec.id)}
@@ -75,13 +75,15 @@ export default function FeelLikeUsingScreen() {
 
         {/* Dynamic Content Area based on Active Tab */}
         <Animated.View key={activeTab} layout={Layout.springify().damping(16)}>
-          
           {/* SPONSOR TAB */}
           {activeTab === 'sponsor' && (
             <Animated.View entering={FadeInDown.duration(400).springify()}>
               <View style={styles.infoArea}>
                 <Text style={styles.infoTitle}>Press the Icon to Call Your Sponsor</Text>
-                <Text style={styles.infoSub}>Try talking about your feelings to a friend, family member, health professional or sponsor.</Text>
+                <Text style={styles.infoSub}>
+                  Try talking about your feelings to a friend, family member, health professional or
+                  sponsor.
+                </Text>
               </View>
 
               <View style={styles.sponsorCard}>
@@ -93,10 +95,18 @@ export default function FeelLikeUsingScreen() {
               </View>
 
               <View style={styles.actionArea}>
-                <TouchableOpacity style={styles.outlineBtn} activeOpacity={0.8} onPress={() => router.push('/(app)/inner-circle')}>
+                <TouchableOpacity
+                  style={styles.outlineBtn}
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/(app)/inner-circle')}
+                >
                   <Text style={styles.outlineBtnText}>Open Emergency Contacts</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.solidBtn} activeOpacity={0.8} onPress={() => markComplete('sponsor')}>
+                <TouchableOpacity
+                  style={styles.solidBtn}
+                  activeOpacity={0.8}
+                  onPress={() => markComplete('sponsor')}
+                >
                   <Text style={styles.solidBtnText}>Complete Activity</Text>
                 </TouchableOpacity>
               </View>
@@ -108,26 +118,45 @@ export default function FeelLikeUsingScreen() {
             <Animated.View entering={FadeInDown.duration(400).springify()}>
               <View style={styles.infoArea}>
                 <Text style={styles.infoTitle}>Take Some Time to Meditate</Text>
-                <Text style={styles.infoSub}>This calming breathing technique for stress, anxiety and panic takes just a few minutes and can be done anywhere.</Text>
+                <Text style={styles.infoSub}>
+                  This calming breathing technique for stress, anxiety and panic takes just a few
+                  minutes and can be done anywhere.
+                </Text>
               </View>
 
               <TouchableOpacity style={styles.videoCard} activeOpacity={0.95}>
-                <LinearGradient colors={['#D2CB9C', '#578378']} style={[StyleSheet.absoluteFill, { borderRadius: 24 }]} />
+                <LinearGradient
+                  colors={['#D2CB9C', '#578378']}
+                  style={[StyleSheet.absoluteFill, { borderRadius: 24 }]}
+                />
                 <Text style={styles.videoTitle}>10-Minute Meditation</Text>
-                
+
                 {/* Abstract Meditation Graphic Elements */}
-                <Ionicons name="leaf" size={120} color="rgba(255,255,255,0.1)" style={{ position: 'absolute', bottom: -20, right: -20 }} />
-                
+                <Ionicons
+                  name="leaf"
+                  size={120}
+                  color="rgba(255,255,255,0.1)"
+                  style={{ position: 'absolute', bottom: -20, right: -20 }}
+                />
+
                 <View style={styles.playBtnWrap}>
                   <Ionicons name="play" size={36} color="#bd51ff" style={{ marginLeft: 6 }} />
                 </View>
               </TouchableOpacity>
 
               <View style={styles.actionArea}>
-                <TouchableOpacity style={styles.outlineBtn} activeOpacity={0.8} onPress={() => router.push('/(app)/apps')}>
+                <TouchableOpacity
+                  style={styles.outlineBtn}
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/(app)/apps')}
+                >
                   <Text style={styles.outlineBtnText}>Open Self-Help Library</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.solidBtn} activeOpacity={0.8} onPress={() => markComplete('meditate')}>
+                <TouchableOpacity
+                  style={styles.solidBtn}
+                  activeOpacity={0.8}
+                  onPress={() => markComplete('meditate')}
+                >
                   <Text style={styles.solidBtnText}>Complete Activity</Text>
                 </TouchableOpacity>
               </View>
@@ -143,7 +172,11 @@ export default function FeelLikeUsingScreen() {
               </View>
 
               <View style={styles.meetingList}>
-                <TouchableOpacity style={styles.meetingCard} activeOpacity={0.8} onPress={() => router.push('/(app)/meetings')}>
+                <TouchableOpacity
+                  style={styles.meetingCard}
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/(app)/meetings')}
+                >
                   <View style={styles.meetingIconOrb}>
                     <Text style={styles.meetingIconTxt}>AA</Text>
                   </View>
@@ -154,7 +187,11 @@ export default function FeelLikeUsingScreen() {
                   <View style={styles.meetingDot} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.meetingCard} activeOpacity={0.8} onPress={() => router.push('/(app)/meetings')}>
+                <TouchableOpacity
+                  style={styles.meetingCard}
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/(app)/meetings')}
+                >
                   <View style={styles.meetingIconOrb}>
                     <Text style={styles.meetingIconTxt}>NA</Text>
                   </View>
@@ -165,7 +202,11 @@ export default function FeelLikeUsingScreen() {
                   <View style={styles.meetingDot} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.meetingCard} activeOpacity={0.8} onPress={() => router.push('/(app)/meetings')}>
+                <TouchableOpacity
+                  style={styles.meetingCard}
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/(app)/meetings')}
+                >
                   <View style={styles.meetingIconOrb}>
                     <Text style={styles.meetingIconTxt}>AA</Text>
                   </View>
@@ -178,19 +219,25 @@ export default function FeelLikeUsingScreen() {
               </View>
 
               <View style={styles.actionArea}>
-                <TouchableOpacity style={styles.outlineBtn} activeOpacity={0.8} onPress={() => router.push('/(app)/meetings')}>
+                <TouchableOpacity
+                  style={styles.outlineBtn}
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/(app)/meetings')}
+                >
                   <Text style={styles.outlineBtnText}>5 Similar Meetings Happening Now</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.solidBtn} activeOpacity={0.8} onPress={() => markComplete('meeting')}>
+                <TouchableOpacity
+                  style={styles.solidBtn}
+                  activeOpacity={0.8}
+                  onPress={() => markComplete('meeting')}
+                >
                   <Text style={styles.solidBtnText}>Complete Activity</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>
           )}
-
         </Animated.View>
       </ScrollView>
-
     </View>
   );
 }
@@ -276,7 +323,7 @@ const styles = StyleSheet.create({
   recCircleCompleted: {
     backgroundColor: '#4E88FC', // Soft blue as seen in design for finished state
   },
-  
+
   // SHARED CONTENT STYLES
   infoArea: {
     marginBottom: 24,
