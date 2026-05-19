@@ -18,3 +18,12 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
     detectSessionInUrl: false,
   },
 });
+
+/**
+ * Safely escapes a value for use in a Supabase .or() filter string.
+ * It escapes backslashes and double quotes, and wraps the value in double quotes.
+ */
+export const escapeFilterValue = (value: string) => {
+  const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escaped}"`;
+};
