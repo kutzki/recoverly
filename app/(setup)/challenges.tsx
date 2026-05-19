@@ -23,23 +23,29 @@ const CHALLENGES = [
 export default function ChallengesScreen() {
   const insets     = useSafeAreaInsets();
   const updateUser = useAuthStore((s) => s.updateUser);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [loading,  setLoading]  = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
 
   const toggle = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   const handleNext = async () => {
-    if (selected.length === 0) {
+    if (selected.size === 0) {
       Alert.alert('Select at least one', 'Choose the challenges you want support with.');
       return;
     }
     setLoading(true);
     try {
-      await updateUser({ challenges: selected });
+      await updateUser({ challenges: Array.from(selected) });
       router.push('/(setup)/thank-you');
     } catch (e: any) {
       Alert.alert('Error', e.message ?? 'Failed to save.');
@@ -66,7 +72,7 @@ export default function ChallengesScreen() {
 
         <View style={styles.grid}>
           {CHALLENGES.map((c) => {
-            const isSelected = selected.includes(c.id);
+            const isSelected = selected.has(c.id);
             return (
               <TouchableOpacity
                 key={c.id}
@@ -88,8 +94,8 @@ export default function ChallengesScreen() {
           })}
         </View>
 
-        {selected.length > 0 && (
-          <Text style={styles.selectedCount}>{selected.length} selected</Text>
+        {selected.size > 0 && (
+          <Text style={styles.selectedCount}>{selected.size} selected</Text>
         )}
 
         <TouchableOpacity
