@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import { Alert } from 'react-native';
 
 export type AppNotification = {
   id: string;
