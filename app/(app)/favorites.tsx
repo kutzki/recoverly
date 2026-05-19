@@ -25,14 +25,8 @@ interface Article {
 
 // ─── Mock saved items (replace with real store/DB when favorites table exists) ─
 
-const SAVED_MEETINGS: Meeting[] = [
-  { id: '1', name: 'Westside Serenity', type: 'AA', location: 'Santa Monica, CA', time: '7:30 PM', online: false },
-  { id: '2', name: 'Global Recovery', type: 'NA', location: 'Zoom', time: '10:00 AM', online: true },
-];
-const SAVED_ARTICLES: Article[] = [
-  { id: '1', title: 'Top 10 Sobriety Milestones', emoji: '🎉', source: 'Recoverly Blog' },
-  { id: '2', title: 'Managing Social Anxiety', emoji: '🧘', source: 'Mental Health Daily' },
-];
+const SAVED_MEETINGS: Meeting[] = [];
+const SAVED_ARTICLES: Article[] = [];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
