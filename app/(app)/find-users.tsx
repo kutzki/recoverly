@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/auth';
-import { supabase } from '../../services/supabase';
+import { supabase, escapeFilterValue } from '../../services/supabase';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
@@ -20,10 +20,11 @@ export default function FindUsersScreen() {
     queryKey: ['find-users', query],
     enabled:  query.length >= 2,
     queryFn:  async () => {
+      const safeQuery = escapeFilterValue(`%${query}%`);
       const { data, error } = await supabase
         .from('profiles')
         .select('id, name, username, avatar_url')
-        .or(`name.ilike.%${query}%,username.ilike.%${query}%`)
+        .or(`name.ilike.${safeQuery},username.ilike.${safeQuery}`)
         .neq('id', me?.id ?? '')
         .limit(20);
       if (error) throw error;
